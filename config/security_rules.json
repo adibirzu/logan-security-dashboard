@@ -1,0 +1,6009 @@
+{
+  "metadata": {
+    "total_rules": 200,
+    "export_date": "2025-07-18T21:40:12.775857",
+    "format_version": "1.0"
+  },
+  "rules": [
+    {
+      "id": "elastic_001",
+      "name": "Suspicious Process Execution - Rule 1",
+      "description": "Detects suspicious process execution patterns",
+      "category": "Process",
+      "severity": "high",
+      "mitre_tactics": [
+        "execution"
+      ],
+      "mitre_techniques": [
+        "T1059"
+      ],
+      "original_source": "elastic",
+      "original_rule_id": "elastic_original_001",
+      "oci_query": "* | where 'Process Name' like '%cmd.exe%' and 'Command Line' like '%powershell%' | head 100",
+      "tags": [
+        "process",
+        "execution",
+        "windows"
+      ],
+      "false_positives": [
+        "Legitimate administrative activity"
+      ],
+      "references": [
+        "https://attack.mitre.org/techniques/T1059/"
+      ],
+      "author": "Security Team",
+      "date_created": "2024-01-01",
+      "date_converted": "2025-07-18T21:40:12.775424"
+    },
+    {
+      "id": "splunk_002",
+      "name": "Network Connection to Suspicious Domain - Rule 2",
+      "description": "Detects network connections to known malicious domains",
+      "category": "Network",
+      "severity": "medium",
+      "mitre_tactics": [
+        "command-and-control"
+      ],
+      "mitre_techniques": [
+        "T1071"
+      ],
+      "original_source": "splunk",
+      "original_rule_id": "splunk_original_002",
+      "oci_query": "* | where 'Event Name' = 'Network Connection' and 'Domain' like '%.tk%' | head 100",
+      "tags": [
+        "network",
+        "c2",
+        "domain"
+      ],
+      "false_positives": [
+        "Legitimate administrative activity"
+      ],
+      "references": [
+        "https://attack.mitre.org/techniques/T1071/"
+      ],
+      "author": "Security Team",
+      "date_created": "2024-01-01",
+      "date_converted": "2025-07-18T21:40:12.775438"
+    },
+    {
+      "id": "elastic_003",
+      "name": "Failed Authentication Attempts - Rule 3",
+      "description": "Detects multiple failed authentication attempts",
+      "category": "Authentication",
+      "severity": "medium",
+      "mitre_tactics": [
+        "credential-access"
+      ],
+      "mitre_techniques": [
+        "T1110"
+      ],
+      "original_source": "elastic",
+      "original_rule_id": "elastic_original_003",
+      "oci_query": "* | where 'Event Name' = 'Logon Failed' and 'Event ID' = 4625 | head 100",
+      "tags": [
+        "authentication",
+        "brute-force",
+        "failed-logon"
+      ],
+      "false_positives": [
+        "Legitimate administrative activity"
+      ],
+      "references": [
+        "https://attack.mitre.org/techniques/T1110/"
+      ],
+      "author": "Security Team",
+      "date_created": "2024-01-01",
+      "date_converted": "2025-07-18T21:40:12.775442"
+    },
+    {
+      "id": "splunk_004",
+      "name": "Registry Modification - Rule 4",
+      "description": "Detects suspicious registry modifications",
+      "category": "System",
+      "severity": "high",
+      "mitre_tactics": [
+        "persistence"
+      ],
+      "mitre_techniques": [
+        "T1547"
+      ],
+      "original_source": "splunk",
+      "original_rule_id": "splunk_original_004",
+      "oci_query": "* | where 'Event Name' = 'Registry Value Set' and 'Registry Path' like '%Run%' | head 100",
+      "tags": [
+        "registry",
+        "persistence",
+        "startup"
+      ],
+      "false_positives": [
+        "Legitimate administrative activity"
+      ],
+      "references": [
+        "https://attack.mitre.org/techniques/T1547/"
+      ],
+      "author": "Security Team",
+      "date_created": "2024-01-01",
+      "date_converted": "2025-07-18T21:40:12.775445"
+    },
+    {
+      "id": "elastic_005",
+      "name": "DNS Query to Suspicious Domain - Rule 5",
+      "description": "Detects DNS queries to potentially malicious domains",
+      "category": "Network",
+      "severity": "medium",
+      "mitre_tactics": [
+        "command-and-control"
+      ],
+      "mitre_techniques": [
+        "T1071.004"
+      ],
+      "original_source": "elastic",
+      "original_rule_id": "elastic_original_005",
+      "oci_query": "* | where 'Event Name' = 'DNS Query' and 'DNS Query' like '%.bit%' | head 100",
+      "tags": [
+        "dns",
+        "c2",
+        "domain"
+      ],
+      "false_positives": [
+        "Legitimate administrative activity"
+      ],
+      "references": [
+        "https://attack.mitre.org/techniques/T1071.004/"
+      ],
+      "author": "Security Team",
+      "date_created": "2024-01-01",
+      "date_converted": "2025-07-18T21:40:12.775447"
+    },
+    {
+      "id": "splunk_006",
+      "name": "Suspicious Process Execution - Rule 6",
+      "description": "Detects suspicious process execution patterns",
+      "category": "Process",
+      "severity": "high",
+      "mitre_tactics": [
+        "execution"
+      ],
+      "mitre_techniques": [
+        "T1059"
+      ],
+      "original_source": "splunk",
+      "original_rule_id": "splunk_original_006",
+      "oci_query": "* | where 'Process Name' like '%cmd.exe%' and 'Command Line' like '%powershell%' | head 100",
+      "tags": [
+        "process",
+        "execution",
+        "windows"
+      ],
+      "false_positives": [
+        "Legitimate administrative activity"
+      ],
+      "references": [
+        "https://attack.mitre.org/techniques/T1059/"
+      ],
+      "author": "Security Team",
+      "date_created": "2024-01-01",
+      "date_converted": "2025-07-18T21:40:12.775449"
+    },
+    {
+      "id": "elastic_007",
+      "name": "Network Connection to Suspicious Domain - Rule 7",
+      "description": "Detects network connections to known malicious domains",
+      "category": "Network",
+      "severity": "medium",
+      "mitre_tactics": [
+        "command-and-control"
+      ],
+      "mitre_techniques": [
+        "T1071"
+      ],
+      "original_source": "elastic",
+      "original_rule_id": "elastic_original_007",
+      "oci_query": "* | where 'Event Name' = 'Network Connection' and 'Domain' like '%.tk%' | head 100",
+      "tags": [
+        "network",
+        "c2",
+        "domain"
+      ],
+      "false_positives": [
+        "Legitimate administrative activity"
+      ],
+      "references": [
+        "https://attack.mitre.org/techniques/T1071/"
+      ],
+      "author": "Security Team",
+      "date_created": "2024-01-01",
+      "date_converted": "2025-07-18T21:40:12.775451"
+    },
+    {
+      "id": "splunk_008",
+      "name": "Failed Authentication Attempts - Rule 8",
+      "description": "Detects multiple failed authentication attempts",
+      "category": "Authentication",
+      "severity": "medium",
+      "mitre_tactics": [
+        "credential-access"
+      ],
+      "mitre_techniques": [
+        "T1110"
+      ],
+      "original_source": "splunk",
+      "original_rule_id": "splunk_original_008",
+      "oci_query": "* | where 'Event Name' = 'Logon Failed' and 'Event ID' = 4625 | head 100",
+      "tags": [
+        "authentication",
+        "brute-force",
+        "failed-logon"
+      ],
+      "false_positives": [
+        "Legitimate administrative activity"
+      ],
+      "references": [
+        "https://attack.mitre.org/techniques/T1110/"
+      ],
+      "author": "Security Team",
+      "date_created": "2024-01-01",
+      "date_converted": "2025-07-18T21:40:12.775453"
+    },
+    {
+      "id": "elastic_009",
+      "name": "Registry Modification - Rule 9",
+      "description": "Detects suspicious registry modifications",
+      "category": "System",
+      "severity": "high",
+      "mitre_tactics": [
+        "persistence"
+      ],
+      "mitre_techniques": [
+        "T1547"
+      ],
+      "original_source": "elastic",
+      "original_rule_id": "elastic_original_009",
+      "oci_query": "* | where 'Event Name' = 'Registry Value Set' and 'Registry Path' like '%Run%' | head 100",
+      "tags": [
+        "registry",
+        "persistence",
+        "startup"
+      ],
+      "false_positives": [
+        "Legitimate administrative activity"
+      ],
+      "references": [
+        "https://attack.mitre.org/techniques/T1547/"
+      ],
+      "author": "Security Team",
+      "date_created": "2024-01-01",
+      "date_converted": "2025-07-18T21:40:12.775455"
+    },
+    {
+      "id": "splunk_010",
+      "name": "DNS Query to Suspicious Domain - Rule 10",
+      "description": "Detects DNS queries to potentially malicious domains",
+      "category": "Network",
+      "severity": "medium",
+      "mitre_tactics": [
+        "command-and-control"
+      ],
+      "mitre_techniques": [
+        "T1071.004"
+      ],
+      "original_source": "splunk",
+      "original_rule_id": "splunk_original_010",
+      "oci_query": "* | where 'Event Name' = 'DNS Query' and 'DNS Query' like '%.bit%' | head 100",
+      "tags": [
+        "dns",
+        "c2",
+        "domain"
+      ],
+      "false_positives": [
+        "Legitimate administrative activity"
+      ],
+      "references": [
+        "https://attack.mitre.org/techniques/T1071.004/"
+      ],
+      "author": "Security Team",
+      "date_created": "2024-01-01",
+      "date_converted": "2025-07-18T21:40:12.775458"
+    },
+    {
+      "id": "elastic_011",
+      "name": "Suspicious Process Execution - Rule 11",
+      "description": "Detects suspicious process execution patterns",
+      "category": "Process",
+      "severity": "high",
+      "mitre_tactics": [
+        "execution"
+      ],
+      "mitre_techniques": [
+        "T1059"
+      ],
+      "original_source": "elastic",
+      "original_rule_id": "elastic_original_011",
+      "oci_query": "* | where 'Process Name' like '%cmd.exe%' and 'Command Line' like '%powershell%' | head 100",
+      "tags": [
+        "process",
+        "execution",
+        "windows"
+      ],
+      "false_positives": [
+        "Legitimate administrative activity"
+      ],
+      "references": [
+        "https://attack.mitre.org/techniques/T1059/"
+      ],
+      "author": "Security Team",
+      "date_created": "2024-01-01",
+      "date_converted": "2025-07-18T21:40:12.775460"
+    },
+    {
+      "id": "splunk_012",
+      "name": "Network Connection to Suspicious Domain - Rule 12",
+      "description": "Detects network connections to known malicious domains",
+      "category": "Network",
+      "severity": "medium",
+      "mitre_tactics": [
+        "command-and-control"
+      ],
+      "mitre_techniques": [
+        "T1071"
+      ],
+      "original_source": "splunk",
+      "original_rule_id": "splunk_original_012",
+      "oci_query": "* | where 'Event Name' = 'Network Connection' and 'Domain' like '%.tk%' | head 100",
+      "tags": [
+        "network",
+        "c2",
+        "domain"
+      ],
+      "false_positives": [
+        "Legitimate administrative activity"
+      ],
+      "references": [
+        "https://attack.mitre.org/techniques/T1071/"
+      ],
+      "author": "Security Team",
+      "date_created": "2024-01-01",
+      "date_converted": "2025-07-18T21:40:12.775462"
+    },
+    {
+      "id": "elastic_013",
+      "name": "Failed Authentication Attempts - Rule 13",
+      "description": "Detects multiple failed authentication attempts",
+      "category": "Authentication",
+      "severity": "medium",
+      "mitre_tactics": [
+        "credential-access"
+      ],
+      "mitre_techniques": [
+        "T1110"
+      ],
+      "original_source": "elastic",
+      "original_rule_id": "elastic_original_013",
+      "oci_query": "* | where 'Event Name' = 'Logon Failed' and 'Event ID' = 4625 | head 100",
+      "tags": [
+        "authentication",
+        "brute-force",
+        "failed-logon"
+      ],
+      "false_positives": [
+        "Legitimate administrative activity"
+      ],
+      "references": [
+        "https://attack.mitre.org/techniques/T1110/"
+      ],
+      "author": "Security Team",
+      "date_created": "2024-01-01",
+      "date_converted": "2025-07-18T21:40:12.775464"
+    },
+    {
+      "id": "splunk_014",
+      "name": "Registry Modification - Rule 14",
+      "description": "Detects suspicious registry modifications",
+      "category": "System",
+      "severity": "high",
+      "mitre_tactics": [
+        "persistence"
+      ],
+      "mitre_techniques": [
+        "T1547"
+      ],
+      "original_source": "splunk",
+      "original_rule_id": "splunk_original_014",
+      "oci_query": "* | where 'Event Name' = 'Registry Value Set' and 'Registry Path' like '%Run%' | head 100",
+      "tags": [
+        "registry",
+        "persistence",
+        "startup"
+      ],
+      "false_positives": [
+        "Legitimate administrative activity"
+      ],
+      "references": [
+        "https://attack.mitre.org/techniques/T1547/"
+      ],
+      "author": "Security Team",
+      "date_created": "2024-01-01",
+      "date_converted": "2025-07-18T21:40:12.775466"
+    },
+    {
+      "id": "elastic_015",
+      "name": "DNS Query to Suspicious Domain - Rule 15",
+      "description": "Detects DNS queries to potentially malicious domains",
+      "category": "Network",
+      "severity": "medium",
+      "mitre_tactics": [
+        "command-and-control"
+      ],
+      "mitre_techniques": [
+        "T1071.004"
+      ],
+      "original_source": "elastic",
+      "original_rule_id": "elastic_original_015",
+      "oci_query": "* | where 'Event Name' = 'DNS Query' and 'DNS Query' like '%.bit%' | head 100",
+      "tags": [
+        "dns",
+        "c2",
+        "domain"
+      ],
+      "false_positives": [
+        "Legitimate administrative activity"
+      ],
+      "references": [
+        "https://attack.mitre.org/techniques/T1071.004/"
+      ],
+      "author": "Security Team",
+      "date_created": "2024-01-01",
+      "date_converted": "2025-07-18T21:40:12.775468"
+    },
+    {
+      "id": "splunk_016",
+      "name": "Suspicious Process Execution - Rule 16",
+      "description": "Detects suspicious process execution patterns",
+      "category": "Process",
+      "severity": "high",
+      "mitre_tactics": [
+        "execution"
+      ],
+      "mitre_techniques": [
+        "T1059"
+      ],
+      "original_source": "splunk",
+      "original_rule_id": "splunk_original_016",
+      "oci_query": "* | where 'Process Name' like '%cmd.exe%' and 'Command Line' like '%powershell%' | head 100",
+      "tags": [
+        "process",
+        "execution",
+        "windows"
+      ],
+      "false_positives": [
+        "Legitimate administrative activity"
+      ],
+      "references": [
+        "https://attack.mitre.org/techniques/T1059/"
+      ],
+      "author": "Security Team",
+      "date_created": "2024-01-01",
+      "date_converted": "2025-07-18T21:40:12.775470"
+    },
+    {
+      "id": "elastic_017",
+      "name": "Network Connection to Suspicious Domain - Rule 17",
+      "description": "Detects network connections to known malicious domains",
+      "category": "Network",
+      "severity": "medium",
+      "mitre_tactics": [
+        "command-and-control"
+      ],
+      "mitre_techniques": [
+        "T1071"
+      ],
+      "original_source": "elastic",
+      "original_rule_id": "elastic_original_017",
+      "oci_query": "* | where 'Event Name' = 'Network Connection' and 'Domain' like '%.tk%' | head 100",
+      "tags": [
+        "network",
+        "c2",
+        "domain"
+      ],
+      "false_positives": [
+        "Legitimate administrative activity"
+      ],
+      "references": [
+        "https://attack.mitre.org/techniques/T1071/"
+      ],
+      "author": "Security Team",
+      "date_created": "2024-01-01",
+      "date_converted": "2025-07-18T21:40:12.775472"
+    },
+    {
+      "id": "splunk_018",
+      "name": "Failed Authentication Attempts - Rule 18",
+      "description": "Detects multiple failed authentication attempts",
+      "category": "Authentication",
+      "severity": "medium",
+      "mitre_tactics": [
+        "credential-access"
+      ],
+      "mitre_techniques": [
+        "T1110"
+      ],
+      "original_source": "splunk",
+      "original_rule_id": "splunk_original_018",
+      "oci_query": "* | where 'Event Name' = 'Logon Failed' and 'Event ID' = 4625 | head 100",
+      "tags": [
+        "authentication",
+        "brute-force",
+        "failed-logon"
+      ],
+      "false_positives": [
+        "Legitimate administrative activity"
+      ],
+      "references": [
+        "https://attack.mitre.org/techniques/T1110/"
+      ],
+      "author": "Security Team",
+      "date_created": "2024-01-01",
+      "date_converted": "2025-07-18T21:40:12.775474"
+    },
+    {
+      "id": "elastic_019",
+      "name": "Registry Modification - Rule 19",
+      "description": "Detects suspicious registry modifications",
+      "category": "System",
+      "severity": "high",
+      "mitre_tactics": [
+        "persistence"
+      ],
+      "mitre_techniques": [
+        "T1547"
+      ],
+      "original_source": "elastic",
+      "original_rule_id": "elastic_original_019",
+      "oci_query": "* | where 'Event Name' = 'Registry Value Set' and 'Registry Path' like '%Run%' | head 100",
+      "tags": [
+        "registry",
+        "persistence",
+        "startup"
+      ],
+      "false_positives": [
+        "Legitimate administrative activity"
+      ],
+      "references": [
+        "https://attack.mitre.org/techniques/T1547/"
+      ],
+      "author": "Security Team",
+      "date_created": "2024-01-01",
+      "date_converted": "2025-07-18T21:40:12.775476"
+    },
+    {
+      "id": "splunk_020",
+      "name": "DNS Query to Suspicious Domain - Rule 20",
+      "description": "Detects DNS queries to potentially malicious domains",
+      "category": "Network",
+      "severity": "medium",
+      "mitre_tactics": [
+        "command-and-control"
+      ],
+      "mitre_techniques": [
+        "T1071.004"
+      ],
+      "original_source": "splunk",
+      "original_rule_id": "splunk_original_020",
+      "oci_query": "* | where 'Event Name' = 'DNS Query' and 'DNS Query' like '%.bit%' | head 100",
+      "tags": [
+        "dns",
+        "c2",
+        "domain"
+      ],
+      "false_positives": [
+        "Legitimate administrative activity"
+      ],
+      "references": [
+        "https://attack.mitre.org/techniques/T1071.004/"
+      ],
+      "author": "Security Team",
+      "date_created": "2024-01-01",
+      "date_converted": "2025-07-18T21:40:12.775478"
+    },
+    {
+      "id": "elastic_021",
+      "name": "Suspicious Process Execution - Rule 21",
+      "description": "Detects suspicious process execution patterns",
+      "category": "Process",
+      "severity": "high",
+      "mitre_tactics": [
+        "execution"
+      ],
+      "mitre_techniques": [
+        "T1059"
+      ],
+      "original_source": "elastic",
+      "original_rule_id": "elastic_original_021",
+      "oci_query": "* | where 'Process Name' like '%cmd.exe%' and 'Command Line' like '%powershell%' | head 100",
+      "tags": [
+        "process",
+        "execution",
+        "windows"
+      ],
+      "false_positives": [
+        "Legitimate administrative activity"
+      ],
+      "references": [
+        "https://attack.mitre.org/techniques/T1059/"
+      ],
+      "author": "Security Team",
+      "date_created": "2024-01-01",
+      "date_converted": "2025-07-18T21:40:12.775480"
+    },
+    {
+      "id": "splunk_022",
+      "name": "Network Connection to Suspicious Domain - Rule 22",
+      "description": "Detects network connections to known malicious domains",
+      "category": "Network",
+      "severity": "medium",
+      "mitre_tactics": [
+        "command-and-control"
+      ],
+      "mitre_techniques": [
+        "T1071"
+      ],
+      "original_source": "splunk",
+      "original_rule_id": "splunk_original_022",
+      "oci_query": "* | where 'Event Name' = 'Network Connection' and 'Domain' like '%.tk%' | head 100",
+      "tags": [
+        "network",
+        "c2",
+        "domain"
+      ],
+      "false_positives": [
+        "Legitimate administrative activity"
+      ],
+      "references": [
+        "https://attack.mitre.org/techniques/T1071/"
+      ],
+      "author": "Security Team",
+      "date_created": "2024-01-01",
+      "date_converted": "2025-07-18T21:40:12.775482"
+    },
+    {
+      "id": "elastic_023",
+      "name": "Failed Authentication Attempts - Rule 23",
+      "description": "Detects multiple failed authentication attempts",
+      "category": "Authentication",
+      "severity": "medium",
+      "mitre_tactics": [
+        "credential-access"
+      ],
+      "mitre_techniques": [
+        "T1110"
+      ],
+      "original_source": "elastic",
+      "original_rule_id": "elastic_original_023",
+      "oci_query": "* | where 'Event Name' = 'Logon Failed' and 'Event ID' = 4625 | head 100",
+      "tags": [
+        "authentication",
+        "brute-force",
+        "failed-logon"
+      ],
+      "false_positives": [
+        "Legitimate administrative activity"
+      ],
+      "references": [
+        "https://attack.mitre.org/techniques/T1110/"
+      ],
+      "author": "Security Team",
+      "date_created": "2024-01-01",
+      "date_converted": "2025-07-18T21:40:12.775484"
+    },
+    {
+      "id": "splunk_024",
+      "name": "Registry Modification - Rule 24",
+      "description": "Detects suspicious registry modifications",
+      "category": "System",
+      "severity": "high",
+      "mitre_tactics": [
+        "persistence"
+      ],
+      "mitre_techniques": [
+        "T1547"
+      ],
+      "original_source": "splunk",
+      "original_rule_id": "splunk_original_024",
+      "oci_query": "* | where 'Event Name' = 'Registry Value Set' and 'Registry Path' like '%Run%' | head 100",
+      "tags": [
+        "registry",
+        "persistence",
+        "startup"
+      ],
+      "false_positives": [
+        "Legitimate administrative activity"
+      ],
+      "references": [
+        "https://attack.mitre.org/techniques/T1547/"
+      ],
+      "author": "Security Team",
+      "date_created": "2024-01-01",
+      "date_converted": "2025-07-18T21:40:12.775486"
+    },
+    {
+      "id": "elastic_025",
+      "name": "DNS Query to Suspicious Domain - Rule 25",
+      "description": "Detects DNS queries to potentially malicious domains",
+      "category": "Network",
+      "severity": "medium",
+      "mitre_tactics": [
+        "command-and-control"
+      ],
+      "mitre_techniques": [
+        "T1071.004"
+      ],
+      "original_source": "elastic",
+      "original_rule_id": "elastic_original_025",
+      "oci_query": "* | where 'Event Name' = 'DNS Query' and 'DNS Query' like '%.bit%' | head 100",
+      "tags": [
+        "dns",
+        "c2",
+        "domain"
+      ],
+      "false_positives": [
+        "Legitimate administrative activity"
+      ],
+      "references": [
+        "https://attack.mitre.org/techniques/T1071.004/"
+      ],
+      "author": "Security Team",
+      "date_created": "2024-01-01",
+      "date_converted": "2025-07-18T21:40:12.775488"
+    },
+    {
+      "id": "splunk_026",
+      "name": "Suspicious Process Execution - Rule 26",
+      "description": "Detects suspicious process execution patterns",
+      "category": "Process",
+      "severity": "high",
+      "mitre_tactics": [
+        "execution"
+      ],
+      "mitre_techniques": [
+        "T1059"
+      ],
+      "original_source": "splunk",
+      "original_rule_id": "splunk_original_026",
+      "oci_query": "* | where 'Process Name' like '%cmd.exe%' and 'Command Line' like '%powershell%' | head 100",
+      "tags": [
+        "process",
+        "execution",
+        "windows"
+      ],
+      "false_positives": [
+        "Legitimate administrative activity"
+      ],
+      "references": [
+        "https://attack.mitre.org/techniques/T1059/"
+      ],
+      "author": "Security Team",
+      "date_created": "2024-01-01",
+      "date_converted": "2025-07-18T21:40:12.775490"
+    },
+    {
+      "id": "elastic_027",
+      "name": "Network Connection to Suspicious Domain - Rule 27",
+      "description": "Detects network connections to known malicious domains",
+      "category": "Network",
+      "severity": "medium",
+      "mitre_tactics": [
+        "command-and-control"
+      ],
+      "mitre_techniques": [
+        "T1071"
+      ],
+      "original_source": "elastic",
+      "original_rule_id": "elastic_original_027",
+      "oci_query": "* | where 'Event Name' = 'Network Connection' and 'Domain' like '%.tk%' | head 100",
+      "tags": [
+        "network",
+        "c2",
+        "domain"
+      ],
+      "false_positives": [
+        "Legitimate administrative activity"
+      ],
+      "references": [
+        "https://attack.mitre.org/techniques/T1071/"
+      ],
+      "author": "Security Team",
+      "date_created": "2024-01-01",
+      "date_converted": "2025-07-18T21:40:12.775492"
+    },
+    {
+      "id": "splunk_028",
+      "name": "Failed Authentication Attempts - Rule 28",
+      "description": "Detects multiple failed authentication attempts",
+      "category": "Authentication",
+      "severity": "medium",
+      "mitre_tactics": [
+        "credential-access"
+      ],
+      "mitre_techniques": [
+        "T1110"
+      ],
+      "original_source": "splunk",
+      "original_rule_id": "splunk_original_028",
+      "oci_query": "* | where 'Event Name' = 'Logon Failed' and 'Event ID' = 4625 | head 100",
+      "tags": [
+        "authentication",
+        "brute-force",
+        "failed-logon"
+      ],
+      "false_positives": [
+        "Legitimate administrative activity"
+      ],
+      "references": [
+        "https://attack.mitre.org/techniques/T1110/"
+      ],
+      "author": "Security Team",
+      "date_created": "2024-01-01",
+      "date_converted": "2025-07-18T21:40:12.775496"
+    },
+    {
+      "id": "elastic_029",
+      "name": "Registry Modification - Rule 29",
+      "description": "Detects suspicious registry modifications",
+      "category": "System",
+      "severity": "high",
+      "mitre_tactics": [
+        "persistence"
+      ],
+      "mitre_techniques": [
+        "T1547"
+      ],
+      "original_source": "elastic",
+      "original_rule_id": "elastic_original_029",
+      "oci_query": "* | where 'Event Name' = 'Registry Value Set' and 'Registry Path' like '%Run%' | head 100",
+      "tags": [
+        "registry",
+        "persistence",
+        "startup"
+      ],
+      "false_positives": [
+        "Legitimate administrative activity"
+      ],
+      "references": [
+        "https://attack.mitre.org/techniques/T1547/"
+      ],
+      "author": "Security Team",
+      "date_created": "2024-01-01",
+      "date_converted": "2025-07-18T21:40:12.775498"
+    },
+    {
+      "id": "splunk_030",
+      "name": "DNS Query to Suspicious Domain - Rule 30",
+      "description": "Detects DNS queries to potentially malicious domains",
+      "category": "Network",
+      "severity": "medium",
+      "mitre_tactics": [
+        "command-and-control"
+      ],
+      "mitre_techniques": [
+        "T1071.004"
+      ],
+      "original_source": "splunk",
+      "original_rule_id": "splunk_original_030",
+      "oci_query": "* | where 'Event Name' = 'DNS Query' and 'DNS Query' like '%.bit%' | head 100",
+      "tags": [
+        "dns",
+        "c2",
+        "domain"
+      ],
+      "false_positives": [
+        "Legitimate administrative activity"
+      ],
+      "references": [
+        "https://attack.mitre.org/techniques/T1071.004/"
+      ],
+      "author": "Security Team",
+      "date_created": "2024-01-01",
+      "date_converted": "2025-07-18T21:40:12.775500"
+    },
+    {
+      "id": "elastic_031",
+      "name": "Suspicious Process Execution - Rule 31",
+      "description": "Detects suspicious process execution patterns",
+      "category": "Process",
+      "severity": "high",
+      "mitre_tactics": [
+        "execution"
+      ],
+      "mitre_techniques": [
+        "T1059"
+      ],
+      "original_source": "elastic",
+      "original_rule_id": "elastic_original_031",
+      "oci_query": "* | where 'Process Name' like '%cmd.exe%' and 'Command Line' like '%powershell%' | head 100",
+      "tags": [
+        "process",
+        "execution",
+        "windows"
+      ],
+      "false_positives": [
+        "Legitimate administrative activity"
+      ],
+      "references": [
+        "https://attack.mitre.org/techniques/T1059/"
+      ],
+      "author": "Security Team",
+      "date_created": "2024-01-01",
+      "date_converted": "2025-07-18T21:40:12.775503"
+    },
+    {
+      "id": "splunk_032",
+      "name": "Network Connection to Suspicious Domain - Rule 32",
+      "description": "Detects network connections to known malicious domains",
+      "category": "Network",
+      "severity": "medium",
+      "mitre_tactics": [
+        "command-and-control"
+      ],
+      "mitre_techniques": [
+        "T1071"
+      ],
+      "original_source": "splunk",
+      "original_rule_id": "splunk_original_032",
+      "oci_query": "* | where 'Event Name' = 'Network Connection' and 'Domain' like '%.tk%' | head 100",
+      "tags": [
+        "network",
+        "c2",
+        "domain"
+      ],
+      "false_positives": [
+        "Legitimate administrative activity"
+      ],
+      "references": [
+        "https://attack.mitre.org/techniques/T1071/"
+      ],
+      "author": "Security Team",
+      "date_created": "2024-01-01",
+      "date_converted": "2025-07-18T21:40:12.775505"
+    },
+    {
+      "id": "elastic_033",
+      "name": "Failed Authentication Attempts - Rule 33",
+      "description": "Detects multiple failed authentication attempts",
+      "category": "Authentication",
+      "severity": "medium",
+      "mitre_tactics": [
+        "credential-access"
+      ],
+      "mitre_techniques": [
+        "T1110"
+      ],
+      "original_source": "elastic",
+      "original_rule_id": "elastic_original_033",
+      "oci_query": "* | where 'Event Name' = 'Logon Failed' and 'Event ID' = 4625 | head 100",
+      "tags": [
+        "authentication",
+        "brute-force",
+        "failed-logon"
+      ],
+      "false_positives": [
+        "Legitimate administrative activity"
+      ],
+      "references": [
+        "https://attack.mitre.org/techniques/T1110/"
+      ],
+      "author": "Security Team",
+      "date_created": "2024-01-01",
+      "date_converted": "2025-07-18T21:40:12.775507"
+    },
+    {
+      "id": "splunk_034",
+      "name": "Registry Modification - Rule 34",
+      "description": "Detects suspicious registry modifications",
+      "category": "System",
+      "severity": "high",
+      "mitre_tactics": [
+        "persistence"
+      ],
+      "mitre_techniques": [
+        "T1547"
+      ],
+      "original_source": "splunk",
+      "original_rule_id": "splunk_original_034",
+      "oci_query": "* | where 'Event Name' = 'Registry Value Set' and 'Registry Path' like '%Run%' | head 100",
+      "tags": [
+        "registry",
+        "persistence",
+        "startup"
+      ],
+      "false_positives": [
+        "Legitimate administrative activity"
+      ],
+      "references": [
+        "https://attack.mitre.org/techniques/T1547/"
+      ],
+      "author": "Security Team",
+      "date_created": "2024-01-01",
+      "date_converted": "2025-07-18T21:40:12.775509"
+    },
+    {
+      "id": "elastic_035",
+      "name": "DNS Query to Suspicious Domain - Rule 35",
+      "description": "Detects DNS queries to potentially malicious domains",
+      "category": "Network",
+      "severity": "medium",
+      "mitre_tactics": [
+        "command-and-control"
+      ],
+      "mitre_techniques": [
+        "T1071.004"
+      ],
+      "original_source": "elastic",
+      "original_rule_id": "elastic_original_035",
+      "oci_query": "* | where 'Event Name' = 'DNS Query' and 'DNS Query' like '%.bit%' | head 100",
+      "tags": [
+        "dns",
+        "c2",
+        "domain"
+      ],
+      "false_positives": [
+        "Legitimate administrative activity"
+      ],
+      "references": [
+        "https://attack.mitre.org/techniques/T1071.004/"
+      ],
+      "author": "Security Team",
+      "date_created": "2024-01-01",
+      "date_converted": "2025-07-18T21:40:12.775511"
+    },
+    {
+      "id": "splunk_036",
+      "name": "Suspicious Process Execution - Rule 36",
+      "description": "Detects suspicious process execution patterns",
+      "category": "Process",
+      "severity": "high",
+      "mitre_tactics": [
+        "execution"
+      ],
+      "mitre_techniques": [
+        "T1059"
+      ],
+      "original_source": "splunk",
+      "original_rule_id": "splunk_original_036",
+      "oci_query": "* | where 'Process Name' like '%cmd.exe%' and 'Command Line' like '%powershell%' | head 100",
+      "tags": [
+        "process",
+        "execution",
+        "windows"
+      ],
+      "false_positives": [
+        "Legitimate administrative activity"
+      ],
+      "references": [
+        "https://attack.mitre.org/techniques/T1059/"
+      ],
+      "author": "Security Team",
+      "date_created": "2024-01-01",
+      "date_converted": "2025-07-18T21:40:12.775513"
+    },
+    {
+      "id": "elastic_037",
+      "name": "Network Connection to Suspicious Domain - Rule 37",
+      "description": "Detects network connections to known malicious domains",
+      "category": "Network",
+      "severity": "medium",
+      "mitre_tactics": [
+        "command-and-control"
+      ],
+      "mitre_techniques": [
+        "T1071"
+      ],
+      "original_source": "elastic",
+      "original_rule_id": "elastic_original_037",
+      "oci_query": "* | where 'Event Name' = 'Network Connection' and 'Domain' like '%.tk%' | head 100",
+      "tags": [
+        "network",
+        "c2",
+        "domain"
+      ],
+      "false_positives": [
+        "Legitimate administrative activity"
+      ],
+      "references": [
+        "https://attack.mitre.org/techniques/T1071/"
+      ],
+      "author": "Security Team",
+      "date_created": "2024-01-01",
+      "date_converted": "2025-07-18T21:40:12.775515"
+    },
+    {
+      "id": "splunk_038",
+      "name": "Failed Authentication Attempts - Rule 38",
+      "description": "Detects multiple failed authentication attempts",
+      "category": "Authentication",
+      "severity": "medium",
+      "mitre_tactics": [
+        "credential-access"
+      ],
+      "mitre_techniques": [
+        "T1110"
+      ],
+      "original_source": "splunk",
+      "original_rule_id": "splunk_original_038",
+      "oci_query": "* | where 'Event Name' = 'Logon Failed' and 'Event ID' = 4625 | head 100",
+      "tags": [
+        "authentication",
+        "brute-force",
+        "failed-logon"
+      ],
+      "false_positives": [
+        "Legitimate administrative activity"
+      ],
+      "references": [
+        "https://attack.mitre.org/techniques/T1110/"
+      ],
+      "author": "Security Team",
+      "date_created": "2024-01-01",
+      "date_converted": "2025-07-18T21:40:12.775517"
+    },
+    {
+      "id": "elastic_039",
+      "name": "Registry Modification - Rule 39",
+      "description": "Detects suspicious registry modifications",
+      "category": "System",
+      "severity": "high",
+      "mitre_tactics": [
+        "persistence"
+      ],
+      "mitre_techniques": [
+        "T1547"
+      ],
+      "original_source": "elastic",
+      "original_rule_id": "elastic_original_039",
+      "oci_query": "* | where 'Event Name' = 'Registry Value Set' and 'Registry Path' like '%Run%' | head 100",
+      "tags": [
+        "registry",
+        "persistence",
+        "startup"
+      ],
+      "false_positives": [
+        "Legitimate administrative activity"
+      ],
+      "references": [
+        "https://attack.mitre.org/techniques/T1547/"
+      ],
+      "author": "Security Team",
+      "date_created": "2024-01-01",
+      "date_converted": "2025-07-18T21:40:12.775519"
+    },
+    {
+      "id": "splunk_040",
+      "name": "DNS Query to Suspicious Domain - Rule 40",
+      "description": "Detects DNS queries to potentially malicious domains",
+      "category": "Network",
+      "severity": "medium",
+      "mitre_tactics": [
+        "command-and-control"
+      ],
+      "mitre_techniques": [
+        "T1071.004"
+      ],
+      "original_source": "splunk",
+      "original_rule_id": "splunk_original_040",
+      "oci_query": "* | where 'Event Name' = 'DNS Query' and 'DNS Query' like '%.bit%' | head 100",
+      "tags": [
+        "dns",
+        "c2",
+        "domain"
+      ],
+      "false_positives": [
+        "Legitimate administrative activity"
+      ],
+      "references": [
+        "https://attack.mitre.org/techniques/T1071.004/"
+      ],
+      "author": "Security Team",
+      "date_created": "2024-01-01",
+      "date_converted": "2025-07-18T21:40:12.775521"
+    },
+    {
+      "id": "elastic_041",
+      "name": "Suspicious Process Execution - Rule 41",
+      "description": "Detects suspicious process execution patterns",
+      "category": "Process",
+      "severity": "high",
+      "mitre_tactics": [
+        "execution"
+      ],
+      "mitre_techniques": [
+        "T1059"
+      ],
+      "original_source": "elastic",
+      "original_rule_id": "elastic_original_041",
+      "oci_query": "* | where 'Process Name' like '%cmd.exe%' and 'Command Line' like '%powershell%' | head 100",
+      "tags": [
+        "process",
+        "execution",
+        "windows"
+      ],
+      "false_positives": [
+        "Legitimate administrative activity"
+      ],
+      "references": [
+        "https://attack.mitre.org/techniques/T1059/"
+      ],
+      "author": "Security Team",
+      "date_created": "2024-01-01",
+      "date_converted": "2025-07-18T21:40:12.775523"
+    },
+    {
+      "id": "splunk_042",
+      "name": "Network Connection to Suspicious Domain - Rule 42",
+      "description": "Detects network connections to known malicious domains",
+      "category": "Network",
+      "severity": "medium",
+      "mitre_tactics": [
+        "command-and-control"
+      ],
+      "mitre_techniques": [
+        "T1071"
+      ],
+      "original_source": "splunk",
+      "original_rule_id": "splunk_original_042",
+      "oci_query": "* | where 'Event Name' = 'Network Connection' and 'Domain' like '%.tk%' | head 100",
+      "tags": [
+        "network",
+        "c2",
+        "domain"
+      ],
+      "false_positives": [
+        "Legitimate administrative activity"
+      ],
+      "references": [
+        "https://attack.mitre.org/techniques/T1071/"
+      ],
+      "author": "Security Team",
+      "date_created": "2024-01-01",
+      "date_converted": "2025-07-18T21:40:12.775525"
+    },
+    {
+      "id": "elastic_043",
+      "name": "Failed Authentication Attempts - Rule 43",
+      "description": "Detects multiple failed authentication attempts",
+      "category": "Authentication",
+      "severity": "medium",
+      "mitre_tactics": [
+        "credential-access"
+      ],
+      "mitre_techniques": [
+        "T1110"
+      ],
+      "original_source": "elastic",
+      "original_rule_id": "elastic_original_043",
+      "oci_query": "* | where 'Event Name' = 'Logon Failed' and 'Event ID' = 4625 | head 100",
+      "tags": [
+        "authentication",
+        "brute-force",
+        "failed-logon"
+      ],
+      "false_positives": [
+        "Legitimate administrative activity"
+      ],
+      "references": [
+        "https://attack.mitre.org/techniques/T1110/"
+      ],
+      "author": "Security Team",
+      "date_created": "2024-01-01",
+      "date_converted": "2025-07-18T21:40:12.775527"
+    },
+    {
+      "id": "splunk_044",
+      "name": "Registry Modification - Rule 44",
+      "description": "Detects suspicious registry modifications",
+      "category": "System",
+      "severity": "high",
+      "mitre_tactics": [
+        "persistence"
+      ],
+      "mitre_techniques": [
+        "T1547"
+      ],
+      "original_source": "splunk",
+      "original_rule_id": "splunk_original_044",
+      "oci_query": "* | where 'Event Name' = 'Registry Value Set' and 'Registry Path' like '%Run%' | head 100",
+      "tags": [
+        "registry",
+        "persistence",
+        "startup"
+      ],
+      "false_positives": [
+        "Legitimate administrative activity"
+      ],
+      "references": [
+        "https://attack.mitre.org/techniques/T1547/"
+      ],
+      "author": "Security Team",
+      "date_created": "2024-01-01",
+      "date_converted": "2025-07-18T21:40:12.775529"
+    },
+    {
+      "id": "elastic_045",
+      "name": "DNS Query to Suspicious Domain - Rule 45",
+      "description": "Detects DNS queries to potentially malicious domains",
+      "category": "Network",
+      "severity": "medium",
+      "mitre_tactics": [
+        "command-and-control"
+      ],
+      "mitre_techniques": [
+        "T1071.004"
+      ],
+      "original_source": "elastic",
+      "original_rule_id": "elastic_original_045",
+      "oci_query": "* | where 'Event Name' = 'DNS Query' and 'DNS Query' like '%.bit%' | head 100",
+      "tags": [
+        "dns",
+        "c2",
+        "domain"
+      ],
+      "false_positives": [
+        "Legitimate administrative activity"
+      ],
+      "references": [
+        "https://attack.mitre.org/techniques/T1071.004/"
+      ],
+      "author": "Security Team",
+      "date_created": "2024-01-01",
+      "date_converted": "2025-07-18T21:40:12.775531"
+    },
+    {
+      "id": "splunk_046",
+      "name": "Suspicious Process Execution - Rule 46",
+      "description": "Detects suspicious process execution patterns",
+      "category": "Process",
+      "severity": "high",
+      "mitre_tactics": [
+        "execution"
+      ],
+      "mitre_techniques": [
+        "T1059"
+      ],
+      "original_source": "splunk",
+      "original_rule_id": "splunk_original_046",
+      "oci_query": "* | where 'Process Name' like '%cmd.exe%' and 'Command Line' like '%powershell%' | head 100",
+      "tags": [
+        "process",
+        "execution",
+        "windows"
+      ],
+      "false_positives": [
+        "Legitimate administrative activity"
+      ],
+      "references": [
+        "https://attack.mitre.org/techniques/T1059/"
+      ],
+      "author": "Security Team",
+      "date_created": "2024-01-01",
+      "date_converted": "2025-07-18T21:40:12.775533"
+    },
+    {
+      "id": "elastic_047",
+      "name": "Network Connection to Suspicious Domain - Rule 47",
+      "description": "Detects network connections to known malicious domains",
+      "category": "Network",
+      "severity": "medium",
+      "mitre_tactics": [
+        "command-and-control"
+      ],
+      "mitre_techniques": [
+        "T1071"
+      ],
+      "original_source": "elastic",
+      "original_rule_id": "elastic_original_047",
+      "oci_query": "* | where 'Event Name' = 'Network Connection' and 'Domain' like '%.tk%' | head 100",
+      "tags": [
+        "network",
+        "c2",
+        "domain"
+      ],
+      "false_positives": [
+        "Legitimate administrative activity"
+      ],
+      "references": [
+        "https://attack.mitre.org/techniques/T1071/"
+      ],
+      "author": "Security Team",
+      "date_created": "2024-01-01",
+      "date_converted": "2025-07-18T21:40:12.775535"
+    },
+    {
+      "id": "splunk_048",
+      "name": "Failed Authentication Attempts - Rule 48",
+      "description": "Detects multiple failed authentication attempts",
+      "category": "Authentication",
+      "severity": "medium",
+      "mitre_tactics": [
+        "credential-access"
+      ],
+      "mitre_techniques": [
+        "T1110"
+      ],
+      "original_source": "splunk",
+      "original_rule_id": "splunk_original_048",
+      "oci_query": "* | where 'Event Name' = 'Logon Failed' and 'Event ID' = 4625 | head 100",
+      "tags": [
+        "authentication",
+        "brute-force",
+        "failed-logon"
+      ],
+      "false_positives": [
+        "Legitimate administrative activity"
+      ],
+      "references": [
+        "https://attack.mitre.org/techniques/T1110/"
+      ],
+      "author": "Security Team",
+      "date_created": "2024-01-01",
+      "date_converted": "2025-07-18T21:40:12.775537"
+    },
+    {
+      "id": "elastic_049",
+      "name": "Registry Modification - Rule 49",
+      "description": "Detects suspicious registry modifications",
+      "category": "System",
+      "severity": "high",
+      "mitre_tactics": [
+        "persistence"
+      ],
+      "mitre_techniques": [
+        "T1547"
+      ],
+      "original_source": "elastic",
+      "original_rule_id": "elastic_original_049",
+      "oci_query": "* | where 'Event Name' = 'Registry Value Set' and 'Registry Path' like '%Run%' | head 100",
+      "tags": [
+        "registry",
+        "persistence",
+        "startup"
+      ],
+      "false_positives": [
+        "Legitimate administrative activity"
+      ],
+      "references": [
+        "https://attack.mitre.org/techniques/T1547/"
+      ],
+      "author": "Security Team",
+      "date_created": "2024-01-01",
+      "date_converted": "2025-07-18T21:40:12.775539"
+    },
+    {
+      "id": "splunk_050",
+      "name": "DNS Query to Suspicious Domain - Rule 50",
+      "description": "Detects DNS queries to potentially malicious domains",
+      "category": "Network",
+      "severity": "medium",
+      "mitre_tactics": [
+        "command-and-control"
+      ],
+      "mitre_techniques": [
+        "T1071.004"
+      ],
+      "original_source": "splunk",
+      "original_rule_id": "splunk_original_050",
+      "oci_query": "* | where 'Event Name' = 'DNS Query' and 'DNS Query' like '%.bit%' | head 100",
+      "tags": [
+        "dns",
+        "c2",
+        "domain"
+      ],
+      "false_positives": [
+        "Legitimate administrative activity"
+      ],
+      "references": [
+        "https://attack.mitre.org/techniques/T1071.004/"
+      ],
+      "author": "Security Team",
+      "date_created": "2024-01-01",
+      "date_converted": "2025-07-18T21:40:12.775541"
+    },
+    {
+      "id": "elastic_051",
+      "name": "Suspicious Process Execution - Rule 51",
+      "description": "Detects suspicious process execution patterns",
+      "category": "Process",
+      "severity": "high",
+      "mitre_tactics": [
+        "execution"
+      ],
+      "mitre_techniques": [
+        "T1059"
+      ],
+      "original_source": "elastic",
+      "original_rule_id": "elastic_original_051",
+      "oci_query": "* | where 'Process Name' like '%cmd.exe%' and 'Command Line' like '%powershell%' | head 100",
+      "tags": [
+        "process",
+        "execution",
+        "windows"
+      ],
+      "false_positives": [
+        "Legitimate administrative activity"
+      ],
+      "references": [
+        "https://attack.mitre.org/techniques/T1059/"
+      ],
+      "author": "Security Team",
+      "date_created": "2024-01-01",
+      "date_converted": "2025-07-18T21:40:12.775543"
+    },
+    {
+      "id": "splunk_052",
+      "name": "Network Connection to Suspicious Domain - Rule 52",
+      "description": "Detects network connections to known malicious domains",
+      "category": "Network",
+      "severity": "medium",
+      "mitre_tactics": [
+        "command-and-control"
+      ],
+      "mitre_techniques": [
+        "T1071"
+      ],
+      "original_source": "splunk",
+      "original_rule_id": "splunk_original_052",
+      "oci_query": "* | where 'Event Name' = 'Network Connection' and 'Domain' like '%.tk%' | head 100",
+      "tags": [
+        "network",
+        "c2",
+        "domain"
+      ],
+      "false_positives": [
+        "Legitimate administrative activity"
+      ],
+      "references": [
+        "https://attack.mitre.org/techniques/T1071/"
+      ],
+      "author": "Security Team",
+      "date_created": "2024-01-01",
+      "date_converted": "2025-07-18T21:40:12.775545"
+    },
+    {
+      "id": "elastic_053",
+      "name": "Failed Authentication Attempts - Rule 53",
+      "description": "Detects multiple failed authentication attempts",
+      "category": "Authentication",
+      "severity": "medium",
+      "mitre_tactics": [
+        "credential-access"
+      ],
+      "mitre_techniques": [
+        "T1110"
+      ],
+      "original_source": "elastic",
+      "original_rule_id": "elastic_original_053",
+      "oci_query": "* | where 'Event Name' = 'Logon Failed' and 'Event ID' = 4625 | head 100",
+      "tags": [
+        "authentication",
+        "brute-force",
+        "failed-logon"
+      ],
+      "false_positives": [
+        "Legitimate administrative activity"
+      ],
+      "references": [
+        "https://attack.mitre.org/techniques/T1110/"
+      ],
+      "author": "Security Team",
+      "date_created": "2024-01-01",
+      "date_converted": "2025-07-18T21:40:12.775547"
+    },
+    {
+      "id": "splunk_054",
+      "name": "Registry Modification - Rule 54",
+      "description": "Detects suspicious registry modifications",
+      "category": "System",
+      "severity": "high",
+      "mitre_tactics": [
+        "persistence"
+      ],
+      "mitre_techniques": [
+        "T1547"
+      ],
+      "original_source": "splunk",
+      "original_rule_id": "splunk_original_054",
+      "oci_query": "* | where 'Event Name' = 'Registry Value Set' and 'Registry Path' like '%Run%' | head 100",
+      "tags": [
+        "registry",
+        "persistence",
+        "startup"
+      ],
+      "false_positives": [
+        "Legitimate administrative activity"
+      ],
+      "references": [
+        "https://attack.mitre.org/techniques/T1547/"
+      ],
+      "author": "Security Team",
+      "date_created": "2024-01-01",
+      "date_converted": "2025-07-18T21:40:12.775549"
+    },
+    {
+      "id": "elastic_055",
+      "name": "DNS Query to Suspicious Domain - Rule 55",
+      "description": "Detects DNS queries to potentially malicious domains",
+      "category": "Network",
+      "severity": "medium",
+      "mitre_tactics": [
+        "command-and-control"
+      ],
+      "mitre_techniques": [
+        "T1071.004"
+      ],
+      "original_source": "elastic",
+      "original_rule_id": "elastic_original_055",
+      "oci_query": "* | where 'Event Name' = 'DNS Query' and 'DNS Query' like '%.bit%' | head 100",
+      "tags": [
+        "dns",
+        "c2",
+        "domain"
+      ],
+      "false_positives": [
+        "Legitimate administrative activity"
+      ],
+      "references": [
+        "https://attack.mitre.org/techniques/T1071.004/"
+      ],
+      "author": "Security Team",
+      "date_created": "2024-01-01",
+      "date_converted": "2025-07-18T21:40:12.775552"
+    },
+    {
+      "id": "splunk_056",
+      "name": "Suspicious Process Execution - Rule 56",
+      "description": "Detects suspicious process execution patterns",
+      "category": "Process",
+      "severity": "high",
+      "mitre_tactics": [
+        "execution"
+      ],
+      "mitre_techniques": [
+        "T1059"
+      ],
+      "original_source": "splunk",
+      "original_rule_id": "splunk_original_056",
+      "oci_query": "* | where 'Process Name' like '%cmd.exe%' and 'Command Line' like '%powershell%' | head 100",
+      "tags": [
+        "process",
+        "execution",
+        "windows"
+      ],
+      "false_positives": [
+        "Legitimate administrative activity"
+      ],
+      "references": [
+        "https://attack.mitre.org/techniques/T1059/"
+      ],
+      "author": "Security Team",
+      "date_created": "2024-01-01",
+      "date_converted": "2025-07-18T21:40:12.775554"
+    },
+    {
+      "id": "elastic_057",
+      "name": "Network Connection to Suspicious Domain - Rule 57",
+      "description": "Detects network connections to known malicious domains",
+      "category": "Network",
+      "severity": "medium",
+      "mitre_tactics": [
+        "command-and-control"
+      ],
+      "mitre_techniques": [
+        "T1071"
+      ],
+      "original_source": "elastic",
+      "original_rule_id": "elastic_original_057",
+      "oci_query": "* | where 'Event Name' = 'Network Connection' and 'Domain' like '%.tk%' | head 100",
+      "tags": [
+        "network",
+        "c2",
+        "domain"
+      ],
+      "false_positives": [
+        "Legitimate administrative activity"
+      ],
+      "references": [
+        "https://attack.mitre.org/techniques/T1071/"
+      ],
+      "author": "Security Team",
+      "date_created": "2024-01-01",
+      "date_converted": "2025-07-18T21:40:12.775556"
+    },
+    {
+      "id": "splunk_058",
+      "name": "Failed Authentication Attempts - Rule 58",
+      "description": "Detects multiple failed authentication attempts",
+      "category": "Authentication",
+      "severity": "medium",
+      "mitre_tactics": [
+        "credential-access"
+      ],
+      "mitre_techniques": [
+        "T1110"
+      ],
+      "original_source": "splunk",
+      "original_rule_id": "splunk_original_058",
+      "oci_query": "* | where 'Event Name' = 'Logon Failed' and 'Event ID' = 4625 | head 100",
+      "tags": [
+        "authentication",
+        "brute-force",
+        "failed-logon"
+      ],
+      "false_positives": [
+        "Legitimate administrative activity"
+      ],
+      "references": [
+        "https://attack.mitre.org/techniques/T1110/"
+      ],
+      "author": "Security Team",
+      "date_created": "2024-01-01",
+      "date_converted": "2025-07-18T21:40:12.775558"
+    },
+    {
+      "id": "elastic_059",
+      "name": "Registry Modification - Rule 59",
+      "description": "Detects suspicious registry modifications",
+      "category": "System",
+      "severity": "high",
+      "mitre_tactics": [
+        "persistence"
+      ],
+      "mitre_techniques": [
+        "T1547"
+      ],
+      "original_source": "elastic",
+      "original_rule_id": "elastic_original_059",
+      "oci_query": "* | where 'Event Name' = 'Registry Value Set' and 'Registry Path' like '%Run%' | head 100",
+      "tags": [
+        "registry",
+        "persistence",
+        "startup"
+      ],
+      "false_positives": [
+        "Legitimate administrative activity"
+      ],
+      "references": [
+        "https://attack.mitre.org/techniques/T1547/"
+      ],
+      "author": "Security Team",
+      "date_created": "2024-01-01",
+      "date_converted": "2025-07-18T21:40:12.775560"
+    },
+    {
+      "id": "splunk_060",
+      "name": "DNS Query to Suspicious Domain - Rule 60",
+      "description": "Detects DNS queries to potentially malicious domains",
+      "category": "Network",
+      "severity": "medium",
+      "mitre_tactics": [
+        "command-and-control"
+      ],
+      "mitre_techniques": [
+        "T1071.004"
+      ],
+      "original_source": "splunk",
+      "original_rule_id": "splunk_original_060",
+      "oci_query": "* | where 'Event Name' = 'DNS Query' and 'DNS Query' like '%.bit%' | head 100",
+      "tags": [
+        "dns",
+        "c2",
+        "domain"
+      ],
+      "false_positives": [
+        "Legitimate administrative activity"
+      ],
+      "references": [
+        "https://attack.mitre.org/techniques/T1071.004/"
+      ],
+      "author": "Security Team",
+      "date_created": "2024-01-01",
+      "date_converted": "2025-07-18T21:40:12.775562"
+    },
+    {
+      "id": "elastic_061",
+      "name": "Suspicious Process Execution - Rule 61",
+      "description": "Detects suspicious process execution patterns",
+      "category": "Process",
+      "severity": "high",
+      "mitre_tactics": [
+        "execution"
+      ],
+      "mitre_techniques": [
+        "T1059"
+      ],
+      "original_source": "elastic",
+      "original_rule_id": "elastic_original_061",
+      "oci_query": "* | where 'Process Name' like '%cmd.exe%' and 'Command Line' like '%powershell%' | head 100",
+      "tags": [
+        "process",
+        "execution",
+        "windows"
+      ],
+      "false_positives": [
+        "Legitimate administrative activity"
+      ],
+      "references": [
+        "https://attack.mitre.org/techniques/T1059/"
+      ],
+      "author": "Security Team",
+      "date_created": "2024-01-01",
+      "date_converted": "2025-07-18T21:40:12.775564"
+    },
+    {
+      "id": "splunk_062",
+      "name": "Network Connection to Suspicious Domain - Rule 62",
+      "description": "Detects network connections to known malicious domains",
+      "category": "Network",
+      "severity": "medium",
+      "mitre_tactics": [
+        "command-and-control"
+      ],
+      "mitre_techniques": [
+        "T1071"
+      ],
+      "original_source": "splunk",
+      "original_rule_id": "splunk_original_062",
+      "oci_query": "* | where 'Event Name' = 'Network Connection' and 'Domain' like '%.tk%' | head 100",
+      "tags": [
+        "network",
+        "c2",
+        "domain"
+      ],
+      "false_positives": [
+        "Legitimate administrative activity"
+      ],
+      "references": [
+        "https://attack.mitre.org/techniques/T1071/"
+      ],
+      "author": "Security Team",
+      "date_created": "2024-01-01",
+      "date_converted": "2025-07-18T21:40:12.775566"
+    },
+    {
+      "id": "elastic_063",
+      "name": "Failed Authentication Attempts - Rule 63",
+      "description": "Detects multiple failed authentication attempts",
+      "category": "Authentication",
+      "severity": "medium",
+      "mitre_tactics": [
+        "credential-access"
+      ],
+      "mitre_techniques": [
+        "T1110"
+      ],
+      "original_source": "elastic",
+      "original_rule_id": "elastic_original_063",
+      "oci_query": "* | where 'Event Name' = 'Logon Failed' and 'Event ID' = 4625 | head 100",
+      "tags": [
+        "authentication",
+        "brute-force",
+        "failed-logon"
+      ],
+      "false_positives": [
+        "Legitimate administrative activity"
+      ],
+      "references": [
+        "https://attack.mitre.org/techniques/T1110/"
+      ],
+      "author": "Security Team",
+      "date_created": "2024-01-01",
+      "date_converted": "2025-07-18T21:40:12.775568"
+    },
+    {
+      "id": "splunk_064",
+      "name": "Registry Modification - Rule 64",
+      "description": "Detects suspicious registry modifications",
+      "category": "System",
+      "severity": "high",
+      "mitre_tactics": [
+        "persistence"
+      ],
+      "mitre_techniques": [
+        "T1547"
+      ],
+      "original_source": "splunk",
+      "original_rule_id": "splunk_original_064",
+      "oci_query": "* | where 'Event Name' = 'Registry Value Set' and 'Registry Path' like '%Run%' | head 100",
+      "tags": [
+        "registry",
+        "persistence",
+        "startup"
+      ],
+      "false_positives": [
+        "Legitimate administrative activity"
+      ],
+      "references": [
+        "https://attack.mitre.org/techniques/T1547/"
+      ],
+      "author": "Security Team",
+      "date_created": "2024-01-01",
+      "date_converted": "2025-07-18T21:40:12.775570"
+    },
+    {
+      "id": "elastic_065",
+      "name": "DNS Query to Suspicious Domain - Rule 65",
+      "description": "Detects DNS queries to potentially malicious domains",
+      "category": "Network",
+      "severity": "medium",
+      "mitre_tactics": [
+        "command-and-control"
+      ],
+      "mitre_techniques": [
+        "T1071.004"
+      ],
+      "original_source": "elastic",
+      "original_rule_id": "elastic_original_065",
+      "oci_query": "* | where 'Event Name' = 'DNS Query' and 'DNS Query' like '%.bit%' | head 100",
+      "tags": [
+        "dns",
+        "c2",
+        "domain"
+      ],
+      "false_positives": [
+        "Legitimate administrative activity"
+      ],
+      "references": [
+        "https://attack.mitre.org/techniques/T1071.004/"
+      ],
+      "author": "Security Team",
+      "date_created": "2024-01-01",
+      "date_converted": "2025-07-18T21:40:12.775572"
+    },
+    {
+      "id": "splunk_066",
+      "name": "Suspicious Process Execution - Rule 66",
+      "description": "Detects suspicious process execution patterns",
+      "category": "Process",
+      "severity": "high",
+      "mitre_tactics": [
+        "execution"
+      ],
+      "mitre_techniques": [
+        "T1059"
+      ],
+      "original_source": "splunk",
+      "original_rule_id": "splunk_original_066",
+      "oci_query": "* | where 'Process Name' like '%cmd.exe%' and 'Command Line' like '%powershell%' | head 100",
+      "tags": [
+        "process",
+        "execution",
+        "windows"
+      ],
+      "false_positives": [
+        "Legitimate administrative activity"
+      ],
+      "references": [
+        "https://attack.mitre.org/techniques/T1059/"
+      ],
+      "author": "Security Team",
+      "date_created": "2024-01-01",
+      "date_converted": "2025-07-18T21:40:12.775574"
+    },
+    {
+      "id": "elastic_067",
+      "name": "Network Connection to Suspicious Domain - Rule 67",
+      "description": "Detects network connections to known malicious domains",
+      "category": "Network",
+      "severity": "medium",
+      "mitre_tactics": [
+        "command-and-control"
+      ],
+      "mitre_techniques": [
+        "T1071"
+      ],
+      "original_source": "elastic",
+      "original_rule_id": "elastic_original_067",
+      "oci_query": "* | where 'Event Name' = 'Network Connection' and 'Domain' like '%.tk%' | head 100",
+      "tags": [
+        "network",
+        "c2",
+        "domain"
+      ],
+      "false_positives": [
+        "Legitimate administrative activity"
+      ],
+      "references": [
+        "https://attack.mitre.org/techniques/T1071/"
+      ],
+      "author": "Security Team",
+      "date_created": "2024-01-01",
+      "date_converted": "2025-07-18T21:40:12.775576"
+    },
+    {
+      "id": "splunk_068",
+      "name": "Failed Authentication Attempts - Rule 68",
+      "description": "Detects multiple failed authentication attempts",
+      "category": "Authentication",
+      "severity": "medium",
+      "mitre_tactics": [
+        "credential-access"
+      ],
+      "mitre_techniques": [
+        "T1110"
+      ],
+      "original_source": "splunk",
+      "original_rule_id": "splunk_original_068",
+      "oci_query": "* | where 'Event Name' = 'Logon Failed' and 'Event ID' = 4625 | head 100",
+      "tags": [
+        "authentication",
+        "brute-force",
+        "failed-logon"
+      ],
+      "false_positives": [
+        "Legitimate administrative activity"
+      ],
+      "references": [
+        "https://attack.mitre.org/techniques/T1110/"
+      ],
+      "author": "Security Team",
+      "date_created": "2024-01-01",
+      "date_converted": "2025-07-18T21:40:12.775578"
+    },
+    {
+      "id": "elastic_069",
+      "name": "Registry Modification - Rule 69",
+      "description": "Detects suspicious registry modifications",
+      "category": "System",
+      "severity": "high",
+      "mitre_tactics": [
+        "persistence"
+      ],
+      "mitre_techniques": [
+        "T1547"
+      ],
+      "original_source": "elastic",
+      "original_rule_id": "elastic_original_069",
+      "oci_query": "* | where 'Event Name' = 'Registry Value Set' and 'Registry Path' like '%Run%' | head 100",
+      "tags": [
+        "registry",
+        "persistence",
+        "startup"
+      ],
+      "false_positives": [
+        "Legitimate administrative activity"
+      ],
+      "references": [
+        "https://attack.mitre.org/techniques/T1547/"
+      ],
+      "author": "Security Team",
+      "date_created": "2024-01-01",
+      "date_converted": "2025-07-18T21:40:12.775580"
+    },
+    {
+      "id": "splunk_070",
+      "name": "DNS Query to Suspicious Domain - Rule 70",
+      "description": "Detects DNS queries to potentially malicious domains",
+      "category": "Network",
+      "severity": "medium",
+      "mitre_tactics": [
+        "command-and-control"
+      ],
+      "mitre_techniques": [
+        "T1071.004"
+      ],
+      "original_source": "splunk",
+      "original_rule_id": "splunk_original_070",
+      "oci_query": "* | where 'Event Name' = 'DNS Query' and 'DNS Query' like '%.bit%' | head 100",
+      "tags": [
+        "dns",
+        "c2",
+        "domain"
+      ],
+      "false_positives": [
+        "Legitimate administrative activity"
+      ],
+      "references": [
+        "https://attack.mitre.org/techniques/T1071.004/"
+      ],
+      "author": "Security Team",
+      "date_created": "2024-01-01",
+      "date_converted": "2025-07-18T21:40:12.775582"
+    },
+    {
+      "id": "elastic_071",
+      "name": "Suspicious Process Execution - Rule 71",
+      "description": "Detects suspicious process execution patterns",
+      "category": "Process",
+      "severity": "high",
+      "mitre_tactics": [
+        "execution"
+      ],
+      "mitre_techniques": [
+        "T1059"
+      ],
+      "original_source": "elastic",
+      "original_rule_id": "elastic_original_071",
+      "oci_query": "* | where 'Process Name' like '%cmd.exe%' and 'Command Line' like '%powershell%' | head 100",
+      "tags": [
+        "process",
+        "execution",
+        "windows"
+      ],
+      "false_positives": [
+        "Legitimate administrative activity"
+      ],
+      "references": [
+        "https://attack.mitre.org/techniques/T1059/"
+      ],
+      "author": "Security Team",
+      "date_created": "2024-01-01",
+      "date_converted": "2025-07-18T21:40:12.775584"
+    },
+    {
+      "id": "splunk_072",
+      "name": "Network Connection to Suspicious Domain - Rule 72",
+      "description": "Detects network connections to known malicious domains",
+      "category": "Network",
+      "severity": "medium",
+      "mitre_tactics": [
+        "command-and-control"
+      ],
+      "mitre_techniques": [
+        "T1071"
+      ],
+      "original_source": "splunk",
+      "original_rule_id": "splunk_original_072",
+      "oci_query": "* | where 'Event Name' = 'Network Connection' and 'Domain' like '%.tk%' | head 100",
+      "tags": [
+        "network",
+        "c2",
+        "domain"
+      ],
+      "false_positives": [
+        "Legitimate administrative activity"
+      ],
+      "references": [
+        "https://attack.mitre.org/techniques/T1071/"
+      ],
+      "author": "Security Team",
+      "date_created": "2024-01-01",
+      "date_converted": "2025-07-18T21:40:12.775586"
+    },
+    {
+      "id": "elastic_073",
+      "name": "Failed Authentication Attempts - Rule 73",
+      "description": "Detects multiple failed authentication attempts",
+      "category": "Authentication",
+      "severity": "medium",
+      "mitre_tactics": [
+        "credential-access"
+      ],
+      "mitre_techniques": [
+        "T1110"
+      ],
+      "original_source": "elastic",
+      "original_rule_id": "elastic_original_073",
+      "oci_query": "* | where 'Event Name' = 'Logon Failed' and 'Event ID' = 4625 | head 100",
+      "tags": [
+        "authentication",
+        "brute-force",
+        "failed-logon"
+      ],
+      "false_positives": [
+        "Legitimate administrative activity"
+      ],
+      "references": [
+        "https://attack.mitre.org/techniques/T1110/"
+      ],
+      "author": "Security Team",
+      "date_created": "2024-01-01",
+      "date_converted": "2025-07-18T21:40:12.775588"
+    },
+    {
+      "id": "splunk_074",
+      "name": "Registry Modification - Rule 74",
+      "description": "Detects suspicious registry modifications",
+      "category": "System",
+      "severity": "high",
+      "mitre_tactics": [
+        "persistence"
+      ],
+      "mitre_techniques": [
+        "T1547"
+      ],
+      "original_source": "splunk",
+      "original_rule_id": "splunk_original_074",
+      "oci_query": "* | where 'Event Name' = 'Registry Value Set' and 'Registry Path' like '%Run%' | head 100",
+      "tags": [
+        "registry",
+        "persistence",
+        "startup"
+      ],
+      "false_positives": [
+        "Legitimate administrative activity"
+      ],
+      "references": [
+        "https://attack.mitre.org/techniques/T1547/"
+      ],
+      "author": "Security Team",
+      "date_created": "2024-01-01",
+      "date_converted": "2025-07-18T21:40:12.775590"
+    },
+    {
+      "id": "elastic_075",
+      "name": "DNS Query to Suspicious Domain - Rule 75",
+      "description": "Detects DNS queries to potentially malicious domains",
+      "category": "Network",
+      "severity": "medium",
+      "mitre_tactics": [
+        "command-and-control"
+      ],
+      "mitre_techniques": [
+        "T1071.004"
+      ],
+      "original_source": "elastic",
+      "original_rule_id": "elastic_original_075",
+      "oci_query": "* | where 'Event Name' = 'DNS Query' and 'DNS Query' like '%.bit%' | head 100",
+      "tags": [
+        "dns",
+        "c2",
+        "domain"
+      ],
+      "false_positives": [
+        "Legitimate administrative activity"
+      ],
+      "references": [
+        "https://attack.mitre.org/techniques/T1071.004/"
+      ],
+      "author": "Security Team",
+      "date_created": "2024-01-01",
+      "date_converted": "2025-07-18T21:40:12.775592"
+    },
+    {
+      "id": "splunk_076",
+      "name": "Suspicious Process Execution - Rule 76",
+      "description": "Detects suspicious process execution patterns",
+      "category": "Process",
+      "severity": "high",
+      "mitre_tactics": [
+        "execution"
+      ],
+      "mitre_techniques": [
+        "T1059"
+      ],
+      "original_source": "splunk",
+      "original_rule_id": "splunk_original_076",
+      "oci_query": "* | where 'Process Name' like '%cmd.exe%' and 'Command Line' like '%powershell%' | head 100",
+      "tags": [
+        "process",
+        "execution",
+        "windows"
+      ],
+      "false_positives": [
+        "Legitimate administrative activity"
+      ],
+      "references": [
+        "https://attack.mitre.org/techniques/T1059/"
+      ],
+      "author": "Security Team",
+      "date_created": "2024-01-01",
+      "date_converted": "2025-07-18T21:40:12.775594"
+    },
+    {
+      "id": "elastic_077",
+      "name": "Network Connection to Suspicious Domain - Rule 77",
+      "description": "Detects network connections to known malicious domains",
+      "category": "Network",
+      "severity": "medium",
+      "mitre_tactics": [
+        "command-and-control"
+      ],
+      "mitre_techniques": [
+        "T1071"
+      ],
+      "original_source": "elastic",
+      "original_rule_id": "elastic_original_077",
+      "oci_query": "* | where 'Event Name' = 'Network Connection' and 'Domain' like '%.tk%' | head 100",
+      "tags": [
+        "network",
+        "c2",
+        "domain"
+      ],
+      "false_positives": [
+        "Legitimate administrative activity"
+      ],
+      "references": [
+        "https://attack.mitre.org/techniques/T1071/"
+      ],
+      "author": "Security Team",
+      "date_created": "2024-01-01",
+      "date_converted": "2025-07-18T21:40:12.775596"
+    },
+    {
+      "id": "splunk_078",
+      "name": "Failed Authentication Attempts - Rule 78",
+      "description": "Detects multiple failed authentication attempts",
+      "category": "Authentication",
+      "severity": "medium",
+      "mitre_tactics": [
+        "credential-access"
+      ],
+      "mitre_techniques": [
+        "T1110"
+      ],
+      "original_source": "splunk",
+      "original_rule_id": "splunk_original_078",
+      "oci_query": "* | where 'Event Name' = 'Logon Failed' and 'Event ID' = 4625 | head 100",
+      "tags": [
+        "authentication",
+        "brute-force",
+        "failed-logon"
+      ],
+      "false_positives": [
+        "Legitimate administrative activity"
+      ],
+      "references": [
+        "https://attack.mitre.org/techniques/T1110/"
+      ],
+      "author": "Security Team",
+      "date_created": "2024-01-01",
+      "date_converted": "2025-07-18T21:40:12.775598"
+    },
+    {
+      "id": "elastic_079",
+      "name": "Registry Modification - Rule 79",
+      "description": "Detects suspicious registry modifications",
+      "category": "System",
+      "severity": "high",
+      "mitre_tactics": [
+        "persistence"
+      ],
+      "mitre_techniques": [
+        "T1547"
+      ],
+      "original_source": "elastic",
+      "original_rule_id": "elastic_original_079",
+      "oci_query": "* | where 'Event Name' = 'Registry Value Set' and 'Registry Path' like '%Run%' | head 100",
+      "tags": [
+        "registry",
+        "persistence",
+        "startup"
+      ],
+      "false_positives": [
+        "Legitimate administrative activity"
+      ],
+      "references": [
+        "https://attack.mitre.org/techniques/T1547/"
+      ],
+      "author": "Security Team",
+      "date_created": "2024-01-01",
+      "date_converted": "2025-07-18T21:40:12.775600"
+    },
+    {
+      "id": "splunk_080",
+      "name": "DNS Query to Suspicious Domain - Rule 80",
+      "description": "Detects DNS queries to potentially malicious domains",
+      "category": "Network",
+      "severity": "medium",
+      "mitre_tactics": [
+        "command-and-control"
+      ],
+      "mitre_techniques": [
+        "T1071.004"
+      ],
+      "original_source": "splunk",
+      "original_rule_id": "splunk_original_080",
+      "oci_query": "* | where 'Event Name' = 'DNS Query' and 'DNS Query' like '%.bit%' | head 100",
+      "tags": [
+        "dns",
+        "c2",
+        "domain"
+      ],
+      "false_positives": [
+        "Legitimate administrative activity"
+      ],
+      "references": [
+        "https://attack.mitre.org/techniques/T1071.004/"
+      ],
+      "author": "Security Team",
+      "date_created": "2024-01-01",
+      "date_converted": "2025-07-18T21:40:12.775602"
+    },
+    {
+      "id": "elastic_081",
+      "name": "Suspicious Process Execution - Rule 81",
+      "description": "Detects suspicious process execution patterns",
+      "category": "Process",
+      "severity": "high",
+      "mitre_tactics": [
+        "execution"
+      ],
+      "mitre_techniques": [
+        "T1059"
+      ],
+      "original_source": "elastic",
+      "original_rule_id": "elastic_original_081",
+      "oci_query": "* | where 'Process Name' like '%cmd.exe%' and 'Command Line' like '%powershell%' | head 100",
+      "tags": [
+        "process",
+        "execution",
+        "windows"
+      ],
+      "false_positives": [
+        "Legitimate administrative activity"
+      ],
+      "references": [
+        "https://attack.mitre.org/techniques/T1059/"
+      ],
+      "author": "Security Team",
+      "date_created": "2024-01-01",
+      "date_converted": "2025-07-18T21:40:12.775604"
+    },
+    {
+      "id": "splunk_082",
+      "name": "Network Connection to Suspicious Domain - Rule 82",
+      "description": "Detects network connections to known malicious domains",
+      "category": "Network",
+      "severity": "medium",
+      "mitre_tactics": [
+        "command-and-control"
+      ],
+      "mitre_techniques": [
+        "T1071"
+      ],
+      "original_source": "splunk",
+      "original_rule_id": "splunk_original_082",
+      "oci_query": "* | where 'Event Name' = 'Network Connection' and 'Domain' like '%.tk%' | head 100",
+      "tags": [
+        "network",
+        "c2",
+        "domain"
+      ],
+      "false_positives": [
+        "Legitimate administrative activity"
+      ],
+      "references": [
+        "https://attack.mitre.org/techniques/T1071/"
+      ],
+      "author": "Security Team",
+      "date_created": "2024-01-01",
+      "date_converted": "2025-07-18T21:40:12.775607"
+    },
+    {
+      "id": "elastic_083",
+      "name": "Failed Authentication Attempts - Rule 83",
+      "description": "Detects multiple failed authentication attempts",
+      "category": "Authentication",
+      "severity": "medium",
+      "mitre_tactics": [
+        "credential-access"
+      ],
+      "mitre_techniques": [
+        "T1110"
+      ],
+      "original_source": "elastic",
+      "original_rule_id": "elastic_original_083",
+      "oci_query": "* | where 'Event Name' = 'Logon Failed' and 'Event ID' = 4625 | head 100",
+      "tags": [
+        "authentication",
+        "brute-force",
+        "failed-logon"
+      ],
+      "false_positives": [
+        "Legitimate administrative activity"
+      ],
+      "references": [
+        "https://attack.mitre.org/techniques/T1110/"
+      ],
+      "author": "Security Team",
+      "date_created": "2024-01-01",
+      "date_converted": "2025-07-18T21:40:12.775609"
+    },
+    {
+      "id": "splunk_084",
+      "name": "Registry Modification - Rule 84",
+      "description": "Detects suspicious registry modifications",
+      "category": "System",
+      "severity": "high",
+      "mitre_tactics": [
+        "persistence"
+      ],
+      "mitre_techniques": [
+        "T1547"
+      ],
+      "original_source": "splunk",
+      "original_rule_id": "splunk_original_084",
+      "oci_query": "* | where 'Event Name' = 'Registry Value Set' and 'Registry Path' like '%Run%' | head 100",
+      "tags": [
+        "registry",
+        "persistence",
+        "startup"
+      ],
+      "false_positives": [
+        "Legitimate administrative activity"
+      ],
+      "references": [
+        "https://attack.mitre.org/techniques/T1547/"
+      ],
+      "author": "Security Team",
+      "date_created": "2024-01-01",
+      "date_converted": "2025-07-18T21:40:12.775612"
+    },
+    {
+      "id": "elastic_085",
+      "name": "DNS Query to Suspicious Domain - Rule 85",
+      "description": "Detects DNS queries to potentially malicious domains",
+      "category": "Network",
+      "severity": "medium",
+      "mitre_tactics": [
+        "command-and-control"
+      ],
+      "mitre_techniques": [
+        "T1071.004"
+      ],
+      "original_source": "elastic",
+      "original_rule_id": "elastic_original_085",
+      "oci_query": "* | where 'Event Name' = 'DNS Query' and 'DNS Query' like '%.bit%' | head 100",
+      "tags": [
+        "dns",
+        "c2",
+        "domain"
+      ],
+      "false_positives": [
+        "Legitimate administrative activity"
+      ],
+      "references": [
+        "https://attack.mitre.org/techniques/T1071.004/"
+      ],
+      "author": "Security Team",
+      "date_created": "2024-01-01",
+      "date_converted": "2025-07-18T21:40:12.775614"
+    },
+    {
+      "id": "splunk_086",
+      "name": "Suspicious Process Execution - Rule 86",
+      "description": "Detects suspicious process execution patterns",
+      "category": "Process",
+      "severity": "high",
+      "mitre_tactics": [
+        "execution"
+      ],
+      "mitre_techniques": [
+        "T1059"
+      ],
+      "original_source": "splunk",
+      "original_rule_id": "splunk_original_086",
+      "oci_query": "* | where 'Process Name' like '%cmd.exe%' and 'Command Line' like '%powershell%' | head 100",
+      "tags": [
+        "process",
+        "execution",
+        "windows"
+      ],
+      "false_positives": [
+        "Legitimate administrative activity"
+      ],
+      "references": [
+        "https://attack.mitre.org/techniques/T1059/"
+      ],
+      "author": "Security Team",
+      "date_created": "2024-01-01",
+      "date_converted": "2025-07-18T21:40:12.775616"
+    },
+    {
+      "id": "elastic_087",
+      "name": "Network Connection to Suspicious Domain - Rule 87",
+      "description": "Detects network connections to known malicious domains",
+      "category": "Network",
+      "severity": "medium",
+      "mitre_tactics": [
+        "command-and-control"
+      ],
+      "mitre_techniques": [
+        "T1071"
+      ],
+      "original_source": "elastic",
+      "original_rule_id": "elastic_original_087",
+      "oci_query": "* | where 'Event Name' = 'Network Connection' and 'Domain' like '%.tk%' | head 100",
+      "tags": [
+        "network",
+        "c2",
+        "domain"
+      ],
+      "false_positives": [
+        "Legitimate administrative activity"
+      ],
+      "references": [
+        "https://attack.mitre.org/techniques/T1071/"
+      ],
+      "author": "Security Team",
+      "date_created": "2024-01-01",
+      "date_converted": "2025-07-18T21:40:12.775618"
+    },
+    {
+      "id": "splunk_088",
+      "name": "Failed Authentication Attempts - Rule 88",
+      "description": "Detects multiple failed authentication attempts",
+      "category": "Authentication",
+      "severity": "medium",
+      "mitre_tactics": [
+        "credential-access"
+      ],
+      "mitre_techniques": [
+        "T1110"
+      ],
+      "original_source": "splunk",
+      "original_rule_id": "splunk_original_088",
+      "oci_query": "* | where 'Event Name' = 'Logon Failed' and 'Event ID' = 4625 | head 100",
+      "tags": [
+        "authentication",
+        "brute-force",
+        "failed-logon"
+      ],
+      "false_positives": [
+        "Legitimate administrative activity"
+      ],
+      "references": [
+        "https://attack.mitre.org/techniques/T1110/"
+      ],
+      "author": "Security Team",
+      "date_created": "2024-01-01",
+      "date_converted": "2025-07-18T21:40:12.775620"
+    },
+    {
+      "id": "elastic_089",
+      "name": "Registry Modification - Rule 89",
+      "description": "Detects suspicious registry modifications",
+      "category": "System",
+      "severity": "high",
+      "mitre_tactics": [
+        "persistence"
+      ],
+      "mitre_techniques": [
+        "T1547"
+      ],
+      "original_source": "elastic",
+      "original_rule_id": "elastic_original_089",
+      "oci_query": "* | where 'Event Name' = 'Registry Value Set' and 'Registry Path' like '%Run%' | head 100",
+      "tags": [
+        "registry",
+        "persistence",
+        "startup"
+      ],
+      "false_positives": [
+        "Legitimate administrative activity"
+      ],
+      "references": [
+        "https://attack.mitre.org/techniques/T1547/"
+      ],
+      "author": "Security Team",
+      "date_created": "2024-01-01",
+      "date_converted": "2025-07-18T21:40:12.775622"
+    },
+    {
+      "id": "splunk_090",
+      "name": "DNS Query to Suspicious Domain - Rule 90",
+      "description": "Detects DNS queries to potentially malicious domains",
+      "category": "Network",
+      "severity": "medium",
+      "mitre_tactics": [
+        "command-and-control"
+      ],
+      "mitre_techniques": [
+        "T1071.004"
+      ],
+      "original_source": "splunk",
+      "original_rule_id": "splunk_original_090",
+      "oci_query": "* | where 'Event Name' = 'DNS Query' and 'DNS Query' like '%.bit%' | head 100",
+      "tags": [
+        "dns",
+        "c2",
+        "domain"
+      ],
+      "false_positives": [
+        "Legitimate administrative activity"
+      ],
+      "references": [
+        "https://attack.mitre.org/techniques/T1071.004/"
+      ],
+      "author": "Security Team",
+      "date_created": "2024-01-01",
+      "date_converted": "2025-07-18T21:40:12.775625"
+    },
+    {
+      "id": "elastic_091",
+      "name": "Suspicious Process Execution - Rule 91",
+      "description": "Detects suspicious process execution patterns",
+      "category": "Process",
+      "severity": "high",
+      "mitre_tactics": [
+        "execution"
+      ],
+      "mitre_techniques": [
+        "T1059"
+      ],
+      "original_source": "elastic",
+      "original_rule_id": "elastic_original_091",
+      "oci_query": "* | where 'Process Name' like '%cmd.exe%' and 'Command Line' like '%powershell%' | head 100",
+      "tags": [
+        "process",
+        "execution",
+        "windows"
+      ],
+      "false_positives": [
+        "Legitimate administrative activity"
+      ],
+      "references": [
+        "https://attack.mitre.org/techniques/T1059/"
+      ],
+      "author": "Security Team",
+      "date_created": "2024-01-01",
+      "date_converted": "2025-07-18T21:40:12.775627"
+    },
+    {
+      "id": "splunk_092",
+      "name": "Network Connection to Suspicious Domain - Rule 92",
+      "description": "Detects network connections to known malicious domains",
+      "category": "Network",
+      "severity": "medium",
+      "mitre_tactics": [
+        "command-and-control"
+      ],
+      "mitre_techniques": [
+        "T1071"
+      ],
+      "original_source": "splunk",
+      "original_rule_id": "splunk_original_092",
+      "oci_query": "* | where 'Event Name' = 'Network Connection' and 'Domain' like '%.tk%' | head 100",
+      "tags": [
+        "network",
+        "c2",
+        "domain"
+      ],
+      "false_positives": [
+        "Legitimate administrative activity"
+      ],
+      "references": [
+        "https://attack.mitre.org/techniques/T1071/"
+      ],
+      "author": "Security Team",
+      "date_created": "2024-01-01",
+      "date_converted": "2025-07-18T21:40:12.775629"
+    },
+    {
+      "id": "elastic_093",
+      "name": "Failed Authentication Attempts - Rule 93",
+      "description": "Detects multiple failed authentication attempts",
+      "category": "Authentication",
+      "severity": "medium",
+      "mitre_tactics": [
+        "credential-access"
+      ],
+      "mitre_techniques": [
+        "T1110"
+      ],
+      "original_source": "elastic",
+      "original_rule_id": "elastic_original_093",
+      "oci_query": "* | where 'Event Name' = 'Logon Failed' and 'Event ID' = 4625 | head 100",
+      "tags": [
+        "authentication",
+        "brute-force",
+        "failed-logon"
+      ],
+      "false_positives": [
+        "Legitimate administrative activity"
+      ],
+      "references": [
+        "https://attack.mitre.org/techniques/T1110/"
+      ],
+      "author": "Security Team",
+      "date_created": "2024-01-01",
+      "date_converted": "2025-07-18T21:40:12.775631"
+    },
+    {
+      "id": "splunk_094",
+      "name": "Registry Modification - Rule 94",
+      "description": "Detects suspicious registry modifications",
+      "category": "System",
+      "severity": "high",
+      "mitre_tactics": [
+        "persistence"
+      ],
+      "mitre_techniques": [
+        "T1547"
+      ],
+      "original_source": "splunk",
+      "original_rule_id": "splunk_original_094",
+      "oci_query": "* | where 'Event Name' = 'Registry Value Set' and 'Registry Path' like '%Run%' | head 100",
+      "tags": [
+        "registry",
+        "persistence",
+        "startup"
+      ],
+      "false_positives": [
+        "Legitimate administrative activity"
+      ],
+      "references": [
+        "https://attack.mitre.org/techniques/T1547/"
+      ],
+      "author": "Security Team",
+      "date_created": "2024-01-01",
+      "date_converted": "2025-07-18T21:40:12.775633"
+    },
+    {
+      "id": "elastic_095",
+      "name": "DNS Query to Suspicious Domain - Rule 95",
+      "description": "Detects DNS queries to potentially malicious domains",
+      "category": "Network",
+      "severity": "medium",
+      "mitre_tactics": [
+        "command-and-control"
+      ],
+      "mitre_techniques": [
+        "T1071.004"
+      ],
+      "original_source": "elastic",
+      "original_rule_id": "elastic_original_095",
+      "oci_query": "* | where 'Event Name' = 'DNS Query' and 'DNS Query' like '%.bit%' | head 100",
+      "tags": [
+        "dns",
+        "c2",
+        "domain"
+      ],
+      "false_positives": [
+        "Legitimate administrative activity"
+      ],
+      "references": [
+        "https://attack.mitre.org/techniques/T1071.004/"
+      ],
+      "author": "Security Team",
+      "date_created": "2024-01-01",
+      "date_converted": "2025-07-18T21:40:12.775636"
+    },
+    {
+      "id": "splunk_096",
+      "name": "Suspicious Process Execution - Rule 96",
+      "description": "Detects suspicious process execution patterns",
+      "category": "Process",
+      "severity": "high",
+      "mitre_tactics": [
+        "execution"
+      ],
+      "mitre_techniques": [
+        "T1059"
+      ],
+      "original_source": "splunk",
+      "original_rule_id": "splunk_original_096",
+      "oci_query": "* | where 'Process Name' like '%cmd.exe%' and 'Command Line' like '%powershell%' | head 100",
+      "tags": [
+        "process",
+        "execution",
+        "windows"
+      ],
+      "false_positives": [
+        "Legitimate administrative activity"
+      ],
+      "references": [
+        "https://attack.mitre.org/techniques/T1059/"
+      ],
+      "author": "Security Team",
+      "date_created": "2024-01-01",
+      "date_converted": "2025-07-18T21:40:12.775638"
+    },
+    {
+      "id": "elastic_097",
+      "name": "Network Connection to Suspicious Domain - Rule 97",
+      "description": "Detects network connections to known malicious domains",
+      "category": "Network",
+      "severity": "medium",
+      "mitre_tactics": [
+        "command-and-control"
+      ],
+      "mitre_techniques": [
+        "T1071"
+      ],
+      "original_source": "elastic",
+      "original_rule_id": "elastic_original_097",
+      "oci_query": "* | where 'Event Name' = 'Network Connection' and 'Domain' like '%.tk%' | head 100",
+      "tags": [
+        "network",
+        "c2",
+        "domain"
+      ],
+      "false_positives": [
+        "Legitimate administrative activity"
+      ],
+      "references": [
+        "https://attack.mitre.org/techniques/T1071/"
+      ],
+      "author": "Security Team",
+      "date_created": "2024-01-01",
+      "date_converted": "2025-07-18T21:40:12.775640"
+    },
+    {
+      "id": "splunk_098",
+      "name": "Failed Authentication Attempts - Rule 98",
+      "description": "Detects multiple failed authentication attempts",
+      "category": "Authentication",
+      "severity": "medium",
+      "mitre_tactics": [
+        "credential-access"
+      ],
+      "mitre_techniques": [
+        "T1110"
+      ],
+      "original_source": "splunk",
+      "original_rule_id": "splunk_original_098",
+      "oci_query": "* | where 'Event Name' = 'Logon Failed' and 'Event ID' = 4625 | head 100",
+      "tags": [
+        "authentication",
+        "brute-force",
+        "failed-logon"
+      ],
+      "false_positives": [
+        "Legitimate administrative activity"
+      ],
+      "references": [
+        "https://attack.mitre.org/techniques/T1110/"
+      ],
+      "author": "Security Team",
+      "date_created": "2024-01-01",
+      "date_converted": "2025-07-18T21:40:12.775642"
+    },
+    {
+      "id": "elastic_099",
+      "name": "Registry Modification - Rule 99",
+      "description": "Detects suspicious registry modifications",
+      "category": "System",
+      "severity": "high",
+      "mitre_tactics": [
+        "persistence"
+      ],
+      "mitre_techniques": [
+        "T1547"
+      ],
+      "original_source": "elastic",
+      "original_rule_id": "elastic_original_099",
+      "oci_query": "* | where 'Event Name' = 'Registry Value Set' and 'Registry Path' like '%Run%' | head 100",
+      "tags": [
+        "registry",
+        "persistence",
+        "startup"
+      ],
+      "false_positives": [
+        "Legitimate administrative activity"
+      ],
+      "references": [
+        "https://attack.mitre.org/techniques/T1547/"
+      ],
+      "author": "Security Team",
+      "date_created": "2024-01-01",
+      "date_converted": "2025-07-18T21:40:12.775644"
+    },
+    {
+      "id": "splunk_100",
+      "name": "DNS Query to Suspicious Domain - Rule 100",
+      "description": "Detects DNS queries to potentially malicious domains",
+      "category": "Network",
+      "severity": "medium",
+      "mitre_tactics": [
+        "command-and-control"
+      ],
+      "mitre_techniques": [
+        "T1071.004"
+      ],
+      "original_source": "splunk",
+      "original_rule_id": "splunk_original_100",
+      "oci_query": "* | where 'Event Name' = 'DNS Query' and 'DNS Query' like '%.bit%' | head 100",
+      "tags": [
+        "dns",
+        "c2",
+        "domain"
+      ],
+      "false_positives": [
+        "Legitimate administrative activity"
+      ],
+      "references": [
+        "https://attack.mitre.org/techniques/T1071.004/"
+      ],
+      "author": "Security Team",
+      "date_created": "2024-01-01",
+      "date_converted": "2025-07-18T21:40:12.775647"
+    },
+    {
+      "id": "elastic_101",
+      "name": "Suspicious Process Execution - Rule 101",
+      "description": "Detects suspicious process execution patterns",
+      "category": "Process",
+      "severity": "high",
+      "mitre_tactics": [
+        "execution"
+      ],
+      "mitre_techniques": [
+        "T1059"
+      ],
+      "original_source": "elastic",
+      "original_rule_id": "elastic_original_101",
+      "oci_query": "* | where 'Process Name' like '%cmd.exe%' and 'Command Line' like '%powershell%' | head 100",
+      "tags": [
+        "process",
+        "execution",
+        "windows"
+      ],
+      "false_positives": [
+        "Legitimate administrative activity"
+      ],
+      "references": [
+        "https://attack.mitre.org/techniques/T1059/"
+      ],
+      "author": "Security Team",
+      "date_created": "2024-01-01",
+      "date_converted": "2025-07-18T21:40:12.775649"
+    },
+    {
+      "id": "splunk_102",
+      "name": "Network Connection to Suspicious Domain - Rule 102",
+      "description": "Detects network connections to known malicious domains",
+      "category": "Network",
+      "severity": "medium",
+      "mitre_tactics": [
+        "command-and-control"
+      ],
+      "mitre_techniques": [
+        "T1071"
+      ],
+      "original_source": "splunk",
+      "original_rule_id": "splunk_original_102",
+      "oci_query": "* | where 'Event Name' = 'Network Connection' and 'Domain' like '%.tk%' | head 100",
+      "tags": [
+        "network",
+        "c2",
+        "domain"
+      ],
+      "false_positives": [
+        "Legitimate administrative activity"
+      ],
+      "references": [
+        "https://attack.mitre.org/techniques/T1071/"
+      ],
+      "author": "Security Team",
+      "date_created": "2024-01-01",
+      "date_converted": "2025-07-18T21:40:12.775651"
+    },
+    {
+      "id": "elastic_103",
+      "name": "Failed Authentication Attempts - Rule 103",
+      "description": "Detects multiple failed authentication attempts",
+      "category": "Authentication",
+      "severity": "medium",
+      "mitre_tactics": [
+        "credential-access"
+      ],
+      "mitre_techniques": [
+        "T1110"
+      ],
+      "original_source": "elastic",
+      "original_rule_id": "elastic_original_103",
+      "oci_query": "* | where 'Event Name' = 'Logon Failed' and 'Event ID' = 4625 | head 100",
+      "tags": [
+        "authentication",
+        "brute-force",
+        "failed-logon"
+      ],
+      "false_positives": [
+        "Legitimate administrative activity"
+      ],
+      "references": [
+        "https://attack.mitre.org/techniques/T1110/"
+      ],
+      "author": "Security Team",
+      "date_created": "2024-01-01",
+      "date_converted": "2025-07-18T21:40:12.775653"
+    },
+    {
+      "id": "splunk_104",
+      "name": "Registry Modification - Rule 104",
+      "description": "Detects suspicious registry modifications",
+      "category": "System",
+      "severity": "high",
+      "mitre_tactics": [
+        "persistence"
+      ],
+      "mitre_techniques": [
+        "T1547"
+      ],
+      "original_source": "splunk",
+      "original_rule_id": "splunk_original_104",
+      "oci_query": "* | where 'Event Name' = 'Registry Value Set' and 'Registry Path' like '%Run%' | head 100",
+      "tags": [
+        "registry",
+        "persistence",
+        "startup"
+      ],
+      "false_positives": [
+        "Legitimate administrative activity"
+      ],
+      "references": [
+        "https://attack.mitre.org/techniques/T1547/"
+      ],
+      "author": "Security Team",
+      "date_created": "2024-01-01",
+      "date_converted": "2025-07-18T21:40:12.775655"
+    },
+    {
+      "id": "elastic_105",
+      "name": "DNS Query to Suspicious Domain - Rule 105",
+      "description": "Detects DNS queries to potentially malicious domains",
+      "category": "Network",
+      "severity": "medium",
+      "mitre_tactics": [
+        "command-and-control"
+      ],
+      "mitre_techniques": [
+        "T1071.004"
+      ],
+      "original_source": "elastic",
+      "original_rule_id": "elastic_original_105",
+      "oci_query": "* | where 'Event Name' = 'DNS Query' and 'DNS Query' like '%.bit%' | head 100",
+      "tags": [
+        "dns",
+        "c2",
+        "domain"
+      ],
+      "false_positives": [
+        "Legitimate administrative activity"
+      ],
+      "references": [
+        "https://attack.mitre.org/techniques/T1071.004/"
+      ],
+      "author": "Security Team",
+      "date_created": "2024-01-01",
+      "date_converted": "2025-07-18T21:40:12.775657"
+    },
+    {
+      "id": "splunk_106",
+      "name": "Suspicious Process Execution - Rule 106",
+      "description": "Detects suspicious process execution patterns",
+      "category": "Process",
+      "severity": "high",
+      "mitre_tactics": [
+        "execution"
+      ],
+      "mitre_techniques": [
+        "T1059"
+      ],
+      "original_source": "splunk",
+      "original_rule_id": "splunk_original_106",
+      "oci_query": "* | where 'Process Name' like '%cmd.exe%' and 'Command Line' like '%powershell%' | head 100",
+      "tags": [
+        "process",
+        "execution",
+        "windows"
+      ],
+      "false_positives": [
+        "Legitimate administrative activity"
+      ],
+      "references": [
+        "https://attack.mitre.org/techniques/T1059/"
+      ],
+      "author": "Security Team",
+      "date_created": "2024-01-01",
+      "date_converted": "2025-07-18T21:40:12.775659"
+    },
+    {
+      "id": "elastic_107",
+      "name": "Network Connection to Suspicious Domain - Rule 107",
+      "description": "Detects network connections to known malicious domains",
+      "category": "Network",
+      "severity": "medium",
+      "mitre_tactics": [
+        "command-and-control"
+      ],
+      "mitre_techniques": [
+        "T1071"
+      ],
+      "original_source": "elastic",
+      "original_rule_id": "elastic_original_107",
+      "oci_query": "* | where 'Event Name' = 'Network Connection' and 'Domain' like '%.tk%' | head 100",
+      "tags": [
+        "network",
+        "c2",
+        "domain"
+      ],
+      "false_positives": [
+        "Legitimate administrative activity"
+      ],
+      "references": [
+        "https://attack.mitre.org/techniques/T1071/"
+      ],
+      "author": "Security Team",
+      "date_created": "2024-01-01",
+      "date_converted": "2025-07-18T21:40:12.775661"
+    },
+    {
+      "id": "splunk_108",
+      "name": "Failed Authentication Attempts - Rule 108",
+      "description": "Detects multiple failed authentication attempts",
+      "category": "Authentication",
+      "severity": "medium",
+      "mitre_tactics": [
+        "credential-access"
+      ],
+      "mitre_techniques": [
+        "T1110"
+      ],
+      "original_source": "splunk",
+      "original_rule_id": "splunk_original_108",
+      "oci_query": "* | where 'Event Name' = 'Logon Failed' and 'Event ID' = 4625 | head 100",
+      "tags": [
+        "authentication",
+        "brute-force",
+        "failed-logon"
+      ],
+      "false_positives": [
+        "Legitimate administrative activity"
+      ],
+      "references": [
+        "https://attack.mitre.org/techniques/T1110/"
+      ],
+      "author": "Security Team",
+      "date_created": "2024-01-01",
+      "date_converted": "2025-07-18T21:40:12.775663"
+    },
+    {
+      "id": "elastic_109",
+      "name": "Registry Modification - Rule 109",
+      "description": "Detects suspicious registry modifications",
+      "category": "System",
+      "severity": "high",
+      "mitre_tactics": [
+        "persistence"
+      ],
+      "mitre_techniques": [
+        "T1547"
+      ],
+      "original_source": "elastic",
+      "original_rule_id": "elastic_original_109",
+      "oci_query": "* | where 'Event Name' = 'Registry Value Set' and 'Registry Path' like '%Run%' | head 100",
+      "tags": [
+        "registry",
+        "persistence",
+        "startup"
+      ],
+      "false_positives": [
+        "Legitimate administrative activity"
+      ],
+      "references": [
+        "https://attack.mitre.org/techniques/T1547/"
+      ],
+      "author": "Security Team",
+      "date_created": "2024-01-01",
+      "date_converted": "2025-07-18T21:40:12.775665"
+    },
+    {
+      "id": "splunk_110",
+      "name": "DNS Query to Suspicious Domain - Rule 110",
+      "description": "Detects DNS queries to potentially malicious domains",
+      "category": "Network",
+      "severity": "medium",
+      "mitre_tactics": [
+        "command-and-control"
+      ],
+      "mitre_techniques": [
+        "T1071.004"
+      ],
+      "original_source": "splunk",
+      "original_rule_id": "splunk_original_110",
+      "oci_query": "* | where 'Event Name' = 'DNS Query' and 'DNS Query' like '%.bit%' | head 100",
+      "tags": [
+        "dns",
+        "c2",
+        "domain"
+      ],
+      "false_positives": [
+        "Legitimate administrative activity"
+      ],
+      "references": [
+        "https://attack.mitre.org/techniques/T1071.004/"
+      ],
+      "author": "Security Team",
+      "date_created": "2024-01-01",
+      "date_converted": "2025-07-18T21:40:12.775667"
+    },
+    {
+      "id": "elastic_111",
+      "name": "Suspicious Process Execution - Rule 111",
+      "description": "Detects suspicious process execution patterns",
+      "category": "Process",
+      "severity": "high",
+      "mitre_tactics": [
+        "execution"
+      ],
+      "mitre_techniques": [
+        "T1059"
+      ],
+      "original_source": "elastic",
+      "original_rule_id": "elastic_original_111",
+      "oci_query": "* | where 'Process Name' like '%cmd.exe%' and 'Command Line' like '%powershell%' | head 100",
+      "tags": [
+        "process",
+        "execution",
+        "windows"
+      ],
+      "false_positives": [
+        "Legitimate administrative activity"
+      ],
+      "references": [
+        "https://attack.mitre.org/techniques/T1059/"
+      ],
+      "author": "Security Team",
+      "date_created": "2024-01-01",
+      "date_converted": "2025-07-18T21:40:12.775669"
+    },
+    {
+      "id": "splunk_112",
+      "name": "Network Connection to Suspicious Domain - Rule 112",
+      "description": "Detects network connections to known malicious domains",
+      "category": "Network",
+      "severity": "medium",
+      "mitre_tactics": [
+        "command-and-control"
+      ],
+      "mitre_techniques": [
+        "T1071"
+      ],
+      "original_source": "splunk",
+      "original_rule_id": "splunk_original_112",
+      "oci_query": "* | where 'Event Name' = 'Network Connection' and 'Domain' like '%.tk%' | head 100",
+      "tags": [
+        "network",
+        "c2",
+        "domain"
+      ],
+      "false_positives": [
+        "Legitimate administrative activity"
+      ],
+      "references": [
+        "https://attack.mitre.org/techniques/T1071/"
+      ],
+      "author": "Security Team",
+      "date_created": "2024-01-01",
+      "date_converted": "2025-07-18T21:40:12.775671"
+    },
+    {
+      "id": "elastic_113",
+      "name": "Failed Authentication Attempts - Rule 113",
+      "description": "Detects multiple failed authentication attempts",
+      "category": "Authentication",
+      "severity": "medium",
+      "mitre_tactics": [
+        "credential-access"
+      ],
+      "mitre_techniques": [
+        "T1110"
+      ],
+      "original_source": "elastic",
+      "original_rule_id": "elastic_original_113",
+      "oci_query": "* | where 'Event Name' = 'Logon Failed' and 'Event ID' = 4625 | head 100",
+      "tags": [
+        "authentication",
+        "brute-force",
+        "failed-logon"
+      ],
+      "false_positives": [
+        "Legitimate administrative activity"
+      ],
+      "references": [
+        "https://attack.mitre.org/techniques/T1110/"
+      ],
+      "author": "Security Team",
+      "date_created": "2024-01-01",
+      "date_converted": "2025-07-18T21:40:12.775673"
+    },
+    {
+      "id": "splunk_114",
+      "name": "Registry Modification - Rule 114",
+      "description": "Detects suspicious registry modifications",
+      "category": "System",
+      "severity": "high",
+      "mitre_tactics": [
+        "persistence"
+      ],
+      "mitre_techniques": [
+        "T1547"
+      ],
+      "original_source": "splunk",
+      "original_rule_id": "splunk_original_114",
+      "oci_query": "* | where 'Event Name' = 'Registry Value Set' and 'Registry Path' like '%Run%' | head 100",
+      "tags": [
+        "registry",
+        "persistence",
+        "startup"
+      ],
+      "false_positives": [
+        "Legitimate administrative activity"
+      ],
+      "references": [
+        "https://attack.mitre.org/techniques/T1547/"
+      ],
+      "author": "Security Team",
+      "date_created": "2024-01-01",
+      "date_converted": "2025-07-18T21:40:12.775675"
+    },
+    {
+      "id": "elastic_115",
+      "name": "DNS Query to Suspicious Domain - Rule 115",
+      "description": "Detects DNS queries to potentially malicious domains",
+      "category": "Network",
+      "severity": "medium",
+      "mitre_tactics": [
+        "command-and-control"
+      ],
+      "mitre_techniques": [
+        "T1071.004"
+      ],
+      "original_source": "elastic",
+      "original_rule_id": "elastic_original_115",
+      "oci_query": "* | where 'Event Name' = 'DNS Query' and 'DNS Query' like '%.bit%' | head 100",
+      "tags": [
+        "dns",
+        "c2",
+        "domain"
+      ],
+      "false_positives": [
+        "Legitimate administrative activity"
+      ],
+      "references": [
+        "https://attack.mitre.org/techniques/T1071.004/"
+      ],
+      "author": "Security Team",
+      "date_created": "2024-01-01",
+      "date_converted": "2025-07-18T21:40:12.775677"
+    },
+    {
+      "id": "splunk_116",
+      "name": "Suspicious Process Execution - Rule 116",
+      "description": "Detects suspicious process execution patterns",
+      "category": "Process",
+      "severity": "high",
+      "mitre_tactics": [
+        "execution"
+      ],
+      "mitre_techniques": [
+        "T1059"
+      ],
+      "original_source": "splunk",
+      "original_rule_id": "splunk_original_116",
+      "oci_query": "* | where 'Process Name' like '%cmd.exe%' and 'Command Line' like '%powershell%' | head 100",
+      "tags": [
+        "process",
+        "execution",
+        "windows"
+      ],
+      "false_positives": [
+        "Legitimate administrative activity"
+      ],
+      "references": [
+        "https://attack.mitre.org/techniques/T1059/"
+      ],
+      "author": "Security Team",
+      "date_created": "2024-01-01",
+      "date_converted": "2025-07-18T21:40:12.775680"
+    },
+    {
+      "id": "elastic_117",
+      "name": "Network Connection to Suspicious Domain - Rule 117",
+      "description": "Detects network connections to known malicious domains",
+      "category": "Network",
+      "severity": "medium",
+      "mitre_tactics": [
+        "command-and-control"
+      ],
+      "mitre_techniques": [
+        "T1071"
+      ],
+      "original_source": "elastic",
+      "original_rule_id": "elastic_original_117",
+      "oci_query": "* | where 'Event Name' = 'Network Connection' and 'Domain' like '%.tk%' | head 100",
+      "tags": [
+        "network",
+        "c2",
+        "domain"
+      ],
+      "false_positives": [
+        "Legitimate administrative activity"
+      ],
+      "references": [
+        "https://attack.mitre.org/techniques/T1071/"
+      ],
+      "author": "Security Team",
+      "date_created": "2024-01-01",
+      "date_converted": "2025-07-18T21:40:12.775682"
+    },
+    {
+      "id": "splunk_118",
+      "name": "Failed Authentication Attempts - Rule 118",
+      "description": "Detects multiple failed authentication attempts",
+      "category": "Authentication",
+      "severity": "medium",
+      "mitre_tactics": [
+        "credential-access"
+      ],
+      "mitre_techniques": [
+        "T1110"
+      ],
+      "original_source": "splunk",
+      "original_rule_id": "splunk_original_118",
+      "oci_query": "* | where 'Event Name' = 'Logon Failed' and 'Event ID' = 4625 | head 100",
+      "tags": [
+        "authentication",
+        "brute-force",
+        "failed-logon"
+      ],
+      "false_positives": [
+        "Legitimate administrative activity"
+      ],
+      "references": [
+        "https://attack.mitre.org/techniques/T1110/"
+      ],
+      "author": "Security Team",
+      "date_created": "2024-01-01",
+      "date_converted": "2025-07-18T21:40:12.775684"
+    },
+    {
+      "id": "elastic_119",
+      "name": "Registry Modification - Rule 119",
+      "description": "Detects suspicious registry modifications",
+      "category": "System",
+      "severity": "high",
+      "mitre_tactics": [
+        "persistence"
+      ],
+      "mitre_techniques": [
+        "T1547"
+      ],
+      "original_source": "elastic",
+      "original_rule_id": "elastic_original_119",
+      "oci_query": "* | where 'Event Name' = 'Registry Value Set' and 'Registry Path' like '%Run%' | head 100",
+      "tags": [
+        "registry",
+        "persistence",
+        "startup"
+      ],
+      "false_positives": [
+        "Legitimate administrative activity"
+      ],
+      "references": [
+        "https://attack.mitre.org/techniques/T1547/"
+      ],
+      "author": "Security Team",
+      "date_created": "2024-01-01",
+      "date_converted": "2025-07-18T21:40:12.775686"
+    },
+    {
+      "id": "splunk_120",
+      "name": "DNS Query to Suspicious Domain - Rule 120",
+      "description": "Detects DNS queries to potentially malicious domains",
+      "category": "Network",
+      "severity": "medium",
+      "mitre_tactics": [
+        "command-and-control"
+      ],
+      "mitre_techniques": [
+        "T1071.004"
+      ],
+      "original_source": "splunk",
+      "original_rule_id": "splunk_original_120",
+      "oci_query": "* | where 'Event Name' = 'DNS Query' and 'DNS Query' like '%.bit%' | head 100",
+      "tags": [
+        "dns",
+        "c2",
+        "domain"
+      ],
+      "false_positives": [
+        "Legitimate administrative activity"
+      ],
+      "references": [
+        "https://attack.mitre.org/techniques/T1071.004/"
+      ],
+      "author": "Security Team",
+      "date_created": "2024-01-01",
+      "date_converted": "2025-07-18T21:40:12.775688"
+    },
+    {
+      "id": "elastic_121",
+      "name": "Suspicious Process Execution - Rule 121",
+      "description": "Detects suspicious process execution patterns",
+      "category": "Process",
+      "severity": "high",
+      "mitre_tactics": [
+        "execution"
+      ],
+      "mitre_techniques": [
+        "T1059"
+      ],
+      "original_source": "elastic",
+      "original_rule_id": "elastic_original_121",
+      "oci_query": "* | where 'Process Name' like '%cmd.exe%' and 'Command Line' like '%powershell%' | head 100",
+      "tags": [
+        "process",
+        "execution",
+        "windows"
+      ],
+      "false_positives": [
+        "Legitimate administrative activity"
+      ],
+      "references": [
+        "https://attack.mitre.org/techniques/T1059/"
+      ],
+      "author": "Security Team",
+      "date_created": "2024-01-01",
+      "date_converted": "2025-07-18T21:40:12.775690"
+    },
+    {
+      "id": "splunk_122",
+      "name": "Network Connection to Suspicious Domain - Rule 122",
+      "description": "Detects network connections to known malicious domains",
+      "category": "Network",
+      "severity": "medium",
+      "mitre_tactics": [
+        "command-and-control"
+      ],
+      "mitre_techniques": [
+        "T1071"
+      ],
+      "original_source": "splunk",
+      "original_rule_id": "splunk_original_122",
+      "oci_query": "* | where 'Event Name' = 'Network Connection' and 'Domain' like '%.tk%' | head 100",
+      "tags": [
+        "network",
+        "c2",
+        "domain"
+      ],
+      "false_positives": [
+        "Legitimate administrative activity"
+      ],
+      "references": [
+        "https://attack.mitre.org/techniques/T1071/"
+      ],
+      "author": "Security Team",
+      "date_created": "2024-01-01",
+      "date_converted": "2025-07-18T21:40:12.775692"
+    },
+    {
+      "id": "elastic_123",
+      "name": "Failed Authentication Attempts - Rule 123",
+      "description": "Detects multiple failed authentication attempts",
+      "category": "Authentication",
+      "severity": "medium",
+      "mitre_tactics": [
+        "credential-access"
+      ],
+      "mitre_techniques": [
+        "T1110"
+      ],
+      "original_source": "elastic",
+      "original_rule_id": "elastic_original_123",
+      "oci_query": "* | where 'Event Name' = 'Logon Failed' and 'Event ID' = 4625 | head 100",
+      "tags": [
+        "authentication",
+        "brute-force",
+        "failed-logon"
+      ],
+      "false_positives": [
+        "Legitimate administrative activity"
+      ],
+      "references": [
+        "https://attack.mitre.org/techniques/T1110/"
+      ],
+      "author": "Security Team",
+      "date_created": "2024-01-01",
+      "date_converted": "2025-07-18T21:40:12.775694"
+    },
+    {
+      "id": "splunk_124",
+      "name": "Registry Modification - Rule 124",
+      "description": "Detects suspicious registry modifications",
+      "category": "System",
+      "severity": "high",
+      "mitre_tactics": [
+        "persistence"
+      ],
+      "mitre_techniques": [
+        "T1547"
+      ],
+      "original_source": "splunk",
+      "original_rule_id": "splunk_original_124",
+      "oci_query": "* | where 'Event Name' = 'Registry Value Set' and 'Registry Path' like '%Run%' | head 100",
+      "tags": [
+        "registry",
+        "persistence",
+        "startup"
+      ],
+      "false_positives": [
+        "Legitimate administrative activity"
+      ],
+      "references": [
+        "https://attack.mitre.org/techniques/T1547/"
+      ],
+      "author": "Security Team",
+      "date_created": "2024-01-01",
+      "date_converted": "2025-07-18T21:40:12.775696"
+    },
+    {
+      "id": "elastic_125",
+      "name": "DNS Query to Suspicious Domain - Rule 125",
+      "description": "Detects DNS queries to potentially malicious domains",
+      "category": "Network",
+      "severity": "medium",
+      "mitre_tactics": [
+        "command-and-control"
+      ],
+      "mitre_techniques": [
+        "T1071.004"
+      ],
+      "original_source": "elastic",
+      "original_rule_id": "elastic_original_125",
+      "oci_query": "* | where 'Event Name' = 'DNS Query' and 'DNS Query' like '%.bit%' | head 100",
+      "tags": [
+        "dns",
+        "c2",
+        "domain"
+      ],
+      "false_positives": [
+        "Legitimate administrative activity"
+      ],
+      "references": [
+        "https://attack.mitre.org/techniques/T1071.004/"
+      ],
+      "author": "Security Team",
+      "date_created": "2024-01-01",
+      "date_converted": "2025-07-18T21:40:12.775698"
+    },
+    {
+      "id": "splunk_126",
+      "name": "Suspicious Process Execution - Rule 126",
+      "description": "Detects suspicious process execution patterns",
+      "category": "Process",
+      "severity": "high",
+      "mitre_tactics": [
+        "execution"
+      ],
+      "mitre_techniques": [
+        "T1059"
+      ],
+      "original_source": "splunk",
+      "original_rule_id": "splunk_original_126",
+      "oci_query": "* | where 'Process Name' like '%cmd.exe%' and 'Command Line' like '%powershell%' | head 100",
+      "tags": [
+        "process",
+        "execution",
+        "windows"
+      ],
+      "false_positives": [
+        "Legitimate administrative activity"
+      ],
+      "references": [
+        "https://attack.mitre.org/techniques/T1059/"
+      ],
+      "author": "Security Team",
+      "date_created": "2024-01-01",
+      "date_converted": "2025-07-18T21:40:12.775700"
+    },
+    {
+      "id": "elastic_127",
+      "name": "Network Connection to Suspicious Domain - Rule 127",
+      "description": "Detects network connections to known malicious domains",
+      "category": "Network",
+      "severity": "medium",
+      "mitre_tactics": [
+        "command-and-control"
+      ],
+      "mitre_techniques": [
+        "T1071"
+      ],
+      "original_source": "elastic",
+      "original_rule_id": "elastic_original_127",
+      "oci_query": "* | where 'Event Name' = 'Network Connection' and 'Domain' like '%.tk%' | head 100",
+      "tags": [
+        "network",
+        "c2",
+        "domain"
+      ],
+      "false_positives": [
+        "Legitimate administrative activity"
+      ],
+      "references": [
+        "https://attack.mitre.org/techniques/T1071/"
+      ],
+      "author": "Security Team",
+      "date_created": "2024-01-01",
+      "date_converted": "2025-07-18T21:40:12.775702"
+    },
+    {
+      "id": "splunk_128",
+      "name": "Failed Authentication Attempts - Rule 128",
+      "description": "Detects multiple failed authentication attempts",
+      "category": "Authentication",
+      "severity": "medium",
+      "mitre_tactics": [
+        "credential-access"
+      ],
+      "mitre_techniques": [
+        "T1110"
+      ],
+      "original_source": "splunk",
+      "original_rule_id": "splunk_original_128",
+      "oci_query": "* | where 'Event Name' = 'Logon Failed' and 'Event ID' = 4625 | head 100",
+      "tags": [
+        "authentication",
+        "brute-force",
+        "failed-logon"
+      ],
+      "false_positives": [
+        "Legitimate administrative activity"
+      ],
+      "references": [
+        "https://attack.mitre.org/techniques/T1110/"
+      ],
+      "author": "Security Team",
+      "date_created": "2024-01-01",
+      "date_converted": "2025-07-18T21:40:12.775704"
+    },
+    {
+      "id": "elastic_129",
+      "name": "Registry Modification - Rule 129",
+      "description": "Detects suspicious registry modifications",
+      "category": "System",
+      "severity": "high",
+      "mitre_tactics": [
+        "persistence"
+      ],
+      "mitre_techniques": [
+        "T1547"
+      ],
+      "original_source": "elastic",
+      "original_rule_id": "elastic_original_129",
+      "oci_query": "* | where 'Event Name' = 'Registry Value Set' and 'Registry Path' like '%Run%' | head 100",
+      "tags": [
+        "registry",
+        "persistence",
+        "startup"
+      ],
+      "false_positives": [
+        "Legitimate administrative activity"
+      ],
+      "references": [
+        "https://attack.mitre.org/techniques/T1547/"
+      ],
+      "author": "Security Team",
+      "date_created": "2024-01-01",
+      "date_converted": "2025-07-18T21:40:12.775706"
+    },
+    {
+      "id": "splunk_130",
+      "name": "DNS Query to Suspicious Domain - Rule 130",
+      "description": "Detects DNS queries to potentially malicious domains",
+      "category": "Network",
+      "severity": "medium",
+      "mitre_tactics": [
+        "command-and-control"
+      ],
+      "mitre_techniques": [
+        "T1071.004"
+      ],
+      "original_source": "splunk",
+      "original_rule_id": "splunk_original_130",
+      "oci_query": "* | where 'Event Name' = 'DNS Query' and 'DNS Query' like '%.bit%' | head 100",
+      "tags": [
+        "dns",
+        "c2",
+        "domain"
+      ],
+      "false_positives": [
+        "Legitimate administrative activity"
+      ],
+      "references": [
+        "https://attack.mitre.org/techniques/T1071.004/"
+      ],
+      "author": "Security Team",
+      "date_created": "2024-01-01",
+      "date_converted": "2025-07-18T21:40:12.775709"
+    },
+    {
+      "id": "elastic_131",
+      "name": "Suspicious Process Execution - Rule 131",
+      "description": "Detects suspicious process execution patterns",
+      "category": "Process",
+      "severity": "high",
+      "mitre_tactics": [
+        "execution"
+      ],
+      "mitre_techniques": [
+        "T1059"
+      ],
+      "original_source": "elastic",
+      "original_rule_id": "elastic_original_131",
+      "oci_query": "* | where 'Process Name' like '%cmd.exe%' and 'Command Line' like '%powershell%' | head 100",
+      "tags": [
+        "process",
+        "execution",
+        "windows"
+      ],
+      "false_positives": [
+        "Legitimate administrative activity"
+      ],
+      "references": [
+        "https://attack.mitre.org/techniques/T1059/"
+      ],
+      "author": "Security Team",
+      "date_created": "2024-01-01",
+      "date_converted": "2025-07-18T21:40:12.775712"
+    },
+    {
+      "id": "splunk_132",
+      "name": "Network Connection to Suspicious Domain - Rule 132",
+      "description": "Detects network connections to known malicious domains",
+      "category": "Network",
+      "severity": "medium",
+      "mitre_tactics": [
+        "command-and-control"
+      ],
+      "mitre_techniques": [
+        "T1071"
+      ],
+      "original_source": "splunk",
+      "original_rule_id": "splunk_original_132",
+      "oci_query": "* | where 'Event Name' = 'Network Connection' and 'Domain' like '%.tk%' | head 100",
+      "tags": [
+        "network",
+        "c2",
+        "domain"
+      ],
+      "false_positives": [
+        "Legitimate administrative activity"
+      ],
+      "references": [
+        "https://attack.mitre.org/techniques/T1071/"
+      ],
+      "author": "Security Team",
+      "date_created": "2024-01-01",
+      "date_converted": "2025-07-18T21:40:12.775714"
+    },
+    {
+      "id": "elastic_133",
+      "name": "Failed Authentication Attempts - Rule 133",
+      "description": "Detects multiple failed authentication attempts",
+      "category": "Authentication",
+      "severity": "medium",
+      "mitre_tactics": [
+        "credential-access"
+      ],
+      "mitre_techniques": [
+        "T1110"
+      ],
+      "original_source": "elastic",
+      "original_rule_id": "elastic_original_133",
+      "oci_query": "* | where 'Event Name' = 'Logon Failed' and 'Event ID' = 4625 | head 100",
+      "tags": [
+        "authentication",
+        "brute-force",
+        "failed-logon"
+      ],
+      "false_positives": [
+        "Legitimate administrative activity"
+      ],
+      "references": [
+        "https://attack.mitre.org/techniques/T1110/"
+      ],
+      "author": "Security Team",
+      "date_created": "2024-01-01",
+      "date_converted": "2025-07-18T21:40:12.775716"
+    },
+    {
+      "id": "splunk_134",
+      "name": "Registry Modification - Rule 134",
+      "description": "Detects suspicious registry modifications",
+      "category": "System",
+      "severity": "high",
+      "mitre_tactics": [
+        "persistence"
+      ],
+      "mitre_techniques": [
+        "T1547"
+      ],
+      "original_source": "splunk",
+      "original_rule_id": "splunk_original_134",
+      "oci_query": "* | where 'Event Name' = 'Registry Value Set' and 'Registry Path' like '%Run%' | head 100",
+      "tags": [
+        "registry",
+        "persistence",
+        "startup"
+      ],
+      "false_positives": [
+        "Legitimate administrative activity"
+      ],
+      "references": [
+        "https://attack.mitre.org/techniques/T1547/"
+      ],
+      "author": "Security Team",
+      "date_created": "2024-01-01",
+      "date_converted": "2025-07-18T21:40:12.775718"
+    },
+    {
+      "id": "elastic_135",
+      "name": "DNS Query to Suspicious Domain - Rule 135",
+      "description": "Detects DNS queries to potentially malicious domains",
+      "category": "Network",
+      "severity": "medium",
+      "mitre_tactics": [
+        "command-and-control"
+      ],
+      "mitre_techniques": [
+        "T1071.004"
+      ],
+      "original_source": "elastic",
+      "original_rule_id": "elastic_original_135",
+      "oci_query": "* | where 'Event Name' = 'DNS Query' and 'DNS Query' like '%.bit%' | head 100",
+      "tags": [
+        "dns",
+        "c2",
+        "domain"
+      ],
+      "false_positives": [
+        "Legitimate administrative activity"
+      ],
+      "references": [
+        "https://attack.mitre.org/techniques/T1071.004/"
+      ],
+      "author": "Security Team",
+      "date_created": "2024-01-01",
+      "date_converted": "2025-07-18T21:40:12.775720"
+    },
+    {
+      "id": "splunk_136",
+      "name": "Suspicious Process Execution - Rule 136",
+      "description": "Detects suspicious process execution patterns",
+      "category": "Process",
+      "severity": "high",
+      "mitre_tactics": [
+        "execution"
+      ],
+      "mitre_techniques": [
+        "T1059"
+      ],
+      "original_source": "splunk",
+      "original_rule_id": "splunk_original_136",
+      "oci_query": "* | where 'Process Name' like '%cmd.exe%' and 'Command Line' like '%powershell%' | head 100",
+      "tags": [
+        "process",
+        "execution",
+        "windows"
+      ],
+      "false_positives": [
+        "Legitimate administrative activity"
+      ],
+      "references": [
+        "https://attack.mitre.org/techniques/T1059/"
+      ],
+      "author": "Security Team",
+      "date_created": "2024-01-01",
+      "date_converted": "2025-07-18T21:40:12.775722"
+    },
+    {
+      "id": "elastic_137",
+      "name": "Network Connection to Suspicious Domain - Rule 137",
+      "description": "Detects network connections to known malicious domains",
+      "category": "Network",
+      "severity": "medium",
+      "mitre_tactics": [
+        "command-and-control"
+      ],
+      "mitre_techniques": [
+        "T1071"
+      ],
+      "original_source": "elastic",
+      "original_rule_id": "elastic_original_137",
+      "oci_query": "* | where 'Event Name' = 'Network Connection' and 'Domain' like '%.tk%' | head 100",
+      "tags": [
+        "network",
+        "c2",
+        "domain"
+      ],
+      "false_positives": [
+        "Legitimate administrative activity"
+      ],
+      "references": [
+        "https://attack.mitre.org/techniques/T1071/"
+      ],
+      "author": "Security Team",
+      "date_created": "2024-01-01",
+      "date_converted": "2025-07-18T21:40:12.775724"
+    },
+    {
+      "id": "splunk_138",
+      "name": "Failed Authentication Attempts - Rule 138",
+      "description": "Detects multiple failed authentication attempts",
+      "category": "Authentication",
+      "severity": "medium",
+      "mitre_tactics": [
+        "credential-access"
+      ],
+      "mitre_techniques": [
+        "T1110"
+      ],
+      "original_source": "splunk",
+      "original_rule_id": "splunk_original_138",
+      "oci_query": "* | where 'Event Name' = 'Logon Failed' and 'Event ID' = 4625 | head 100",
+      "tags": [
+        "authentication",
+        "brute-force",
+        "failed-logon"
+      ],
+      "false_positives": [
+        "Legitimate administrative activity"
+      ],
+      "references": [
+        "https://attack.mitre.org/techniques/T1110/"
+      ],
+      "author": "Security Team",
+      "date_created": "2024-01-01",
+      "date_converted": "2025-07-18T21:40:12.775726"
+    },
+    {
+      "id": "elastic_139",
+      "name": "Registry Modification - Rule 139",
+      "description": "Detects suspicious registry modifications",
+      "category": "System",
+      "severity": "high",
+      "mitre_tactics": [
+        "persistence"
+      ],
+      "mitre_techniques": [
+        "T1547"
+      ],
+      "original_source": "elastic",
+      "original_rule_id": "elastic_original_139",
+      "oci_query": "* | where 'Event Name' = 'Registry Value Set' and 'Registry Path' like '%Run%' | head 100",
+      "tags": [
+        "registry",
+        "persistence",
+        "startup"
+      ],
+      "false_positives": [
+        "Legitimate administrative activity"
+      ],
+      "references": [
+        "https://attack.mitre.org/techniques/T1547/"
+      ],
+      "author": "Security Team",
+      "date_created": "2024-01-01",
+      "date_converted": "2025-07-18T21:40:12.775728"
+    },
+    {
+      "id": "splunk_140",
+      "name": "DNS Query to Suspicious Domain - Rule 140",
+      "description": "Detects DNS queries to potentially malicious domains",
+      "category": "Network",
+      "severity": "medium",
+      "mitre_tactics": [
+        "command-and-control"
+      ],
+      "mitre_techniques": [
+        "T1071.004"
+      ],
+      "original_source": "splunk",
+      "original_rule_id": "splunk_original_140",
+      "oci_query": "* | where 'Event Name' = 'DNS Query' and 'DNS Query' like '%.bit%' | head 100",
+      "tags": [
+        "dns",
+        "c2",
+        "domain"
+      ],
+      "false_positives": [
+        "Legitimate administrative activity"
+      ],
+      "references": [
+        "https://attack.mitre.org/techniques/T1071.004/"
+      ],
+      "author": "Security Team",
+      "date_created": "2024-01-01",
+      "date_converted": "2025-07-18T21:40:12.775730"
+    },
+    {
+      "id": "elastic_141",
+      "name": "Suspicious Process Execution - Rule 141",
+      "description": "Detects suspicious process execution patterns",
+      "category": "Process",
+      "severity": "high",
+      "mitre_tactics": [
+        "execution"
+      ],
+      "mitre_techniques": [
+        "T1059"
+      ],
+      "original_source": "elastic",
+      "original_rule_id": "elastic_original_141",
+      "oci_query": "* | where 'Process Name' like '%cmd.exe%' and 'Command Line' like '%powershell%' | head 100",
+      "tags": [
+        "process",
+        "execution",
+        "windows"
+      ],
+      "false_positives": [
+        "Legitimate administrative activity"
+      ],
+      "references": [
+        "https://attack.mitre.org/techniques/T1059/"
+      ],
+      "author": "Security Team",
+      "date_created": "2024-01-01",
+      "date_converted": "2025-07-18T21:40:12.775732"
+    },
+    {
+      "id": "splunk_142",
+      "name": "Network Connection to Suspicious Domain - Rule 142",
+      "description": "Detects network connections to known malicious domains",
+      "category": "Network",
+      "severity": "medium",
+      "mitre_tactics": [
+        "command-and-control"
+      ],
+      "mitre_techniques": [
+        "T1071"
+      ],
+      "original_source": "splunk",
+      "original_rule_id": "splunk_original_142",
+      "oci_query": "* | where 'Event Name' = 'Network Connection' and 'Domain' like '%.tk%' | head 100",
+      "tags": [
+        "network",
+        "c2",
+        "domain"
+      ],
+      "false_positives": [
+        "Legitimate administrative activity"
+      ],
+      "references": [
+        "https://attack.mitre.org/techniques/T1071/"
+      ],
+      "author": "Security Team",
+      "date_created": "2024-01-01",
+      "date_converted": "2025-07-18T21:40:12.775734"
+    },
+    {
+      "id": "elastic_143",
+      "name": "Failed Authentication Attempts - Rule 143",
+      "description": "Detects multiple failed authentication attempts",
+      "category": "Authentication",
+      "severity": "medium",
+      "mitre_tactics": [
+        "credential-access"
+      ],
+      "mitre_techniques": [
+        "T1110"
+      ],
+      "original_source": "elastic",
+      "original_rule_id": "elastic_original_143",
+      "oci_query": "* | where 'Event Name' = 'Logon Failed' and 'Event ID' = 4625 | head 100",
+      "tags": [
+        "authentication",
+        "brute-force",
+        "failed-logon"
+      ],
+      "false_positives": [
+        "Legitimate administrative activity"
+      ],
+      "references": [
+        "https://attack.mitre.org/techniques/T1110/"
+      ],
+      "author": "Security Team",
+      "date_created": "2024-01-01",
+      "date_converted": "2025-07-18T21:40:12.775736"
+    },
+    {
+      "id": "splunk_144",
+      "name": "Registry Modification - Rule 144",
+      "description": "Detects suspicious registry modifications",
+      "category": "System",
+      "severity": "high",
+      "mitre_tactics": [
+        "persistence"
+      ],
+      "mitre_techniques": [
+        "T1547"
+      ],
+      "original_source": "splunk",
+      "original_rule_id": "splunk_original_144",
+      "oci_query": "* | where 'Event Name' = 'Registry Value Set' and 'Registry Path' like '%Run%' | head 100",
+      "tags": [
+        "registry",
+        "persistence",
+        "startup"
+      ],
+      "false_positives": [
+        "Legitimate administrative activity"
+      ],
+      "references": [
+        "https://attack.mitre.org/techniques/T1547/"
+      ],
+      "author": "Security Team",
+      "date_created": "2024-01-01",
+      "date_converted": "2025-07-18T21:40:12.775738"
+    },
+    {
+      "id": "elastic_145",
+      "name": "DNS Query to Suspicious Domain - Rule 145",
+      "description": "Detects DNS queries to potentially malicious domains",
+      "category": "Network",
+      "severity": "medium",
+      "mitre_tactics": [
+        "command-and-control"
+      ],
+      "mitre_techniques": [
+        "T1071.004"
+      ],
+      "original_source": "elastic",
+      "original_rule_id": "elastic_original_145",
+      "oci_query": "* | where 'Event Name' = 'DNS Query' and 'DNS Query' like '%.bit%' | head 100",
+      "tags": [
+        "dns",
+        "c2",
+        "domain"
+      ],
+      "false_positives": [
+        "Legitimate administrative activity"
+      ],
+      "references": [
+        "https://attack.mitre.org/techniques/T1071.004/"
+      ],
+      "author": "Security Team",
+      "date_created": "2024-01-01",
+      "date_converted": "2025-07-18T21:40:12.775740"
+    },
+    {
+      "id": "splunk_146",
+      "name": "Suspicious Process Execution - Rule 146",
+      "description": "Detects suspicious process execution patterns",
+      "category": "Process",
+      "severity": "high",
+      "mitre_tactics": [
+        "execution"
+      ],
+      "mitre_techniques": [
+        "T1059"
+      ],
+      "original_source": "splunk",
+      "original_rule_id": "splunk_original_146",
+      "oci_query": "* | where 'Process Name' like '%cmd.exe%' and 'Command Line' like '%powershell%' | head 100",
+      "tags": [
+        "process",
+        "execution",
+        "windows"
+      ],
+      "false_positives": [
+        "Legitimate administrative activity"
+      ],
+      "references": [
+        "https://attack.mitre.org/techniques/T1059/"
+      ],
+      "author": "Security Team",
+      "date_created": "2024-01-01",
+      "date_converted": "2025-07-18T21:40:12.775742"
+    },
+    {
+      "id": "elastic_147",
+      "name": "Network Connection to Suspicious Domain - Rule 147",
+      "description": "Detects network connections to known malicious domains",
+      "category": "Network",
+      "severity": "medium",
+      "mitre_tactics": [
+        "command-and-control"
+      ],
+      "mitre_techniques": [
+        "T1071"
+      ],
+      "original_source": "elastic",
+      "original_rule_id": "elastic_original_147",
+      "oci_query": "* | where 'Event Name' = 'Network Connection' and 'Domain' like '%.tk%' | head 100",
+      "tags": [
+        "network",
+        "c2",
+        "domain"
+      ],
+      "false_positives": [
+        "Legitimate administrative activity"
+      ],
+      "references": [
+        "https://attack.mitre.org/techniques/T1071/"
+      ],
+      "author": "Security Team",
+      "date_created": "2024-01-01",
+      "date_converted": "2025-07-18T21:40:12.775744"
+    },
+    {
+      "id": "splunk_148",
+      "name": "Failed Authentication Attempts - Rule 148",
+      "description": "Detects multiple failed authentication attempts",
+      "category": "Authentication",
+      "severity": "medium",
+      "mitre_tactics": [
+        "credential-access"
+      ],
+      "mitre_techniques": [
+        "T1110"
+      ],
+      "original_source": "splunk",
+      "original_rule_id": "splunk_original_148",
+      "oci_query": "* | where 'Event Name' = 'Logon Failed' and 'Event ID' = 4625 | head 100",
+      "tags": [
+        "authentication",
+        "brute-force",
+        "failed-logon"
+      ],
+      "false_positives": [
+        "Legitimate administrative activity"
+      ],
+      "references": [
+        "https://attack.mitre.org/techniques/T1110/"
+      ],
+      "author": "Security Team",
+      "date_created": "2024-01-01",
+      "date_converted": "2025-07-18T21:40:12.775746"
+    },
+    {
+      "id": "elastic_149",
+      "name": "Registry Modification - Rule 149",
+      "description": "Detects suspicious registry modifications",
+      "category": "System",
+      "severity": "high",
+      "mitre_tactics": [
+        "persistence"
+      ],
+      "mitre_techniques": [
+        "T1547"
+      ],
+      "original_source": "elastic",
+      "original_rule_id": "elastic_original_149",
+      "oci_query": "* | where 'Event Name' = 'Registry Value Set' and 'Registry Path' like '%Run%' | head 100",
+      "tags": [
+        "registry",
+        "persistence",
+        "startup"
+      ],
+      "false_positives": [
+        "Legitimate administrative activity"
+      ],
+      "references": [
+        "https://attack.mitre.org/techniques/T1547/"
+      ],
+      "author": "Security Team",
+      "date_created": "2024-01-01",
+      "date_converted": "2025-07-18T21:40:12.775748"
+    },
+    {
+      "id": "splunk_150",
+      "name": "DNS Query to Suspicious Domain - Rule 150",
+      "description": "Detects DNS queries to potentially malicious domains",
+      "category": "Network",
+      "severity": "medium",
+      "mitre_tactics": [
+        "command-and-control"
+      ],
+      "mitre_techniques": [
+        "T1071.004"
+      ],
+      "original_source": "splunk",
+      "original_rule_id": "splunk_original_150",
+      "oci_query": "* | where 'Event Name' = 'DNS Query' and 'DNS Query' like '%.bit%' | head 100",
+      "tags": [
+        "dns",
+        "c2",
+        "domain"
+      ],
+      "false_positives": [
+        "Legitimate administrative activity"
+      ],
+      "references": [
+        "https://attack.mitre.org/techniques/T1071.004/"
+      ],
+      "author": "Security Team",
+      "date_created": "2024-01-01",
+      "date_converted": "2025-07-18T21:40:12.775750"
+    },
+    {
+      "id": "elastic_151",
+      "name": "Suspicious Process Execution - Rule 151",
+      "description": "Detects suspicious process execution patterns",
+      "category": "Process",
+      "severity": "high",
+      "mitre_tactics": [
+        "execution"
+      ],
+      "mitre_techniques": [
+        "T1059"
+      ],
+      "original_source": "elastic",
+      "original_rule_id": "elastic_original_151",
+      "oci_query": "* | where 'Process Name' like '%cmd.exe%' and 'Command Line' like '%powershell%' | head 100",
+      "tags": [
+        "process",
+        "execution",
+        "windows"
+      ],
+      "false_positives": [
+        "Legitimate administrative activity"
+      ],
+      "references": [
+        "https://attack.mitre.org/techniques/T1059/"
+      ],
+      "author": "Security Team",
+      "date_created": "2024-01-01",
+      "date_converted": "2025-07-18T21:40:12.775752"
+    },
+    {
+      "id": "splunk_152",
+      "name": "Network Connection to Suspicious Domain - Rule 152",
+      "description": "Detects network connections to known malicious domains",
+      "category": "Network",
+      "severity": "medium",
+      "mitre_tactics": [
+        "command-and-control"
+      ],
+      "mitre_techniques": [
+        "T1071"
+      ],
+      "original_source": "splunk",
+      "original_rule_id": "splunk_original_152",
+      "oci_query": "* | where 'Event Name' = 'Network Connection' and 'Domain' like '%.tk%' | head 100",
+      "tags": [
+        "network",
+        "c2",
+        "domain"
+      ],
+      "false_positives": [
+        "Legitimate administrative activity"
+      ],
+      "references": [
+        "https://attack.mitre.org/techniques/T1071/"
+      ],
+      "author": "Security Team",
+      "date_created": "2024-01-01",
+      "date_converted": "2025-07-18T21:40:12.775754"
+    },
+    {
+      "id": "elastic_153",
+      "name": "Failed Authentication Attempts - Rule 153",
+      "description": "Detects multiple failed authentication attempts",
+      "category": "Authentication",
+      "severity": "medium",
+      "mitre_tactics": [
+        "credential-access"
+      ],
+      "mitre_techniques": [
+        "T1110"
+      ],
+      "original_source": "elastic",
+      "original_rule_id": "elastic_original_153",
+      "oci_query": "* | where 'Event Name' = 'Logon Failed' and 'Event ID' = 4625 | head 100",
+      "tags": [
+        "authentication",
+        "brute-force",
+        "failed-logon"
+      ],
+      "false_positives": [
+        "Legitimate administrative activity"
+      ],
+      "references": [
+        "https://attack.mitre.org/techniques/T1110/"
+      ],
+      "author": "Security Team",
+      "date_created": "2024-01-01",
+      "date_converted": "2025-07-18T21:40:12.775756"
+    },
+    {
+      "id": "splunk_154",
+      "name": "Registry Modification - Rule 154",
+      "description": "Detects suspicious registry modifications",
+      "category": "System",
+      "severity": "high",
+      "mitre_tactics": [
+        "persistence"
+      ],
+      "mitre_techniques": [
+        "T1547"
+      ],
+      "original_source": "splunk",
+      "original_rule_id": "splunk_original_154",
+      "oci_query": "* | where 'Event Name' = 'Registry Value Set' and 'Registry Path' like '%Run%' | head 100",
+      "tags": [
+        "registry",
+        "persistence",
+        "startup"
+      ],
+      "false_positives": [
+        "Legitimate administrative activity"
+      ],
+      "references": [
+        "https://attack.mitre.org/techniques/T1547/"
+      ],
+      "author": "Security Team",
+      "date_created": "2024-01-01",
+      "date_converted": "2025-07-18T21:40:12.775758"
+    },
+    {
+      "id": "elastic_155",
+      "name": "DNS Query to Suspicious Domain - Rule 155",
+      "description": "Detects DNS queries to potentially malicious domains",
+      "category": "Network",
+      "severity": "medium",
+      "mitre_tactics": [
+        "command-and-control"
+      ],
+      "mitre_techniques": [
+        "T1071.004"
+      ],
+      "original_source": "elastic",
+      "original_rule_id": "elastic_original_155",
+      "oci_query": "* | where 'Event Name' = 'DNS Query' and 'DNS Query' like '%.bit%' | head 100",
+      "tags": [
+        "dns",
+        "c2",
+        "domain"
+      ],
+      "false_positives": [
+        "Legitimate administrative activity"
+      ],
+      "references": [
+        "https://attack.mitre.org/techniques/T1071.004/"
+      ],
+      "author": "Security Team",
+      "date_created": "2024-01-01",
+      "date_converted": "2025-07-18T21:40:12.775760"
+    },
+    {
+      "id": "splunk_156",
+      "name": "Suspicious Process Execution - Rule 156",
+      "description": "Detects suspicious process execution patterns",
+      "category": "Process",
+      "severity": "high",
+      "mitre_tactics": [
+        "execution"
+      ],
+      "mitre_techniques": [
+        "T1059"
+      ],
+      "original_source": "splunk",
+      "original_rule_id": "splunk_original_156",
+      "oci_query": "* | where 'Process Name' like '%cmd.exe%' and 'Command Line' like '%powershell%' | head 100",
+      "tags": [
+        "process",
+        "execution",
+        "windows"
+      ],
+      "false_positives": [
+        "Legitimate administrative activity"
+      ],
+      "references": [
+        "https://attack.mitre.org/techniques/T1059/"
+      ],
+      "author": "Security Team",
+      "date_created": "2024-01-01",
+      "date_converted": "2025-07-18T21:40:12.775762"
+    },
+    {
+      "id": "elastic_157",
+      "name": "Network Connection to Suspicious Domain - Rule 157",
+      "description": "Detects network connections to known malicious domains",
+      "category": "Network",
+      "severity": "medium",
+      "mitre_tactics": [
+        "command-and-control"
+      ],
+      "mitre_techniques": [
+        "T1071"
+      ],
+      "original_source": "elastic",
+      "original_rule_id": "elastic_original_157",
+      "oci_query": "* | where 'Event Name' = 'Network Connection' and 'Domain' like '%.tk%' | head 100",
+      "tags": [
+        "network",
+        "c2",
+        "domain"
+      ],
+      "false_positives": [
+        "Legitimate administrative activity"
+      ],
+      "references": [
+        "https://attack.mitre.org/techniques/T1071/"
+      ],
+      "author": "Security Team",
+      "date_created": "2024-01-01",
+      "date_converted": "2025-07-18T21:40:12.775764"
+    },
+    {
+      "id": "splunk_158",
+      "name": "Failed Authentication Attempts - Rule 158",
+      "description": "Detects multiple failed authentication attempts",
+      "category": "Authentication",
+      "severity": "medium",
+      "mitre_tactics": [
+        "credential-access"
+      ],
+      "mitre_techniques": [
+        "T1110"
+      ],
+      "original_source": "splunk",
+      "original_rule_id": "splunk_original_158",
+      "oci_query": "* | where 'Event Name' = 'Logon Failed' and 'Event ID' = 4625 | head 100",
+      "tags": [
+        "authentication",
+        "brute-force",
+        "failed-logon"
+      ],
+      "false_positives": [
+        "Legitimate administrative activity"
+      ],
+      "references": [
+        "https://attack.mitre.org/techniques/T1110/"
+      ],
+      "author": "Security Team",
+      "date_created": "2024-01-01",
+      "date_converted": "2025-07-18T21:40:12.775766"
+    },
+    {
+      "id": "elastic_159",
+      "name": "Registry Modification - Rule 159",
+      "description": "Detects suspicious registry modifications",
+      "category": "System",
+      "severity": "high",
+      "mitre_tactics": [
+        "persistence"
+      ],
+      "mitre_techniques": [
+        "T1547"
+      ],
+      "original_source": "elastic",
+      "original_rule_id": "elastic_original_159",
+      "oci_query": "* | where 'Event Name' = 'Registry Value Set' and 'Registry Path' like '%Run%' | head 100",
+      "tags": [
+        "registry",
+        "persistence",
+        "startup"
+      ],
+      "false_positives": [
+        "Legitimate administrative activity"
+      ],
+      "references": [
+        "https://attack.mitre.org/techniques/T1547/"
+      ],
+      "author": "Security Team",
+      "date_created": "2024-01-01",
+      "date_converted": "2025-07-18T21:40:12.775769"
+    },
+    {
+      "id": "splunk_160",
+      "name": "DNS Query to Suspicious Domain - Rule 160",
+      "description": "Detects DNS queries to potentially malicious domains",
+      "category": "Network",
+      "severity": "medium",
+      "mitre_tactics": [
+        "command-and-control"
+      ],
+      "mitre_techniques": [
+        "T1071.004"
+      ],
+      "original_source": "splunk",
+      "original_rule_id": "splunk_original_160",
+      "oci_query": "* | where 'Event Name' = 'DNS Query' and 'DNS Query' like '%.bit%' | head 100",
+      "tags": [
+        "dns",
+        "c2",
+        "domain"
+      ],
+      "false_positives": [
+        "Legitimate administrative activity"
+      ],
+      "references": [
+        "https://attack.mitre.org/techniques/T1071.004/"
+      ],
+      "author": "Security Team",
+      "date_created": "2024-01-01",
+      "date_converted": "2025-07-18T21:40:12.775771"
+    },
+    {
+      "id": "elastic_161",
+      "name": "Suspicious Process Execution - Rule 161",
+      "description": "Detects suspicious process execution patterns",
+      "category": "Process",
+      "severity": "high",
+      "mitre_tactics": [
+        "execution"
+      ],
+      "mitre_techniques": [
+        "T1059"
+      ],
+      "original_source": "elastic",
+      "original_rule_id": "elastic_original_161",
+      "oci_query": "* | where 'Process Name' like '%cmd.exe%' and 'Command Line' like '%powershell%' | head 100",
+      "tags": [
+        "process",
+        "execution",
+        "windows"
+      ],
+      "false_positives": [
+        "Legitimate administrative activity"
+      ],
+      "references": [
+        "https://attack.mitre.org/techniques/T1059/"
+      ],
+      "author": "Security Team",
+      "date_created": "2024-01-01",
+      "date_converted": "2025-07-18T21:40:12.775773"
+    },
+    {
+      "id": "splunk_162",
+      "name": "Network Connection to Suspicious Domain - Rule 162",
+      "description": "Detects network connections to known malicious domains",
+      "category": "Network",
+      "severity": "medium",
+      "mitre_tactics": [
+        "command-and-control"
+      ],
+      "mitre_techniques": [
+        "T1071"
+      ],
+      "original_source": "splunk",
+      "original_rule_id": "splunk_original_162",
+      "oci_query": "* | where 'Event Name' = 'Network Connection' and 'Domain' like '%.tk%' | head 100",
+      "tags": [
+        "network",
+        "c2",
+        "domain"
+      ],
+      "false_positives": [
+        "Legitimate administrative activity"
+      ],
+      "references": [
+        "https://attack.mitre.org/techniques/T1071/"
+      ],
+      "author": "Security Team",
+      "date_created": "2024-01-01",
+      "date_converted": "2025-07-18T21:40:12.775777"
+    },
+    {
+      "id": "elastic_163",
+      "name": "Failed Authentication Attempts - Rule 163",
+      "description": "Detects multiple failed authentication attempts",
+      "category": "Authentication",
+      "severity": "medium",
+      "mitre_tactics": [
+        "credential-access"
+      ],
+      "mitre_techniques": [
+        "T1110"
+      ],
+      "original_source": "elastic",
+      "original_rule_id": "elastic_original_163",
+      "oci_query": "* | where 'Event Name' = 'Logon Failed' and 'Event ID' = 4625 | head 100",
+      "tags": [
+        "authentication",
+        "brute-force",
+        "failed-logon"
+      ],
+      "false_positives": [
+        "Legitimate administrative activity"
+      ],
+      "references": [
+        "https://attack.mitre.org/techniques/T1110/"
+      ],
+      "author": "Security Team",
+      "date_created": "2024-01-01",
+      "date_converted": "2025-07-18T21:40:12.775779"
+    },
+    {
+      "id": "splunk_164",
+      "name": "Registry Modification - Rule 164",
+      "description": "Detects suspicious registry modifications",
+      "category": "System",
+      "severity": "high",
+      "mitre_tactics": [
+        "persistence"
+      ],
+      "mitre_techniques": [
+        "T1547"
+      ],
+      "original_source": "splunk",
+      "original_rule_id": "splunk_original_164",
+      "oci_query": "* | where 'Event Name' = 'Registry Value Set' and 'Registry Path' like '%Run%' | head 100",
+      "tags": [
+        "registry",
+        "persistence",
+        "startup"
+      ],
+      "false_positives": [
+        "Legitimate administrative activity"
+      ],
+      "references": [
+        "https://attack.mitre.org/techniques/T1547/"
+      ],
+      "author": "Security Team",
+      "date_created": "2024-01-01",
+      "date_converted": "2025-07-18T21:40:12.775781"
+    },
+    {
+      "id": "elastic_165",
+      "name": "DNS Query to Suspicious Domain - Rule 165",
+      "description": "Detects DNS queries to potentially malicious domains",
+      "category": "Network",
+      "severity": "medium",
+      "mitre_tactics": [
+        "command-and-control"
+      ],
+      "mitre_techniques": [
+        "T1071.004"
+      ],
+      "original_source": "elastic",
+      "original_rule_id": "elastic_original_165",
+      "oci_query": "* | where 'Event Name' = 'DNS Query' and 'DNS Query' like '%.bit%' | head 100",
+      "tags": [
+        "dns",
+        "c2",
+        "domain"
+      ],
+      "false_positives": [
+        "Legitimate administrative activity"
+      ],
+      "references": [
+        "https://attack.mitre.org/techniques/T1071.004/"
+      ],
+      "author": "Security Team",
+      "date_created": "2024-01-01",
+      "date_converted": "2025-07-18T21:40:12.775783"
+    },
+    {
+      "id": "splunk_166",
+      "name": "Suspicious Process Execution - Rule 166",
+      "description": "Detects suspicious process execution patterns",
+      "category": "Process",
+      "severity": "high",
+      "mitre_tactics": [
+        "execution"
+      ],
+      "mitre_techniques": [
+        "T1059"
+      ],
+      "original_source": "splunk",
+      "original_rule_id": "splunk_original_166",
+      "oci_query": "* | where 'Process Name' like '%cmd.exe%' and 'Command Line' like '%powershell%' | head 100",
+      "tags": [
+        "process",
+        "execution",
+        "windows"
+      ],
+      "false_positives": [
+        "Legitimate administrative activity"
+      ],
+      "references": [
+        "https://attack.mitre.org/techniques/T1059/"
+      ],
+      "author": "Security Team",
+      "date_created": "2024-01-01",
+      "date_converted": "2025-07-18T21:40:12.775785"
+    },
+    {
+      "id": "elastic_167",
+      "name": "Network Connection to Suspicious Domain - Rule 167",
+      "description": "Detects network connections to known malicious domains",
+      "category": "Network",
+      "severity": "medium",
+      "mitre_tactics": [
+        "command-and-control"
+      ],
+      "mitre_techniques": [
+        "T1071"
+      ],
+      "original_source": "elastic",
+      "original_rule_id": "elastic_original_167",
+      "oci_query": "* | where 'Event Name' = 'Network Connection' and 'Domain' like '%.tk%' | head 100",
+      "tags": [
+        "network",
+        "c2",
+        "domain"
+      ],
+      "false_positives": [
+        "Legitimate administrative activity"
+      ],
+      "references": [
+        "https://attack.mitre.org/techniques/T1071/"
+      ],
+      "author": "Security Team",
+      "date_created": "2024-01-01",
+      "date_converted": "2025-07-18T21:40:12.775787"
+    },
+    {
+      "id": "splunk_168",
+      "name": "Failed Authentication Attempts - Rule 168",
+      "description": "Detects multiple failed authentication attempts",
+      "category": "Authentication",
+      "severity": "medium",
+      "mitre_tactics": [
+        "credential-access"
+      ],
+      "mitre_techniques": [
+        "T1110"
+      ],
+      "original_source": "splunk",
+      "original_rule_id": "splunk_original_168",
+      "oci_query": "* | where 'Event Name' = 'Logon Failed' and 'Event ID' = 4625 | head 100",
+      "tags": [
+        "authentication",
+        "brute-force",
+        "failed-logon"
+      ],
+      "false_positives": [
+        "Legitimate administrative activity"
+      ],
+      "references": [
+        "https://attack.mitre.org/techniques/T1110/"
+      ],
+      "author": "Security Team",
+      "date_created": "2024-01-01",
+      "date_converted": "2025-07-18T21:40:12.775789"
+    },
+    {
+      "id": "elastic_169",
+      "name": "Registry Modification - Rule 169",
+      "description": "Detects suspicious registry modifications",
+      "category": "System",
+      "severity": "high",
+      "mitre_tactics": [
+        "persistence"
+      ],
+      "mitre_techniques": [
+        "T1547"
+      ],
+      "original_source": "elastic",
+      "original_rule_id": "elastic_original_169",
+      "oci_query": "* | where 'Event Name' = 'Registry Value Set' and 'Registry Path' like '%Run%' | head 100",
+      "tags": [
+        "registry",
+        "persistence",
+        "startup"
+      ],
+      "false_positives": [
+        "Legitimate administrative activity"
+      ],
+      "references": [
+        "https://attack.mitre.org/techniques/T1547/"
+      ],
+      "author": "Security Team",
+      "date_created": "2024-01-01",
+      "date_converted": "2025-07-18T21:40:12.775791"
+    },
+    {
+      "id": "splunk_170",
+      "name": "DNS Query to Suspicious Domain - Rule 170",
+      "description": "Detects DNS queries to potentially malicious domains",
+      "category": "Network",
+      "severity": "medium",
+      "mitre_tactics": [
+        "command-and-control"
+      ],
+      "mitre_techniques": [
+        "T1071.004"
+      ],
+      "original_source": "splunk",
+      "original_rule_id": "splunk_original_170",
+      "oci_query": "* | where 'Event Name' = 'DNS Query' and 'DNS Query' like '%.bit%' | head 100",
+      "tags": [
+        "dns",
+        "c2",
+        "domain"
+      ],
+      "false_positives": [
+        "Legitimate administrative activity"
+      ],
+      "references": [
+        "https://attack.mitre.org/techniques/T1071.004/"
+      ],
+      "author": "Security Team",
+      "date_created": "2024-01-01",
+      "date_converted": "2025-07-18T21:40:12.775793"
+    },
+    {
+      "id": "elastic_171",
+      "name": "Suspicious Process Execution - Rule 171",
+      "description": "Detects suspicious process execution patterns",
+      "category": "Process",
+      "severity": "high",
+      "mitre_tactics": [
+        "execution"
+      ],
+      "mitre_techniques": [
+        "T1059"
+      ],
+      "original_source": "elastic",
+      "original_rule_id": "elastic_original_171",
+      "oci_query": "* | where 'Process Name' like '%cmd.exe%' and 'Command Line' like '%powershell%' | head 100",
+      "tags": [
+        "process",
+        "execution",
+        "windows"
+      ],
+      "false_positives": [
+        "Legitimate administrative activity"
+      ],
+      "references": [
+        "https://attack.mitre.org/techniques/T1059/"
+      ],
+      "author": "Security Team",
+      "date_created": "2024-01-01",
+      "date_converted": "2025-07-18T21:40:12.775795"
+    },
+    {
+      "id": "splunk_172",
+      "name": "Network Connection to Suspicious Domain - Rule 172",
+      "description": "Detects network connections to known malicious domains",
+      "category": "Network",
+      "severity": "medium",
+      "mitre_tactics": [
+        "command-and-control"
+      ],
+      "mitre_techniques": [
+        "T1071"
+      ],
+      "original_source": "splunk",
+      "original_rule_id": "splunk_original_172",
+      "oci_query": "* | where 'Event Name' = 'Network Connection' and 'Domain' like '%.tk%' | head 100",
+      "tags": [
+        "network",
+        "c2",
+        "domain"
+      ],
+      "false_positives": [
+        "Legitimate administrative activity"
+      ],
+      "references": [
+        "https://attack.mitre.org/techniques/T1071/"
+      ],
+      "author": "Security Team",
+      "date_created": "2024-01-01",
+      "date_converted": "2025-07-18T21:40:12.775797"
+    },
+    {
+      "id": "elastic_173",
+      "name": "Failed Authentication Attempts - Rule 173",
+      "description": "Detects multiple failed authentication attempts",
+      "category": "Authentication",
+      "severity": "medium",
+      "mitre_tactics": [
+        "credential-access"
+      ],
+      "mitre_techniques": [
+        "T1110"
+      ],
+      "original_source": "elastic",
+      "original_rule_id": "elastic_original_173",
+      "oci_query": "* | where 'Event Name' = 'Logon Failed' and 'Event ID' = 4625 | head 100",
+      "tags": [
+        "authentication",
+        "brute-force",
+        "failed-logon"
+      ],
+      "false_positives": [
+        "Legitimate administrative activity"
+      ],
+      "references": [
+        "https://attack.mitre.org/techniques/T1110/"
+      ],
+      "author": "Security Team",
+      "date_created": "2024-01-01",
+      "date_converted": "2025-07-18T21:40:12.775799"
+    },
+    {
+      "id": "splunk_174",
+      "name": "Registry Modification - Rule 174",
+      "description": "Detects suspicious registry modifications",
+      "category": "System",
+      "severity": "high",
+      "mitre_tactics": [
+        "persistence"
+      ],
+      "mitre_techniques": [
+        "T1547"
+      ],
+      "original_source": "splunk",
+      "original_rule_id": "splunk_original_174",
+      "oci_query": "* | where 'Event Name' = 'Registry Value Set' and 'Registry Path' like '%Run%' | head 100",
+      "tags": [
+        "registry",
+        "persistence",
+        "startup"
+      ],
+      "false_positives": [
+        "Legitimate administrative activity"
+      ],
+      "references": [
+        "https://attack.mitre.org/techniques/T1547/"
+      ],
+      "author": "Security Team",
+      "date_created": "2024-01-01",
+      "date_converted": "2025-07-18T21:40:12.775801"
+    },
+    {
+      "id": "elastic_175",
+      "name": "DNS Query to Suspicious Domain - Rule 175",
+      "description": "Detects DNS queries to potentially malicious domains",
+      "category": "Network",
+      "severity": "medium",
+      "mitre_tactics": [
+        "command-and-control"
+      ],
+      "mitre_techniques": [
+        "T1071.004"
+      ],
+      "original_source": "elastic",
+      "original_rule_id": "elastic_original_175",
+      "oci_query": "* | where 'Event Name' = 'DNS Query' and 'DNS Query' like '%.bit%' | head 100",
+      "tags": [
+        "dns",
+        "c2",
+        "domain"
+      ],
+      "false_positives": [
+        "Legitimate administrative activity"
+      ],
+      "references": [
+        "https://attack.mitre.org/techniques/T1071.004/"
+      ],
+      "author": "Security Team",
+      "date_created": "2024-01-01",
+      "date_converted": "2025-07-18T21:40:12.775803"
+    },
+    {
+      "id": "splunk_176",
+      "name": "Suspicious Process Execution - Rule 176",
+      "description": "Detects suspicious process execution patterns",
+      "category": "Process",
+      "severity": "high",
+      "mitre_tactics": [
+        "execution"
+      ],
+      "mitre_techniques": [
+        "T1059"
+      ],
+      "original_source": "splunk",
+      "original_rule_id": "splunk_original_176",
+      "oci_query": "* | where 'Process Name' like '%cmd.exe%' and 'Command Line' like '%powershell%' | head 100",
+      "tags": [
+        "process",
+        "execution",
+        "windows"
+      ],
+      "false_positives": [
+        "Legitimate administrative activity"
+      ],
+      "references": [
+        "https://attack.mitre.org/techniques/T1059/"
+      ],
+      "author": "Security Team",
+      "date_created": "2024-01-01",
+      "date_converted": "2025-07-18T21:40:12.775807"
+    },
+    {
+      "id": "elastic_177",
+      "name": "Network Connection to Suspicious Domain - Rule 177",
+      "description": "Detects network connections to known malicious domains",
+      "category": "Network",
+      "severity": "medium",
+      "mitre_tactics": [
+        "command-and-control"
+      ],
+      "mitre_techniques": [
+        "T1071"
+      ],
+      "original_source": "elastic",
+      "original_rule_id": "elastic_original_177",
+      "oci_query": "* | where 'Event Name' = 'Network Connection' and 'Domain' like '%.tk%' | head 100",
+      "tags": [
+        "network",
+        "c2",
+        "domain"
+      ],
+      "false_positives": [
+        "Legitimate administrative activity"
+      ],
+      "references": [
+        "https://attack.mitre.org/techniques/T1071/"
+      ],
+      "author": "Security Team",
+      "date_created": "2024-01-01",
+      "date_converted": "2025-07-18T21:40:12.775809"
+    },
+    {
+      "id": "splunk_178",
+      "name": "Failed Authentication Attempts - Rule 178",
+      "description": "Detects multiple failed authentication attempts",
+      "category": "Authentication",
+      "severity": "medium",
+      "mitre_tactics": [
+        "credential-access"
+      ],
+      "mitre_techniques": [
+        "T1110"
+      ],
+      "original_source": "splunk",
+      "original_rule_id": "splunk_original_178",
+      "oci_query": "* | where 'Event Name' = 'Logon Failed' and 'Event ID' = 4625 | head 100",
+      "tags": [
+        "authentication",
+        "brute-force",
+        "failed-logon"
+      ],
+      "false_positives": [
+        "Legitimate administrative activity"
+      ],
+      "references": [
+        "https://attack.mitre.org/techniques/T1110/"
+      ],
+      "author": "Security Team",
+      "date_created": "2024-01-01",
+      "date_converted": "2025-07-18T21:40:12.775811"
+    },
+    {
+      "id": "elastic_179",
+      "name": "Registry Modification - Rule 179",
+      "description": "Detects suspicious registry modifications",
+      "category": "System",
+      "severity": "high",
+      "mitre_tactics": [
+        "persistence"
+      ],
+      "mitre_techniques": [
+        "T1547"
+      ],
+      "original_source": "elastic",
+      "original_rule_id": "elastic_original_179",
+      "oci_query": "* | where 'Event Name' = 'Registry Value Set' and 'Registry Path' like '%Run%' | head 100",
+      "tags": [
+        "registry",
+        "persistence",
+        "startup"
+      ],
+      "false_positives": [
+        "Legitimate administrative activity"
+      ],
+      "references": [
+        "https://attack.mitre.org/techniques/T1547/"
+      ],
+      "author": "Security Team",
+      "date_created": "2024-01-01",
+      "date_converted": "2025-07-18T21:40:12.775813"
+    },
+    {
+      "id": "splunk_180",
+      "name": "DNS Query to Suspicious Domain - Rule 180",
+      "description": "Detects DNS queries to potentially malicious domains",
+      "category": "Network",
+      "severity": "medium",
+      "mitre_tactics": [
+        "command-and-control"
+      ],
+      "mitre_techniques": [
+        "T1071.004"
+      ],
+      "original_source": "splunk",
+      "original_rule_id": "splunk_original_180",
+      "oci_query": "* | where 'Event Name' = 'DNS Query' and 'DNS Query' like '%.bit%' | head 100",
+      "tags": [
+        "dns",
+        "c2",
+        "domain"
+      ],
+      "false_positives": [
+        "Legitimate administrative activity"
+      ],
+      "references": [
+        "https://attack.mitre.org/techniques/T1071.004/"
+      ],
+      "author": "Security Team",
+      "date_created": "2024-01-01",
+      "date_converted": "2025-07-18T21:40:12.775815"
+    },
+    {
+      "id": "elastic_181",
+      "name": "Suspicious Process Execution - Rule 181",
+      "description": "Detects suspicious process execution patterns",
+      "category": "Process",
+      "severity": "high",
+      "mitre_tactics": [
+        "execution"
+      ],
+      "mitre_techniques": [
+        "T1059"
+      ],
+      "original_source": "elastic",
+      "original_rule_id": "elastic_original_181",
+      "oci_query": "* | where 'Process Name' like '%cmd.exe%' and 'Command Line' like '%powershell%' | head 100",
+      "tags": [
+        "process",
+        "execution",
+        "windows"
+      ],
+      "false_positives": [
+        "Legitimate administrative activity"
+      ],
+      "references": [
+        "https://attack.mitre.org/techniques/T1059/"
+      ],
+      "author": "Security Team",
+      "date_created": "2024-01-01",
+      "date_converted": "2025-07-18T21:40:12.775817"
+    },
+    {
+      "id": "splunk_182",
+      "name": "Network Connection to Suspicious Domain - Rule 182",
+      "description": "Detects network connections to known malicious domains",
+      "category": "Network",
+      "severity": "medium",
+      "mitre_tactics": [
+        "command-and-control"
+      ],
+      "mitre_techniques": [
+        "T1071"
+      ],
+      "original_source": "splunk",
+      "original_rule_id": "splunk_original_182",
+      "oci_query": "* | where 'Event Name' = 'Network Connection' and 'Domain' like '%.tk%' | head 100",
+      "tags": [
+        "network",
+        "c2",
+        "domain"
+      ],
+      "false_positives": [
+        "Legitimate administrative activity"
+      ],
+      "references": [
+        "https://attack.mitre.org/techniques/T1071/"
+      ],
+      "author": "Security Team",
+      "date_created": "2024-01-01",
+      "date_converted": "2025-07-18T21:40:12.775819"
+    },
+    {
+      "id": "elastic_183",
+      "name": "Failed Authentication Attempts - Rule 183",
+      "description": "Detects multiple failed authentication attempts",
+      "category": "Authentication",
+      "severity": "medium",
+      "mitre_tactics": [
+        "credential-access"
+      ],
+      "mitre_techniques": [
+        "T1110"
+      ],
+      "original_source": "elastic",
+      "original_rule_id": "elastic_original_183",
+      "oci_query": "* | where 'Event Name' = 'Logon Failed' and 'Event ID' = 4625 | head 100",
+      "tags": [
+        "authentication",
+        "brute-force",
+        "failed-logon"
+      ],
+      "false_positives": [
+        "Legitimate administrative activity"
+      ],
+      "references": [
+        "https://attack.mitre.org/techniques/T1110/"
+      ],
+      "author": "Security Team",
+      "date_created": "2024-01-01",
+      "date_converted": "2025-07-18T21:40:12.775821"
+    },
+    {
+      "id": "splunk_184",
+      "name": "Registry Modification - Rule 184",
+      "description": "Detects suspicious registry modifications",
+      "category": "System",
+      "severity": "high",
+      "mitre_tactics": [
+        "persistence"
+      ],
+      "mitre_techniques": [
+        "T1547"
+      ],
+      "original_source": "splunk",
+      "original_rule_id": "splunk_original_184",
+      "oci_query": "* | where 'Event Name' = 'Registry Value Set' and 'Registry Path' like '%Run%' | head 100",
+      "tags": [
+        "registry",
+        "persistence",
+        "startup"
+      ],
+      "false_positives": [
+        "Legitimate administrative activity"
+      ],
+      "references": [
+        "https://attack.mitre.org/techniques/T1547/"
+      ],
+      "author": "Security Team",
+      "date_created": "2024-01-01",
+      "date_converted": "2025-07-18T21:40:12.775823"
+    },
+    {
+      "id": "elastic_185",
+      "name": "DNS Query to Suspicious Domain - Rule 185",
+      "description": "Detects DNS queries to potentially malicious domains",
+      "category": "Network",
+      "severity": "medium",
+      "mitre_tactics": [
+        "command-and-control"
+      ],
+      "mitre_techniques": [
+        "T1071.004"
+      ],
+      "original_source": "elastic",
+      "original_rule_id": "elastic_original_185",
+      "oci_query": "* | where 'Event Name' = 'DNS Query' and 'DNS Query' like '%.bit%' | head 100",
+      "tags": [
+        "dns",
+        "c2",
+        "domain"
+      ],
+      "false_positives": [
+        "Legitimate administrative activity"
+      ],
+      "references": [
+        "https://attack.mitre.org/techniques/T1071.004/"
+      ],
+      "author": "Security Team",
+      "date_created": "2024-01-01",
+      "date_converted": "2025-07-18T21:40:12.775825"
+    },
+    {
+      "id": "splunk_186",
+      "name": "Suspicious Process Execution - Rule 186",
+      "description": "Detects suspicious process execution patterns",
+      "category": "Process",
+      "severity": "high",
+      "mitre_tactics": [
+        "execution"
+      ],
+      "mitre_techniques": [
+        "T1059"
+      ],
+      "original_source": "splunk",
+      "original_rule_id": "splunk_original_186",
+      "oci_query": "* | where 'Process Name' like '%cmd.exe%' and 'Command Line' like '%powershell%' | head 100",
+      "tags": [
+        "process",
+        "execution",
+        "windows"
+      ],
+      "false_positives": [
+        "Legitimate administrative activity"
+      ],
+      "references": [
+        "https://attack.mitre.org/techniques/T1059/"
+      ],
+      "author": "Security Team",
+      "date_created": "2024-01-01",
+      "date_converted": "2025-07-18T21:40:12.775827"
+    },
+    {
+      "id": "elastic_187",
+      "name": "Network Connection to Suspicious Domain - Rule 187",
+      "description": "Detects network connections to known malicious domains",
+      "category": "Network",
+      "severity": "medium",
+      "mitre_tactics": [
+        "command-and-control"
+      ],
+      "mitre_techniques": [
+        "T1071"
+      ],
+      "original_source": "elastic",
+      "original_rule_id": "elastic_original_187",
+      "oci_query": "* | where 'Event Name' = 'Network Connection' and 'Domain' like '%.tk%' | head 100",
+      "tags": [
+        "network",
+        "c2",
+        "domain"
+      ],
+      "false_positives": [
+        "Legitimate administrative activity"
+      ],
+      "references": [
+        "https://attack.mitre.org/techniques/T1071/"
+      ],
+      "author": "Security Team",
+      "date_created": "2024-01-01",
+      "date_converted": "2025-07-18T21:40:12.775829"
+    },
+    {
+      "id": "splunk_188",
+      "name": "Failed Authentication Attempts - Rule 188",
+      "description": "Detects multiple failed authentication attempts",
+      "category": "Authentication",
+      "severity": "medium",
+      "mitre_tactics": [
+        "credential-access"
+      ],
+      "mitre_techniques": [
+        "T1110"
+      ],
+      "original_source": "splunk",
+      "original_rule_id": "splunk_original_188",
+      "oci_query": "* | where 'Event Name' = 'Logon Failed' and 'Event ID' = 4625 | head 100",
+      "tags": [
+        "authentication",
+        "brute-force",
+        "failed-logon"
+      ],
+      "false_positives": [
+        "Legitimate administrative activity"
+      ],
+      "references": [
+        "https://attack.mitre.org/techniques/T1110/"
+      ],
+      "author": "Security Team",
+      "date_created": "2024-01-01",
+      "date_converted": "2025-07-18T21:40:12.775831"
+    },
+    {
+      "id": "elastic_189",
+      "name": "Registry Modification - Rule 189",
+      "description": "Detects suspicious registry modifications",
+      "category": "System",
+      "severity": "high",
+      "mitre_tactics": [
+        "persistence"
+      ],
+      "mitre_techniques": [
+        "T1547"
+      ],
+      "original_source": "elastic",
+      "original_rule_id": "elastic_original_189",
+      "oci_query": "* | where 'Event Name' = 'Registry Value Set' and 'Registry Path' like '%Run%' | head 100",
+      "tags": [
+        "registry",
+        "persistence",
+        "startup"
+      ],
+      "false_positives": [
+        "Legitimate administrative activity"
+      ],
+      "references": [
+        "https://attack.mitre.org/techniques/T1547/"
+      ],
+      "author": "Security Team",
+      "date_created": "2024-01-01",
+      "date_converted": "2025-07-18T21:40:12.775834"
+    },
+    {
+      "id": "splunk_190",
+      "name": "DNS Query to Suspicious Domain - Rule 190",
+      "description": "Detects DNS queries to potentially malicious domains",
+      "category": "Network",
+      "severity": "medium",
+      "mitre_tactics": [
+        "command-and-control"
+      ],
+      "mitre_techniques": [
+        "T1071.004"
+      ],
+      "original_source": "splunk",
+      "original_rule_id": "splunk_original_190",
+      "oci_query": "* | where 'Event Name' = 'DNS Query' and 'DNS Query' like '%.bit%' | head 100",
+      "tags": [
+        "dns",
+        "c2",
+        "domain"
+      ],
+      "false_positives": [
+        "Legitimate administrative activity"
+      ],
+      "references": [
+        "https://attack.mitre.org/techniques/T1071.004/"
+      ],
+      "author": "Security Team",
+      "date_created": "2024-01-01",
+      "date_converted": "2025-07-18T21:40:12.775836"
+    },
+    {
+      "id": "elastic_191",
+      "name": "Suspicious Process Execution - Rule 191",
+      "description": "Detects suspicious process execution patterns",
+      "category": "Process",
+      "severity": "high",
+      "mitre_tactics": [
+        "execution"
+      ],
+      "mitre_techniques": [
+        "T1059"
+      ],
+      "original_source": "elastic",
+      "original_rule_id": "elastic_original_191",
+      "oci_query": "* | where 'Process Name' like '%cmd.exe%' and 'Command Line' like '%powershell%' | head 100",
+      "tags": [
+        "process",
+        "execution",
+        "windows"
+      ],
+      "false_positives": [
+        "Legitimate administrative activity"
+      ],
+      "references": [
+        "https://attack.mitre.org/techniques/T1059/"
+      ],
+      "author": "Security Team",
+      "date_created": "2024-01-01",
+      "date_converted": "2025-07-18T21:40:12.775838"
+    },
+    {
+      "id": "splunk_192",
+      "name": "Network Connection to Suspicious Domain - Rule 192",
+      "description": "Detects network connections to known malicious domains",
+      "category": "Network",
+      "severity": "medium",
+      "mitre_tactics": [
+        "command-and-control"
+      ],
+      "mitre_techniques": [
+        "T1071"
+      ],
+      "original_source": "splunk",
+      "original_rule_id": "splunk_original_192",
+      "oci_query": "* | where 'Event Name' = 'Network Connection' and 'Domain' like '%.tk%' | head 100",
+      "tags": [
+        "network",
+        "c2",
+        "domain"
+      ],
+      "false_positives": [
+        "Legitimate administrative activity"
+      ],
+      "references": [
+        "https://attack.mitre.org/techniques/T1071/"
+      ],
+      "author": "Security Team",
+      "date_created": "2024-01-01",
+      "date_converted": "2025-07-18T21:40:12.775840"
+    },
+    {
+      "id": "elastic_193",
+      "name": "Failed Authentication Attempts - Rule 193",
+      "description": "Detects multiple failed authentication attempts",
+      "category": "Authentication",
+      "severity": "medium",
+      "mitre_tactics": [
+        "credential-access"
+      ],
+      "mitre_techniques": [
+        "T1110"
+      ],
+      "original_source": "elastic",
+      "original_rule_id": "elastic_original_193",
+      "oci_query": "* | where 'Event Name' = 'Logon Failed' and 'Event ID' = 4625 | head 100",
+      "tags": [
+        "authentication",
+        "brute-force",
+        "failed-logon"
+      ],
+      "false_positives": [
+        "Legitimate administrative activity"
+      ],
+      "references": [
+        "https://attack.mitre.org/techniques/T1110/"
+      ],
+      "author": "Security Team",
+      "date_created": "2024-01-01",
+      "date_converted": "2025-07-18T21:40:12.775842"
+    },
+    {
+      "id": "splunk_194",
+      "name": "Registry Modification - Rule 194",
+      "description": "Detects suspicious registry modifications",
+      "category": "System",
+      "severity": "high",
+      "mitre_tactics": [
+        "persistence"
+      ],
+      "mitre_techniques": [
+        "T1547"
+      ],
+      "original_source": "splunk",
+      "original_rule_id": "splunk_original_194",
+      "oci_query": "* | where 'Event Name' = 'Registry Value Set' and 'Registry Path' like '%Run%' | head 100",
+      "tags": [
+        "registry",
+        "persistence",
+        "startup"
+      ],
+      "false_positives": [
+        "Legitimate administrative activity"
+      ],
+      "references": [
+        "https://attack.mitre.org/techniques/T1547/"
+      ],
+      "author": "Security Team",
+      "date_created": "2024-01-01",
+      "date_converted": "2025-07-18T21:40:12.775844"
+    },
+    {
+      "id": "elastic_195",
+      "name": "DNS Query to Suspicious Domain - Rule 195",
+      "description": "Detects DNS queries to potentially malicious domains",
+      "category": "Network",
+      "severity": "medium",
+      "mitre_tactics": [
+        "command-and-control"
+      ],
+      "mitre_techniques": [
+        "T1071.004"
+      ],
+      "original_source": "elastic",
+      "original_rule_id": "elastic_original_195",
+      "oci_query": "* | where 'Event Name' = 'DNS Query' and 'DNS Query' like '%.bit%' | head 100",
+      "tags": [
+        "dns",
+        "c2",
+        "domain"
+      ],
+      "false_positives": [
+        "Legitimate administrative activity"
+      ],
+      "references": [
+        "https://attack.mitre.org/techniques/T1071.004/"
+      ],
+      "author": "Security Team",
+      "date_created": "2024-01-01",
+      "date_converted": "2025-07-18T21:40:12.775846"
+    },
+    {
+      "id": "splunk_196",
+      "name": "Suspicious Process Execution - Rule 196",
+      "description": "Detects suspicious process execution patterns",
+      "category": "Process",
+      "severity": "high",
+      "mitre_tactics": [
+        "execution"
+      ],
+      "mitre_techniques": [
+        "T1059"
+      ],
+      "original_source": "splunk",
+      "original_rule_id": "splunk_original_196",
+      "oci_query": "* | where 'Process Name' like '%cmd.exe%' and 'Command Line' like '%powershell%' | head 100",
+      "tags": [
+        "process",
+        "execution",
+        "windows"
+      ],
+      "false_positives": [
+        "Legitimate administrative activity"
+      ],
+      "references": [
+        "https://attack.mitre.org/techniques/T1059/"
+      ],
+      "author": "Security Team",
+      "date_created": "2024-01-01",
+      "date_converted": "2025-07-18T21:40:12.775848"
+    },
+    {
+      "id": "elastic_197",
+      "name": "Network Connection to Suspicious Domain - Rule 197",
+      "description": "Detects network connections to known malicious domains",
+      "category": "Network",
+      "severity": "medium",
+      "mitre_tactics": [
+        "command-and-control"
+      ],
+      "mitre_techniques": [
+        "T1071"
+      ],
+      "original_source": "elastic",
+      "original_rule_id": "elastic_original_197",
+      "oci_query": "* | where 'Event Name' = 'Network Connection' and 'Domain' like '%.tk%' | head 100",
+      "tags": [
+        "network",
+        "c2",
+        "domain"
+      ],
+      "false_positives": [
+        "Legitimate administrative activity"
+      ],
+      "references": [
+        "https://attack.mitre.org/techniques/T1071/"
+      ],
+      "author": "Security Team",
+      "date_created": "2024-01-01",
+      "date_converted": "2025-07-18T21:40:12.775850"
+    },
+    {
+      "id": "splunk_198",
+      "name": "Failed Authentication Attempts - Rule 198",
+      "description": "Detects multiple failed authentication attempts",
+      "category": "Authentication",
+      "severity": "medium",
+      "mitre_tactics": [
+        "credential-access"
+      ],
+      "mitre_techniques": [
+        "T1110"
+      ],
+      "original_source": "splunk",
+      "original_rule_id": "splunk_original_198",
+      "oci_query": "* | where 'Event Name' = 'Logon Failed' and 'Event ID' = 4625 | head 100",
+      "tags": [
+        "authentication",
+        "brute-force",
+        "failed-logon"
+      ],
+      "false_positives": [
+        "Legitimate administrative activity"
+      ],
+      "references": [
+        "https://attack.mitre.org/techniques/T1110/"
+      ],
+      "author": "Security Team",
+      "date_created": "2024-01-01",
+      "date_converted": "2025-07-18T21:40:12.775852"
+    },
+    {
+      "id": "elastic_199",
+      "name": "Registry Modification - Rule 199",
+      "description": "Detects suspicious registry modifications",
+      "category": "System",
+      "severity": "high",
+      "mitre_tactics": [
+        "persistence"
+      ],
+      "mitre_techniques": [
+        "T1547"
+      ],
+      "original_source": "elastic",
+      "original_rule_id": "elastic_original_199",
+      "oci_query": "* | where 'Event Name' = 'Registry Value Set' and 'Registry Path' like '%Run%' | head 100",
+      "tags": [
+        "registry",
+        "persistence",
+        "startup"
+      ],
+      "false_positives": [
+        "Legitimate administrative activity"
+      ],
+      "references": [
+        "https://attack.mitre.org/techniques/T1547/"
+      ],
+      "author": "Security Team",
+      "date_created": "2024-01-01",
+      "date_converted": "2025-07-18T21:40:12.775854"
+    },
+    {
+      "id": "splunk_200",
+      "name": "DNS Query to Suspicious Domain - Rule 200",
+      "description": "Detects DNS queries to potentially malicious domains",
+      "category": "Network",
+      "severity": "medium",
+      "mitre_tactics": [
+        "command-and-control"
+      ],
+      "mitre_techniques": [
+        "T1071.004"
+      ],
+      "original_source": "splunk",
+      "original_rule_id": "splunk_original_200",
+      "oci_query": "* | where 'Event Name' = 'DNS Query' and 'DNS Query' like '%.bit%' | head 100",
+      "tags": [
+        "dns",
+        "c2",
+        "domain"
+      ],
+      "false_positives": [
+        "Legitimate administrative activity"
+      ],
+      "references": [
+        "https://attack.mitre.org/techniques/T1071.004/"
+      ],
+      "author": "Security Team",
+      "date_created": "2024-01-01",
+      "date_converted": "2025-07-18T21:40:12.775856"
+    }
+  ]
+}

@@ -80,14 +80,15 @@ interface SimpleQueryBuilderProps {
   onExecute: (query: string, options: { timePeriodMinutes: number; maxResults: number }) => Promise<any>
   onSave?: (query: { name: string; query: string; description: string }) => void
   loading?: boolean
+  timeRange?: any // TimeRange from UnifiedTimeFilter
 }
 
-export default function SimpleQueryBuilder({ onExecute, onSave, loading = false }: SimpleQueryBuilderProps) {
+export default function SimpleQueryBuilder({ onExecute, onSave, loading = false, timeRange: unifiedTimeRange }: SimpleQueryBuilderProps) {
   const [conditions, setConditions] = useState<QueryCondition[]>([
     { id: '1', field: "'Log Source'", operator: '=', value: '', logicalOperator: 'AND' }
   ])
   const [customQuery, setCustomQuery] = useState('')
-  const [timeRange, setTimeRange] = useState(60) // 1 hour default
+  const [timeRange, setTimeRange] = useState(60) // 1 hour default - only used when no unified time filter
   const [maxResults, setMaxResults] = useState(100)
   const [queryMode, setQueryMode] = useState<'builder' | 'custom'>('builder')
   const [isValidating, setIsValidating] = useState(false)
@@ -558,94 +559,107 @@ export default function SimpleQueryBuilder({ onExecute, onSave, loading = false 
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="space-y-2">
-              <Label htmlFor="time-range">Time Range</Label>
-              <Select value={isCustomPeriod ? '-1' : timeRange.toString()} onValueChange={handleTimeRangeChange}>
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {TIME_RANGES.map((range) => (
-                    <SelectItem key={range.value} value={range.value.toString()}>
-                      {range.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              
-              {/* Custom Period Selector */}
-              {isCustomPeriod && (
-                <div className="mt-4 p-4 border rounded-lg space-y-4">
-                  <div className="text-sm font-medium">Custom Time Period</div>
-                  
-                  <div className="grid grid-cols-2 gap-4">
-                    {/* Start Date & Time */}
-                    <div className="space-y-2">
-                      <Label>Start Date & Time</Label>
-                      <div className="flex gap-2">
-                        <Popover>
-                          <PopoverTrigger asChild>
-                            <Button variant="outline" className="w-full justify-start text-left font-normal">
-                              <CalendarIcon className="mr-2 h-4 w-4" />
-                              {startDate ? format(startDate, 'MMM dd, yyyy') : 'Select date'}
-                            </Button>
-                          </PopoverTrigger>
-                          <PopoverContent className="w-auto p-0" align="start">
-                            <Calendar
-                              mode="single"
-                              selected={startDate}
-                              onSelect={setStartDate}
-                              initialFocus
-                            />
-                          </PopoverContent>
-                        </Popover>
-                        <Input
-                          type="time"
-                          value={startTime}
-                          onChange={(e) => setStartTime(e.target.value)}
-                          className="w-24"
-                        />
+            {/* Time Range is now controlled by the unified filter */}
+            {unifiedTimeRange && (
+              <div className="space-y-2">
+                <Label>Time Range</Label>
+                <div className="text-sm text-muted-foreground">
+                  Time filtering is controlled by the unified time filter above.
+                </div>
+              </div>
+            )}
+            
+            {/* Show legacy time range selector only if no unified time filter */}
+            {!unifiedTimeRange && (
+              <div className="space-y-2">
+                <Label htmlFor="time-range">Time Range</Label>
+                <Select value={isCustomPeriod ? '-1' : timeRange.toString()} onValueChange={handleTimeRangeChange}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {TIME_RANGES.map((range) => (
+                      <SelectItem key={range.value} value={range.value.toString()}>
+                        {range.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                
+                {/* Custom Period Selector */}
+                {isCustomPeriod && (
+                  <div className="mt-4 p-4 border rounded-lg space-y-4">
+                    <div className="text-sm font-medium">Custom Time Period</div>
+                    
+                    <div className="grid grid-cols-2 gap-4">
+                      {/* Start Date & Time */}
+                      <div className="space-y-2">
+                        <Label>Start Date & Time</Label>
+                        <div className="flex gap-2">
+                          <Popover>
+                            <PopoverTrigger asChild>
+                              <Button variant="outline" className="w-full justify-start text-left font-normal">
+                                <CalendarIcon className="mr-2 h-4 w-4" />
+                                {startDate ? format(startDate, 'MMM dd, yyyy') : 'Select date'}
+                              </Button>
+                            </PopoverTrigger>
+                            <PopoverContent className="w-auto p-0" align="start">
+                              <Calendar
+                                mode="single"
+                                selected={startDate}
+                                onSelect={setStartDate}
+                                initialFocus
+                              />
+                            </PopoverContent>
+                          </Popover>
+                          <Input
+                            type="time"
+                            value={startTime}
+                            onChange={(e) => setStartTime(e.target.value)}
+                            className="w-24"
+                          />
+                        </div>
+                      </div>
+                      
+                      {/* End Date & Time */}
+                      <div className="space-y-2">
+                        <Label>End Date & Time</Label>
+                        <div className="flex gap-2">
+                          <Popover>
+                            <PopoverTrigger asChild>
+                              <Button variant="outline" className="w-full justify-start text-left font-normal">
+                                <CalendarIcon className="mr-2 h-4 w-4" />
+                                {endDate ? format(endDate, 'MMM dd, yyyy') : 'Select date'}
+                              </Button>
+                            </PopoverTrigger>
+                            <PopoverContent className="w-auto p-0" align="start">
+                              <Calendar
+                                mode="single"
+                                selected={endDate}
+                                onSelect={setEndDate}
+                                initialFocus
+                              />
+                            </PopoverContent>
+                          </Popover>
+                          <Input
+                            type="time"
+                            value={endTime}
+                            onChange={(e) => setEndTime(e.target.value)}
+                            className="w-24"
+                          />
+                        </div>
                       </div>
                     </div>
                     
-                    {/* End Date & Time */}
-                    <div className="space-y-2">
-                      <Label>End Date & Time</Label>
-                      <div className="flex gap-2">
-                        <Popover>
-                          <PopoverTrigger asChild>
-                            <Button variant="outline" className="w-full justify-start text-left font-normal">
-                              <CalendarIcon className="mr-2 h-4 w-4" />
-                              {endDate ? format(endDate, 'MMM dd, yyyy') : 'Select date'}
-                            </Button>
-                          </PopoverTrigger>
-                          <PopoverContent className="w-auto p-0" align="start">
-                            <Calendar
-                              mode="single"
-                              selected={endDate}
-                              onSelect={setEndDate}
-                              initialFocus
-                            />
-                          </PopoverContent>
-                        </Popover>
-                        <Input
-                          type="time"
-                          value={endTime}
-                          onChange={(e) => setEndTime(e.target.value)}
-                          className="w-24"
-                        />
+                    {startDate && endDate && (
+                      <div className="text-xs text-muted-foreground">
+                        Range: {format(startDate, 'MMM dd, yyyy')} {startTime} → {format(endDate, 'MMM dd, yyyy')} {endTime}
                       </div>
-                    </div>
+                    )}
                   </div>
-                  
-                  {startDate && endDate && (
-                    <div className="text-xs text-muted-foreground">
-                      Range: {format(startDate, 'MMM dd, yyyy')} {startTime} → {format(endDate, 'MMM dd, yyyy')} {endTime}
-                    </div>
-                  )}
-                </div>
-              )}
-            </div>
+                )}
+              </div>
+            )}
 
             <div className="space-y-2">
               <Label htmlFor="max-results">Max Results</Label>

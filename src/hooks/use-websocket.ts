@@ -79,7 +79,9 @@ export function useWebSocket(options: UseWebSocketOptions = {}) {
             
             case 'ping':
               // Respond to ping
-              send({ type: 'pong' })
+              if (ws.current?.readyState === WebSocket.OPEN) {
+                ws.current.send(JSON.stringify({ type: 'pong' }))
+              }
               break
           }
           

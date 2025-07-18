@@ -19,20 +19,24 @@ interface StorageUsage {
 
 interface StorageUsageMonitorProps {
   className?: string
+  timePeriodDays?: number
 }
 
-export function StorageUsageMonitor({ className }: StorageUsageMonitorProps) {
+export function StorageUsageMonitor({ className, timePeriodDays }: StorageUsageMonitorProps) {
   const [storageUsage, setStorageUsage] = useState<StorageUsage | null>(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [timePeriod, setTimePeriod] = useState('30')
+  
+  // Use external time period if provided, otherwise use internal state
+  const effectiveTimePeriod = timePeriodDays ? timePeriodDays.toString() : timePeriod
 
   const loadStorageUsage = useCallback(async () => {
     setLoading(true)
     setError(null)
     
     try {
-      const response = await fetch(`/api/mcp/storage-usage?time_period_days=${timePeriod}`)
+      const response = await fetch(`/api/mcp/storage-usage?time_period_days=${effectiveTimePeriod}`)
       const data = await response.json()
       
       if (data.success) {
@@ -45,7 +49,7 @@ export function StorageUsageMonitor({ className }: StorageUsageMonitorProps) {
     } finally {
       setLoading(false)
     }
-  }, [timePeriod])
+  }, [effectiveTimePeriod])
 
   useEffect(() => {
     loadStorageUsage()
@@ -88,19 +92,21 @@ export function StorageUsageMonitor({ className }: StorageUsageMonitorProps) {
               </CardDescription>
             </div>
             <div className="flex items-center gap-2">
-              <Select value={timePeriod} onValueChange={setTimePeriod}>
-                <SelectTrigger className="w-32">
-                  <Clock className="h-4 w-4 mr-2" />
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {timePeriodOptions.map((option) => (
-                    <SelectItem key={option.value} value={option.value}>
-                      {option.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              {!timePeriodDays && (
+                <Select value={timePeriod} onValueChange={setTimePeriod}>
+                  <SelectTrigger className="w-32">
+                    <Clock className="h-4 w-4 mr-2" />
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {timePeriodOptions.map((option) => (
+                      <SelectItem key={option.value} value={option.value}>
+                        {option.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              )}
               <Button
                 variant="outline"
                 size="sm"

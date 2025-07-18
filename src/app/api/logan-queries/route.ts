@@ -3,6 +3,7 @@ import * as fs from 'fs'
 import * as path from 'path'
 
 const LOGAN_QUERIES_FILE = path.join(process.cwd(), 'config', 'logan-working-queries.json')
+const MITRE_QUERIES_FILE = path.join(process.cwd(), 'config', 'mitre-enhanced-queries.json')
 
 interface LoganQueryCategory {
   name: string
@@ -41,6 +42,44 @@ function loadLoganQueries(): LoganQueriesFile | null {
   return null
 }
 
+// Load MITRE enhanced queries file
+function loadMitreQueries(): any {
+  try {
+    if (fs.existsSync(MITRE_QUERIES_FILE)) {
+      const content = fs.readFileSync(MITRE_QUERIES_FILE, 'utf8')
+      return JSON.parse(content)
+    }
+  } catch (error) {
+    console.error('Error loading MITRE queries:', error)
+  }
+  return null
+}
+
+// Convert MITRE queries to Logan format
+function convertMitreToLoganFormat(mitreData: any): LoganQueryCategory {
+  const queries: LoganQuery[] = mitreData.mitre_enhanced_queries.queries.map((query: any) => ({
+    id: query.id,
+    name: query.name,
+    description: query.description,
+    query: query.query,
+    category: query.category,
+    tags: query.mitre_mapping ? [
+      'mitre-attack',
+      'windows-sysmon',
+      query.mitre_mapping.tactic || 'unknown',
+      ...(query.mitre_mapping.techniques || [])
+    ] : ['mitre-attack', 'windows-sysmon'],
+    timeRange: '1440m', // Default to 24 hours
+    maxResults: 1000
+  }))
+
+  return {
+    name: 'MITRE ATT&CK Enhanced',
+    description: 'Enhanced MITRE ATT&CK queries for Windows Sysmon events with technique extraction and mapping',
+    queries
+  }
+}
+
 // GET - Retrieve Logan working queries
 export async function GET(request: NextRequest) {
   try {
@@ -49,6 +88,7 @@ export async function GET(request: NextRequest) {
     const tag = searchParams.get('tag')
     
     const loganQueries = loadLoganQueries()
+    const mitreQueries = loadMitreQueries()
     
     if (!loganQueries) {
       return NextResponse.json({
@@ -57,8 +97,14 @@ export async function GET(request: NextRequest) {
       }, { status: 404 })
     }
 
+    // Merge MITRE queries with Logan queries
+    let categories = { ...loganQueries.categories }
+    if (mitreQueries) {
+      const mitreCategory = convertMitreToLoganFormat(mitreQueries)
+      categories['mitre_enhanced'] = mitreCategory
+    }
+
     // Filter by category if specified
-    let categories = loganQueries.categories
     if (category) {
       const filteredCategories: Record<string, LoganQueryCategory> = {}
       if (categories[category]) {
