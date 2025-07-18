@@ -1,12 +1,11 @@
 'use client'
 
-import React, { useState } from 'react'
+import { useState } from 'react'
+import { StorageUsageMonitor } from '@/components/StorageMonitor/StorageUsageMonitor'
 import ModernLayout from '@/components/Layout/ModernLayout'
-import { MitreAttackView } from '@/components/MitreAttack/MitreAttackView'
-import { EnhancedMitreAttackView } from '@/components/MitreAttack/EnhancedMitreAttackView'
 import { UnifiedTimeFilter, TimeRange, useTimeRange } from '@/components/TimeFilter/UnifiedTimeFilter'
 
-export default function MitreAttackPage() {
+export default function StorageAnalyticsPage() {
   // Unified time filter state
   const [timeRange, setTimeRange] = useState<TimeRange>({
     type: 'preset',
@@ -15,10 +14,17 @@ export default function MitreAttackPage() {
   })
   const { getTimeRangeInMinutes } = useTimeRange(timeRange)
   
+  // Convert minutes to days for storage analytics
+  const getTimeRangeInDays = (): number => {
+    const minutes = getTimeRangeInMinutes()
+    const days = Math.max(1, Math.ceil(minutes / 1440))
+    return days
+  }
+  
   return (
     <ModernLayout
-      title="MITRE ATT&CK Framework"
-      subtitle="Analyze security events mapped to MITRE ATT&CK tactics and techniques"
+      title="Storage Analytics"
+      subtitle="OCI Logging Analytics storage usage monitoring and analysis"
     >
       <div className="space-y-6">
         <UnifiedTimeFilter
@@ -26,7 +32,7 @@ export default function MitreAttackPage() {
           onChange={setTimeRange}
           showTitle={true}
         />
-        <EnhancedMitreAttackView timeRangeMinutes={getTimeRangeInMinutes()} />
+        <StorageUsageMonitor timePeriodDays={getTimeRangeInDays()} />
       </div>
     </ModernLayout>
   )

@@ -6,6 +6,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { UnifiedTimeFilter, TimeRange, useTimeRange } from '@/components/TimeFilter/UnifiedTimeFilter'
 import { 
   AlertTriangle, 
   Activity, 
@@ -84,19 +85,38 @@ export default function ThreatAnalyticsPage() {
   const [threats, setThreats] = useState<ThreatAnalysis[]>([])
   const [stats, setStats] = useState<ThreatStats | null>(null)
   const [loading, setLoading] = useState(false)
-  const [timeRange, setTimeRange] = useState('24h')
+  
+  // Unified time filter state
+  const [timeRange, setTimeRange] = useState<TimeRange>({
+    type: 'preset',
+    preset: '1440',
+    minutes: 1440
+  })
+  const { getTimeRangeInMinutes, getDateRange, getOCITimeFilter } = useTimeRange(timeRange)
+  
   const [selectedSeverity, setSelectedSeverity] = useState('all')
   const [selectedType, setSelectedType] = useState('all')
   const [sortBy, setSortBy] = useState('score')
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc')
   const [selectedIp, setSelectedIp] = useState<string | null>(null)
+  
+  // Convert new TimeRange format to legacy string format for existing components
+  const getLegacyTimeRangeString = (): string => {
+    const minutes = getTimeRangeInMinutes()
+    if (minutes <= 60) return '1h'
+    if (minutes <= 360) return '6h'
+    if (minutes <= 1440) return '24h'
+    if (minutes <= 10080) return '7d'
+    return '30d'
+  }
 
   const loadThreatAnalysis = useCallback(async () => {
     setLoading(true)
     try {
+      const timeRangeMinutes = getTimeRangeInMinutes()
       const [threatsResponse, statsResponse] = await Promise.all([
-        fetch(`/api/threat-analytics/threats?timeRange=${timeRange}&severity=${selectedSeverity}&type=${selectedType}&sortBy=${sortBy}&sortOrder=${sortOrder}`),
-        fetch(`/api/threat-analytics/stats?timeRange=${timeRange}`)
+        fetch(`/api/threat-analytics/threats?timeRange=${timeRangeMinutes}m&severity=${selectedSeverity}&type=${selectedType}&sortBy=${sortBy}&sortOrder=${sortOrder}`),
+        fetch(`/api/threat-analytics/stats?timeRange=${timeRangeMinutes}m`)
       ])
 
       if (threatsResponse.ok) {
@@ -113,7 +133,7 @@ export default function ThreatAnalyticsPage() {
     } finally {
       setLoading(false)
     }
-  }, [timeRange, selectedSeverity, selectedType, sortBy, sortOrder])
+  }, [getTimeRangeInMinutes, selectedSeverity, selectedType, sortBy, sortOrder])
 
   useEffect(() => {
     loadThreatAnalysis()
@@ -158,6 +178,13 @@ export default function ThreatAnalyticsPage() {
 
   return (
     <div className="space-y-6">
+      {/* Unified Time Filter */}
+      <UnifiedTimeFilter
+        value={timeRange}
+        onChange={setTimeRange}
+        showTitle={true}
+      />
+      
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
@@ -167,18 +194,6 @@ export default function ThreatAnalyticsPage() {
           </p>
         </div>
         <div className="flex items-center gap-4">
-          <Select value={timeRange} onValueChange={setTimeRange}>
-            <SelectTrigger className="w-32">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="1h">Last Hour</SelectItem>
-              <SelectItem value="6h">Last 6 Hours</SelectItem>
-              <SelectItem value="24h">Last 24 Hours</SelectItem>
-              <SelectItem value="7d">Last 7 Days</SelectItem>
-              <SelectItem value="30d">Last 30 Days</SelectItem>
-            </SelectContent>
-          </Select>
           <Button
             variant="oracle-outline"
             size="sm"
@@ -396,15 +411,15 @@ export default function ThreatAnalyticsPage() {
         </TabsContent>
 
         <TabsContent value="enhanced">
-          <EnhancedGraphAnalysis timeRange={timeRange} />
+          <EnhancedGraphAnalysis timeRange={getLegacyTimeRangeString()} />
         </TabsContent>
 
         <TabsContent value="beacons">
-          <VCNBeaconAnalysis timeRange={timeRange} />
+          <VCNBeaconAnalysis timeRange={getLegacyTimeRangeString()} />
         </TabsContent>
 
         <TabsContent value="connections">
-          <VCNLongConnectionAnalysis timeRange={timeRange} />
+          <VCNLongConnectionAnalysis timeRange={getLegacyTimeRangeString()} />
         </TabsContent>
 
         <TabsContent value="dns">
@@ -500,7 +515,7 @@ export default function ThreatAnalyticsPage() {
       {selectedIp && (
         <IPLogViewer
           ip={selectedIp}
-          timeRange={timeRange}
+          timeRange={getLegacyTimeRangeString()}
           onClose={() => setSelectedIp(null)}
         />
       )}

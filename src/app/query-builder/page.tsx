@@ -17,6 +17,8 @@ import InteractiveDashboard from '@/components/Dashboard/InteractiveDashboard'
 import QueryHistoryManager from '@/components/QueryHistory/QueryHistoryManager'
 import StreamingQueryExecutor from '@/components/QueryExecution/StreamingQueryExecutor'
 import AdvancedDataExporter from '@/components/DataExport/AdvancedDataExporter'
+import { SecurityRulesBrowser } from '@/components/SecurityRules/SecurityRulesBrowser'
+import { UnifiedTimeFilter, TimeRange, useTimeRange } from '@/components/TimeFilter/UnifiedTimeFilter'
 
 import { 
   Database, 
@@ -38,7 +40,8 @@ import {
   Layout,
   History,
   Play,
-  Zap
+  Zap,
+  Shield
 } from 'lucide-react'
 
 interface QueryResult {
@@ -174,6 +177,14 @@ export default function QueryBuilderPage() {
     queryUsed: string
   } | null>(null)
   
+  // Unified time filter state
+  const [timeRange, setTimeRange] = useState<TimeRange>({
+    type: 'preset',
+    preset: '240',
+    minutes: 240
+  })
+  const { getTimeRangeInMinutes, getDateRange, getOCITimeFilter } = useTimeRange(timeRange)
+  
   // Logan queries state
   const [loganQueries, setLoganQueries] = useState<Record<string, LoganCategory>>({})
   const [selectedCategory, setSelectedCategory] = useState<string>('network_analysis')
@@ -211,24 +222,8 @@ export default function QueryBuilderPage() {
   }, [])
 
   const loadLoganQuery = (loganQuery: LoganQuery) => {
-    // This will integrate with the SimpleQueryBuilder component
-    // For now, we'll create a basic implementation
-    const timeRangeMap: Record<string, number> = {
-      '1h': 60,
-      '6h': 360,
-      '24h': 1440,
-      '48h': 2880,
-      '72h': 4320,
-      // Legacy mappings for older queries
-      '15m': 60,    // map to 1h
-      '30m': 60,    // map to 1h
-      '2h': 360,    // map to 6h
-      '12h': 1440,  // map to 24h
-      '2d': 2880,   // 48h
-      '7d': 4320    // 72h
-    }
-    
-    const timePeriodMinutes = timeRangeMap[loganQuery.timeRange] || 1440
+    // Use the current unified time filter setting
+    const timePeriodMinutes = getTimeRangeInMinutes()
     executeQuery(loganQuery.query, { 
       timePeriodMinutes, 
       maxResults: loganQuery.maxResults 
@@ -249,7 +244,7 @@ export default function QueryBuilderPage() {
         },
         body: JSON.stringify({
           query,
-          timePeriodMinutes: options.timePeriodMinutes || 1440,
+          timePeriodMinutes: options.timePeriodMinutes || getTimeRangeInMinutes(),
           bypassValidation: options.bypassValidation || false
         })
       })
@@ -264,7 +259,7 @@ export default function QueryBuilderPage() {
         setQueryStats({
           executionTime: data.executionTime || 0,
           totalResults: data.total || 0,
-          timeRange: data.timeRange || `${options.timePeriodMinutes || 1440} minutes`,
+          timeRange: data.timeRange || `${options.timePeriodMinutes || getTimeRangeInMinutes()} minutes`,
           queryUsed: data.queryUsed || query
         })
         
@@ -276,7 +271,7 @@ export default function QueryBuilderPage() {
           executionTime: data.executionTime || (1 + Math.random() * 4),
           resultCount: queryResults.length,
           success: true,
-          timePeriod: options.timePeriodMinutes || 1440,
+          timePeriod: options.timePeriodMinutes || getTimeRangeInMinutes(),
           parameters: options,
           isFavorite: false,
           tags: [],
@@ -299,7 +294,7 @@ export default function QueryBuilderPage() {
           resultCount: 0,
           success: false,
           error: data.error || 'Query execution failed',
-          timePeriod: options.timePeriodMinutes || 1440,
+          timePeriod: options.timePeriodMinutes || getTimeRangeInMinutes(),
           parameters: options,
           isFavorite: false,
           tags: [],
@@ -322,7 +317,7 @@ export default function QueryBuilderPage() {
         resultCount: 0,
         success: false,
         error: error instanceof Error ? error.message : 'Network error',
-        timePeriod: options.timePeriodMinutes || 1440,
+        timePeriod: options.timePeriodMinutes || getTimeRangeInMinutes(),
         parameters: options,
         isFavorite: false,
         tags: [],
@@ -333,7 +328,7 @@ export default function QueryBuilderPage() {
     } finally {
       setIsLoading(false)
     }
-  }, [])
+  }, [getTimeRangeInMinutes])
 
   const saveQuery = (queryData: { name: string; query: string; description: string }) => {
     const newQuery = {
@@ -425,6 +420,13 @@ export default function QueryBuilderPage() {
       subtitle="Comprehensive security analytics with advanced querying, visualization, and data management"
     >
       <div className="space-y-6">
+        {/* Unified Time Filter */}
+        <UnifiedTimeFilter
+          value={timeRange}
+          onChange={setTimeRange}
+          showTitle={true}
+        />
+        
         {/* Header Stats */}
         {queryStats && (
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
@@ -480,8 +482,9 @@ export default function QueryBuilderPage() {
 
         <Tabs defaultValue="builder" className="space-y-6">
           <div className="flex items-center justify-between">
-            <TabsList className="grid w-full grid-cols-7">
+            <TabsList className="grid w-full grid-cols-8">
               <TabsTrigger value="logan-queries">Logan Queries</TabsTrigger>
+              <TabsTrigger value="security-rules">Security Rules</TabsTrigger>
               <TabsTrigger value="builder">Query Builder</TabsTrigger>
               <TabsTrigger value="results">Results ({results.length})</TabsTrigger>
               <TabsTrigger value="visualizations">Visualizations</TabsTrigger>
@@ -591,6 +594,31 @@ export default function QueryBuilderPage() {
             </Card>
           </TabsContent>
 
+          <TabsContent value="security-rules" className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Shield className="h-5 w-5" />
+                  Security Rules Library
+                </CardTitle>
+                <CardDescription>
+                  Prebuilt detection rules from Elastic and Splunk converted to OCI Logging Analytics format
+                </CardDescription>
+              </CardHeader>
+            </Card>
+            
+            <SecurityRulesBrowser
+              onRuleSelect={(rule) => {
+                // Execute the rule query when selected using current time filter
+                executeQuery(rule.oci_query, { 
+                  timePeriodMinutes: getTimeRangeInMinutes(), 
+                  maxResults: 100 
+                })
+                toast.success(`Loaded security rule: ${rule.name}`)
+              }}
+            />
+          </TabsContent>
+
           <TabsContent value="builder">
             <div className="space-y-6">
               <Card>
@@ -606,9 +634,17 @@ export default function QueryBuilderPage() {
               </Card>
               
               <SimpleQueryBuilder
-                onExecute={executeQuery}
+                onExecute={(query, options) => {
+                  // Use unified time filter instead of SimpleQueryBuilder's own time range
+                  const timePeriodMinutes = getTimeRangeInMinutes()
+                  return executeQuery(query, {
+                    ...options,
+                    timePeriodMinutes
+                  })
+                }}
                 onSave={saveQuery}
                 loading={isLoading}
+                timeRange={timeRange}
               />
               
               <AdvancedQueryBuilder

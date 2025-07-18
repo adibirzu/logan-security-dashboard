@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { TimeRangeSelector } from '@/components/ui/TimeRangeSelector';
+import { UnifiedTimeFilter, TimeRange, useTimeRange } from '@/components/TimeFilter/UnifiedTimeFilter';
 import { RITAApplicationAnalysis } from '@/components/ThreatAnalytics/RITAApplicationAnalysis';
 import { RITAIPCommunications } from '@/components/ThreatAnalytics/RITAIPCommunications';
 import NetworkGraphVisualization from '@/components/ThreatAnalytics/NetworkGraphVisualization';
@@ -19,13 +19,29 @@ import {
 } from 'lucide-react';
 
 export default function RITADiscoveryPage() {
-  const [timeRange, setTimeRange] = useState('6h');
+  const [timeRange, setTimeRange] = useState<TimeRange>({
+    type: 'preset',
+    preset: '240',
+    minutes: 240
+  });
   const [selectedIP, setSelectedIP] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState('overview');
+  
+  const { getTimeRangeInMinutes, getDateRange, getOCITimeFilter } = useTimeRange(timeRange);
 
   const handleIPClick = (ip: string) => {
     setSelectedIP(ip);
     setActiveTab('ip-details');
+  };
+
+  // Convert new TimeRange format to legacy string format for existing components
+  const getLegacyTimeRangeString = (): string => {
+    const minutes = getTimeRangeInMinutes();
+    if (minutes <= 60) return '1h';
+    if (minutes <= 240) return '4h';
+    if (minutes <= 1440) return '24h';
+    if (minutes <= 2880) return '48h';
+    return '48h'; // Default fallback
   };
 
   return (
@@ -34,17 +50,12 @@ export default function RITADiscoveryPage() {
       subtitle="Real Intelligence Threat Analytics - Network behavior analysis and threat detection"
     >
       <div className="space-y-6">
-        {/* Global Time Range Selector */}
-        <div className="flex items-center justify-between">
-          <div className="w-full max-w-md">
-            <TimeRangeSelector
-              selectedTimeRange={timeRange}
-              onTimeRangeChange={setTimeRange}
-              showCategories={true}
-              showCustom={true}
-            />
-          </div>
-        </div>
+        {/* Unified Time Filter */}
+        <UnifiedTimeFilter
+          value={timeRange}
+          onChange={setTimeRange}
+          showTitle={true}
+        />
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
         <TabsList className="grid w-full grid-cols-5">
@@ -111,7 +122,7 @@ export default function RITADiscoveryPage() {
             </CardHeader>
             <CardContent>
               <NetworkGraphVisualization
-                timeRange={timeRange}
+                timeRange={getLegacyTimeRangeString()}
                 onIpClick={handleIPClick}
               />
             </CardContent>
@@ -136,7 +147,7 @@ export default function RITADiscoveryPage() {
             </CardHeader>
             <CardContent>
               <NetworkGraphVisualization
-                timeRange={timeRange}
+                timeRange={getLegacyTimeRangeString()}
                 onIpClick={handleIPClick}
               />
             </CardContent>
@@ -147,7 +158,7 @@ export default function RITADiscoveryPage() {
           {selectedIP ? (
             <IPLogViewer
               ip={selectedIP}
-              timeRange={timeRange}
+              timeRange={getLegacyTimeRangeString()}
               onClose={() => setSelectedIP(null)}
             />
           ) : (

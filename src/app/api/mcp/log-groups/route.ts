@@ -44,12 +44,18 @@ export async function GET(request: NextRequest) {
     const result = await callPythonScript('logan_client.py', ['list_sources', '--time-period', timePeriodMinutes.toString()])
 
     if (result.success) {
-      const sources = result.sources || []
+      const sources = (result.sources || []).map((source: any) => ({
+        name: source.name || source.source || 'Unknown',
+        record_count: source.count || source.events || 0,
+        last_activity: source.last_activity || new Date().toISOString(),
+        status: source.status || (source.count > 0 ? 'active' : 'inactive'),
+        description: source.description || `Log source: ${source.name || source.source}`
+      }))
 
       return NextResponse.json({
         success: true,
         sources: sources,
-        total: result.total_count || 0,
+        total: result.total_sources || sources.length || 0,
         time_period_minutes: timePeriodMinutes,
         note: sources.length > 0 ? 'Real data from OCI Logging Analytics' : 'No data found for the selected time period'
       })

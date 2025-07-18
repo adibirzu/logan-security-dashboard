@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { Shield, Database, Activity, Search, ChartBar, Users, Settings, Home, Sparkles, Palette } from 'lucide-react'
+import { Shield, Database, Activity, Search, ChartBar, Users, Settings, Home, Sparkles, HardDrive } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { SimpleThemeToggle } from '@/components/ui/theme-toggle'
 
@@ -26,16 +26,22 @@ const navigation = [
     description: 'All available log sources and their status'
   },
   {
-    name: 'Advanced Analytics',
-    href: '/advanced-analytics',
+    name: 'Query Builder',
+    href: '/query-builder',
     icon: Sparkles,
     description: 'Advanced query builder, visualizations, and data export'
   },
   {
-    name: 'Design Studio',
-    href: '/design-studio',
-    icon: Palette,
-    description: 'AI-powered UI design generation with v0.dev integration'
+    name: 'Storage Analytics',
+    href: '/storage-analytics',
+    icon: HardDrive,
+    description: 'OCI Logging Analytics storage usage monitoring and analysis'
+  },
+  {
+    name: 'Settings',
+    href: '/settings',
+    icon: Settings,
+    description: 'System configuration and service status monitoring'
   }
 ]
 

@@ -10,6 +10,7 @@ import { Database, RefreshCw, Search, Clock, Filter, TrendingUp, Activity } from
 import { getMCPApi } from '@/lib/api/mcp-api'
 import { safeToLocaleString } from '@/lib/format'
 import ModernLayout from '@/components/Layout/ModernLayout'
+import { UnifiedTimeFilter, TimeRange, useTimeRange } from '@/components/TimeFilter/UnifiedTimeFilter'
 
 // Time period options in minutes for consistent time formatting
 const TIME_PERIODS = [
@@ -36,7 +37,15 @@ export default function LogSourcesPage() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [searchTerm, setSearchTerm] = useState('')
-  const [selectedTimePeriod, setSelectedTimePeriod] = useState('1440')
+  
+  // Unified time filter state
+  const [timeRange, setTimeRange] = useState<TimeRange>({
+    type: 'preset',
+    preset: '1440',
+    minutes: 1440
+  })
+  const { getTimeRangeInMinutes, getDateRange, getOCITimeFilter } = useTimeRange(timeRange)
+  
   const [sortBy, setSortBy] = useState<'name' | 'count' | 'activity'>('count')
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc')
   const [showActiveOnly, setShowActiveOnly] = useState(false)
@@ -47,7 +56,7 @@ export default function LogSourcesPage() {
     
     try {
       // Load sources with data for the time period
-      const timeMinutes = parseInt(selectedTimePeriod)
+      const timeMinutes = getTimeRangeInMinutes()
       const response = await fetch(`/api/mcp/log-groups?time_period=${timeMinutes}`)
       const data = await response.json()
       
@@ -74,11 +83,11 @@ export default function LogSourcesPage() {
     } finally {
       setLoading(false)
     }
-  }, [selectedTimePeriod])
+  }, [getTimeRangeInMinutes])
 
   useEffect(() => {
     loadLogSources()
-  }, [selectedTimePeriod, loadLogSources])
+  }, [loadLogSources])
 
   const formatTimestamp = (timestamp: string) => {
     try {
@@ -173,6 +182,13 @@ export default function LogSourcesPage() {
       subtitle="Data sources and ingestion monitoring"
     >
       <div className="space-y-6">
+        {/* Unified Time Filter */}
+        <UnifiedTimeFilter
+          value={timeRange}
+          onChange={setTimeRange}
+          showTitle={true}
+        />
+        
         {/* Page Header */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
@@ -201,7 +217,7 @@ export default function LogSourcesPage() {
             <CardContent>
               <div className="text-2xl font-bold">{totalActiveLog}</div>
               <p className="text-xs text-muted-foreground">
-                Generating logs in last {TIME_PERIODS.find(p => p.value === selectedTimePeriod)?.label}
+                Generating logs in selected period
               </p>
             </CardContent>
           </Card>
@@ -243,23 +259,6 @@ export default function LogSourcesPage() {
           </CardHeader>
           <CardContent>
             <div className="flex flex-wrap gap-4">
-              {/* Time Period Selector */}
-              <div className="flex items-center gap-2">
-                <Clock className="h-4 w-4 text-muted-foreground" />
-                <Select value={selectedTimePeriod} onValueChange={setSelectedTimePeriod}>
-                  <SelectTrigger className="w-40">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {TIME_PERIODS.map((period) => (
-                      <SelectItem key={period.value} value={period.value}>
-                        {period.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
               {/* Search */}
               <div className="flex-1 min-w-60">
                 <div className="relative">
@@ -314,6 +313,27 @@ export default function LogSourcesPage() {
           <Card className="mb-6 border-red-500">
             <CardContent className="text-center py-6">
               <p className="text-red-500">Error: {error}</p>
+              <p className="text-sm text-muted-foreground mt-2">
+                Falling back to demonstration data. Check OCI configuration and credentials.
+              </p>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Demo Data Banner */}
+        {!loading && !error && totalActiveLog > 0 && (
+          <Card className="mb-6 border-blue-200 bg-blue-50">
+            <CardContent className="py-4">
+              <div className="flex items-start gap-3">
+                <Database className="h-5 w-5 text-blue-600 mt-0.5 flex-shrink-0" />
+                <div>
+                  <p className="text-blue-900 font-medium">Dynamic Log Sources Active</p>
+                  <p className="text-blue-700 text-sm mt-1">
+                    Showing {totalActiveLog} active log sources with {safeToLocaleString(totalEvents)} total events. 
+                    Data refreshes automatically every 30 seconds based on your selected time period.
+                  </p>
+                </div>
+              </div>
             </CardContent>
           </Card>
         )}
@@ -332,11 +352,11 @@ export default function LogSourcesPage() {
         {!loading && (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {displaySources.map((source, index) => (
-              <Card key={`${source.name}-${index}`} className="hover:shadow-md transition-shadow">
+              <Card key={`${source.name}-${index}`} className="hover:shadow-md transition-shadow group">
                 <CardHeader className="pb-3">
                   <div className="flex items-start justify-between">
                     <div className="flex-1">
-                      <CardTitle className="text-lg font-medium break-words">
+                      <CardTitle className="text-lg font-medium break-words group-hover:text-primary transition-colors">
                         {source.name}
                       </CardTitle>
                       {source.description && (
@@ -345,19 +365,24 @@ export default function LogSourcesPage() {
                         </CardDescription>
                       )}
                     </div>
-                    <Badge 
-                      variant={source.record_count > 0 ? "default" : "secondary"}
-                      className={source.record_count > 0 ? "bg-green-100 text-green-800" : ""}
-                    >
-                      {source.record_count > 0 ? 'Active' : 'Inactive'}
-                    </Badge>
+                    <div className="flex flex-col gap-1">
+                      <Badge 
+                        variant={source.record_count > 0 ? "default" : "secondary"}
+                        className={source.record_count > 0 ? "bg-green-100 text-green-800 border-green-200" : "bg-gray-100 text-gray-700"}
+                      >
+                        {source.record_count > 0 ? 'Active' : 'Inactive'}
+                      </Badge>
+                      {source.record_count > 0 && (
+                        <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse ml-auto"></div>
+                      )}
+                    </div>
                   </div>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-3">
                     <div className="flex items-center justify-between">
                       <span className="text-sm text-muted-foreground">Events</span>
-                      <span className="font-medium text-lg">
+                      <span className={`font-medium text-lg ${source.record_count > 0 ? 'text-green-600' : 'text-gray-400'}`}>
                         {safeToLocaleString(source.record_count)}
                       </span>
                     </div>
@@ -365,7 +390,7 @@ export default function LogSourcesPage() {
                     {source.last_activity && (
                       <div className="flex items-center justify-between">
                         <span className="text-sm text-muted-foreground">Last Activity</span>
-                        <span className="text-sm">
+                        <span className="text-sm font-medium">
                           {formatTimestamp(source.last_activity)}
                         </span>
                       </div>
@@ -374,7 +399,9 @@ export default function LogSourcesPage() {
                     <div className="pt-2">
                       <div className="w-full bg-gray-200 rounded-full h-2">
                         <div 
-                          className="bg-blue-600 h-2 rounded-full transition-all duration-300"
+                          className={`h-2 rounded-full transition-all duration-300 ${
+                            source.record_count > 0 ? 'bg-gradient-to-r from-blue-500 to-green-500' : 'bg-gray-300'
+                          }`}
                           style={{ 
                             width: totalEvents > 0 
                               ? `${Math.min(100, (source.record_count / Math.max(...displaySources.map(s => s.record_count))) * 100)}%`
@@ -386,6 +413,23 @@ export default function LogSourcesPage() {
                         Relative activity in selected period
                       </p>
                     </div>
+                    
+                    {/* Activity indicator */}
+                    {source.record_count > 0 && (
+                      <div className="flex items-center gap-2 pt-2 border-t">
+                        <Activity className="h-3 w-3 text-green-500" />
+                        <span className="text-xs text-green-600 font-medium">
+                          Live data ingestion
+                        </span>
+                      </div>
+                    )}
+                    
+                    {/* Events per minute indicator */}
+                    {source.record_count > 0 && (
+                      <div className="text-xs text-muted-foreground">
+                        ~{Math.round(source.record_count / getTimeRangeInMinutes())} events/min
+                      </div>
+                    )}
                   </div>
                 </CardContent>
               </Card>

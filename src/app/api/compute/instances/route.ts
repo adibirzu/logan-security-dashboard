@@ -6,6 +6,7 @@ export async function GET(request: NextRequest) {
   try {
     const searchParams = request.nextUrl.searchParams
     const compartmentId = searchParams.get('compartment_id')
+    const region = searchParams.get('region')
     
     const scriptPath = path.join(process.cwd(), 'scripts', 'oci_compute_client.py')
     const args = ['list']
@@ -14,7 +15,7 @@ export async function GET(request: NextRequest) {
       args.push('--compartment-id', compartmentId)
     }
     
-    const result = await executeComputeScript(scriptPath, args)
+    const result = await executeComputeScript(scriptPath, args, region)
     
     if (result.success) {
       return NextResponse.json(result)
@@ -30,14 +31,15 @@ export async function GET(request: NextRequest) {
   }
 }
 
-async function executeComputeScript(scriptPath: string, args: string[]): Promise<any> {
+async function executeComputeScript(scriptPath: string, args: string[], region?: string | null): Promise<any> {
   return new Promise((resolve, reject) => {
     const pythonProcess = spawn('python3', [scriptPath, ...args], {
       env: {
         ...process.env,
-        LOGAN_REGION: process.env.NEXT_PUBLIC_LOGAN_REGION || 'eu-frankfurt-1',
+        LOGAN_REGION: region || process.env.NEXT_PUBLIC_LOGAN_REGION || 'eu-frankfurt-1',
         LOGAN_COMPARTMENT_ID: process.env.NEXT_PUBLIC_LOGAN_COMPARTMENT_ID || ''
-      }
+      },
+      timeout: 30000 // 30 second timeout for better performance
     })
     
     let stdout = ''
