@@ -1,0 +1,35 @@
+version: '3.8'
+
+services:
+  logan-dashboard:
+    build: .
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+    env_file:
+      - .env.local
+    restart: unless-stopped
+    depends_on:
+      - logan-mcp-server
+    networks:
+      - logan-network
+
+  logan-mcp-server:
+    image: python:3.11-slim
+    working_dir: /app
+    volumes:
+      - ../Documents/Cline/MCP/logan-fastmcp:/app
+      - ~/.oci:/root/.oci:ro
+    command: python3 logan_mcp.py
+    environment:
+      - PYTHONPATH=/app
+    env_file:
+      - ../Documents/Cline/MCP/logan-fastmcp/.env
+    restart: unless-stopped
+    networks:
+      - logan-network
+
+networks:
+  logan-network:
+    driver: bridge

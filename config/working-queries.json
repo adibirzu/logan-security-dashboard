@@ -1,0 +1,205 @@
+{
+  "verified_working_queries": {
+    "description": "OCI Logging Analytics queries that have been tested and confirmed to work",
+    "last_updated": "2025-01-10",
+    "meta": {
+      "total_queries": 8,
+      "categories": [
+        "security"
+      ],
+      "last_updated": "2025-07-11"
+    },
+    "queries": [
+      {
+        "id": "top_10_denied_connections",
+        "name": "Top 10 Denied Connections by Source",
+        "query": "'Log Source' in ('OCI VCN Flow Unified Schema Logs') and Action in (drop, reject) | rename 'Source IP' as Source | stats count by Source | top 10 Count",
+        "category": "security",
+        "status": "UNTESTED",
+        "test_date": "2025-07-11",
+        "saved_date": "2025-07-11T17:12:00Z",
+        "saved_by": "system",
+        "description": "Identifies top 10 source IPs with denied connections.",
+        "execution_stats": {},
+        "usage_stats": {},
+        "notes": "New query, requires testing."
+      },
+      {
+        "id": "map_allow_deny",
+        "name": "Map Allow and Deny",
+        "query": "'Client Coordinates' != null and Action != null | geostats count by Action | highlightgroups color = red [ * | where Action = reject ] | highlightgroups color = green [ * | where Action in (accept, allow, alert) ] | highlightgroups color = blue [ * | where Action in (drop) ] | sort -Action",
+        "category": "security",
+        "status": "UNTESTED",
+        "test_date": "2025-07-11",
+        "saved_date": "2025-07-11T17:12:00Z",
+        "saved_by": "system",
+        "description": "Geographical visualization of network actions (allow/deny).",
+        "execution_stats": {},
+        "usage_stats": {},
+        "notes": "New query, requires testing."
+      },
+      {
+        "id": "technique_ids_windows",
+        "name": "Technique ID's Windows",
+        "query": "'Log Source' = 'Windows Sysmon Events' and Technique_id != T1574.002 | fields Technique_id",
+        "category": "security",
+        "status": "UNTESTED",
+        "test_date": "2025-07-11",
+        "saved_date": "2025-07-11T17:12:00Z",
+        "saved_by": "system",
+        "description": "Lists Windows Sysmon technique IDs, excluding a specific one.",
+        "execution_stats": {},
+        "usage_stats": {},
+        "notes": "New query, requires testing."
+      },
+      {
+        "id": "windows_sysmon_detected_events",
+        "name": "Windows Sysmon detected events",
+        "query": "'Log Source' = 'Windows Sysmon Events' and 'Event ID' != null | stats count by 'Event ID' | sort -Count | lookup table = MITRE select 'Event ID' as 'Event ID', 'Event Name', Channel, 'Audit Category', 'OSSEM Id' using 'Event ID' | fields 'Event ID', 'Event Name', Channel, 'Audit Category', 'OSSEM Id'",
+        "category": "security",
+        "status": "UNTESTED",
+        "test_date": "2025-07-11",
+        "saved_date": "2025-07-11T17:12:00Z",
+        "saved_by": "system",
+        "description": "Summarizes Windows Sysmon events with MITRE ATT&CK lookup.",
+        "execution_stats": {},
+        "usage_stats": {},
+        "notes": "New query, requires testing."
+      },
+      {
+        "id": "waf_requests_protection_capabilities",
+        "name": "WAF Requests Protection Capabilities with lookup",
+        "query": "'Log Source' = 'OCI WAF Logs' and 'Security Module' not like in ('%requestAccessControl%', '%responseAccessControl%', '%requestRateLimiting%', '%requestProtection%') and 'Security Module' != null and 'Request Protection Rule IDs Data' != null | rename 'Request Protection Rule IDs' as 'Request Protection Capabilities' | stats count by 'Request Protection Capabilities' | sort -Count | lookup table = 'Web Application Firewall Protection Capabilities' select Key as Key, Name, Description, Tags, _Version using 'Request Protection Capabilities' = 'Protection Capabilities' | fields Name, Key, Description, _Version | rename _Version as Version",
+        "category": "security",
+        "status": "UNTESTED",
+        "test_date": "2025-07-11",
+        "saved_date": "2025-07-11T17:12:00Z",
+        "saved_by": "system",
+        "description": "Analyzes WAF request protection capabilities with lookup.",
+        "execution_stats": {},
+        "usage_stats": {},
+        "notes": "New query, requires testing."
+      },
+      {
+        "id": "waf_protection_rules",
+        "name": "WAF Protection Rules",
+        "query": "'Log Source' = 'OCI WAF Logs' and 'Request Protection Rule IDs' != null | stats count('Host IP Address (Client)') by 'Request Protection Rule IDs', 'Host IP Address (Client)'",
+        "category": "security",
+        "status": "UNTESTED",
+        "test_date": "2025-07-11",
+        "saved_date": "2025-07-11T17:12:00Z",
+        "saved_by": "system",
+        "description": "Counts WAF protection rules by client IP.",
+        "execution_stats": {},
+        "usage_stats": {},
+        "notes": "New query, requires testing."
+      },
+      {
+        "id": "network_data_traffic_analytics",
+        "name": "Network Data Traffic Analytics",
+        "query": "'Log Source' = 'OCI VCN Flow Unified Schema Logs' | eval 'Content Size Out' = unit('Content Size Out', byte) | link span = 15minute Time, 'Source IP' | stats sum('Content Size Out') as 'Data Transfer' | classify 'Start Time', 'Source IP', 'Data Transfer' as 'Data Transfer Analysis'",
+        "category": "security",
+        "status": "UNTESTED",
+        "test_date": "2025-07-11",
+        "saved_date": "2025-07-11T17:12:00Z",
+        "saved_by": "system",
+        "description": "Analyzes network data transfer over time.",
+        "execution_stats": {},
+        "usage_stats": {},
+        "notes": "New query, requires testing."
+      },
+      {
+        "id": "all_network_traffic",
+        "name": "All Network Traffic",
+        "query": "'Log Source' = 'OCI VCN Flow Unified Schema Logs' | eval vol = unit('Content Size Out', byte) | stats sum(vol) as Volume, trend(sum(vol)) | compare timeshift = auto",
+        "category": "security",
+        "status": "UNTESTED",
+        "test_date": "2025-07-11",
+        "saved_date": "2025-07-11T17:12:00Z",
+        "saved_by": "system",
+        "description": "Shows total network traffic volume and trend.",
+        "execution_stats": {},
+        "usage_stats": {},
+        "notes": "New query, requires testing."
+      }
+    ]
+  },
+  "field_names_confirmed": {
+    "description": "Field names confirmed to exist in your OCI Logging Analytics data",
+    "fields": [
+      "'Event Name'",
+      "'Principal Name'",
+      "'IP Address'",
+      "'Compartment Name'",
+      "'Response Status'",
+      "'Log Source'"
+    ]
+  },
+  "queries_to_test": {
+    "description": "Queries ready for testing based on confirmed field names",
+    "queries": [
+      {
+        "name": "Field Discovery",
+        "query": "* | head 1 | transpose | rename column as field_name, \"row 1\" as sample_value",
+        "purpose": "Discover all available field names"
+      },
+      {
+        "name": "Event Types",
+        "query": "* | stats count by 'Event Name' | sort -count | head 20",
+        "purpose": "Most common event types"
+      },
+      {
+        "name": "User Activity",
+        "query": "* | stats count by 'Principal Name' | sort -count | head 20",
+        "purpose": "Most active users"
+      },
+      {
+        "name": "Query Failures",
+        "query": "* | where 'Event Name' = 'Query' and 'Response Status' = 'InvalidParameter'",
+        "purpose": "Based on your sample data showing query failures"
+      },
+      {
+        "name": "IP Activity",
+        "query": "* | stats count by 'IP Address' | sort -count",
+        "purpose": "Activity by source IP"
+      },
+      {
+        "name": "Compartment Activity",
+        "query": "* | stats count by 'Compartment Name' | sort -count",
+        "purpose": "Activity by compartment"
+      }
+    ]
+  },
+  "usage_instructions": {
+    "testing_workflow": [
+      "1. Copy a query from 'queries_to_test'",
+      "2. Test it using: cd scripts && python3 security_analyzer.py search --query \"QUERY_HERE\" --time-period 60",
+      "3. If successful, move it to 'verified_working_queries'",
+      "4. Update the dashboard saved queries with working queries"
+    ],
+    "field_name_tips": [
+      "Field names are case-sensitive",
+      "Always use single quotes around field names with spaces",
+      "Your data shows: 'Event Name', 'Principal Name', 'IP Address', etc.",
+      "Test field names with: * | head 1 | transpose"
+    ]
+  },
+  "sample_data_analysis": {
+    "description": "Analysis of your actual log data from the terminal test",
+    "confirmed_structure": {
+      "data_format": "JSON nested in 'Original Log Content'",
+      "event_name": "Query",
+      "principal_name": "oracleidentitycloudservice/alexandru.birzu@oracle.com",
+      "ip_address": "82.77.117.187",
+      "compartment_name": "oci4cca",
+      "response_status": "InvalidParameter",
+      "message": "Query failed with response 'InvalidParameter'"
+    },
+    "next_queries_to_try": [
+      "* | where 'Principal Name' = 'oracleidentitycloudservice/alexandru.birzu@oracle.com'",
+      "* | where 'IP Address' = '82.77.117.187'",
+      "* | where 'Compartment Name' = 'oci4cca'",
+      "* | where 'Event Name' = 'Query'"
+    ]
+  }
+}

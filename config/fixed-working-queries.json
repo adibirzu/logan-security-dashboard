@@ -1,0 +1,99 @@
+{
+  "working_queries": {
+    "basic_search": {
+      "name": "Basic Log Search",
+      "description": "Simple search to retrieve recent logs",
+      "query": "* | head 10",
+      "category": "basic",
+      "tested": true
+    },
+    "vcn_flow_logs": {
+      "name": "VCN Flow Logs",
+      "description": "Network traffic logs from VCN Flow",
+      "query": "'Log Source' in ('OCI VCN Flow Unified Schema Logs') | head 10",
+      "category": "network",
+      "tested": true
+    },
+    "audit_logs": {
+      "name": "OCI Audit Logs",
+      "description": "Oracle Cloud Infrastructure audit events",
+      "query": "'Log Source' in ('OCI Audit Logs') | head 10",
+      "category": "audit",
+      "tested": true
+    },
+    "dropped_connections": {
+      "name": "Dropped Network Connections",
+      "description": "Network connections that were dropped or rejected",
+      "query": "'Log Source' in ('OCI VCN Flow Unified Schema Logs') and Action in ('drop', 'reject') | head 20",
+      "category": "security",
+      "tested": true
+    },
+    "allowed_connections": {
+      "name": "Allowed Network Connections",
+      "description": "Network connections that were allowed",
+      "query": "'Log Source' in ('OCI VCN Flow Unified Schema Logs') and Action in ('accept', 'allow') | head 20",
+      "category": "network",
+      "tested": true
+    },
+    "recent_audit_events": {
+      "name": "Recent Audit Events",
+      "description": "Recent OCI audit events",
+      "query": "'Log Source' in ('OCI Audit Logs') | head 20",
+      "category": "audit",
+      "tested": true
+    }
+  },
+  "problematic_patterns": {
+    "avoid_dateRelative": {
+      "description": "dateRelative function causes 'Missing input' errors",
+      "example": "Time > dateRelative(1h)",
+      "alternative": "Use direct timestamp comparison or no time filtering"
+    },
+    "avoid_complex_stats": {
+      "description": "Complex stats operations with field names cause parsing issues",
+      "example": "| stats count('Field Name') by 'Field1', 'Field2'",
+      "alternative": "| stats count by 'Field1' | head 10"
+    },
+    "avoid_lookup": {
+      "description": "Lookup operations are not available",
+      "example": "| lookup table = MITRE",
+      "alternative": "Remove lookup operations entirely"
+    },
+    "avoid_top_command": {
+      "description": "Top command syntax is not supported",
+      "example": "| top 10 Count",
+      "alternative": "| sort -Count | head 10"
+    }
+  },
+  "field_mappings": {
+    "VCN_Flow_Logs": {
+      "available_fields": [
+        "Log Source",
+        "Action",
+        "Source IP",
+        "Destination IP",
+        "Protocol",
+        "Source Port",
+        "Destination Port",
+        "Time"
+      ]
+    },
+    "Audit_Logs": {
+      "available_fields": [
+        "Log Source",
+        "Event Type",
+        "Event Name",
+        "Principal Name",
+        "Compartment Name",
+        "Source IP",
+        "Time"
+      ]
+    }
+  },
+  "safe_query_templates": {
+    "basic_filter": "'Log Source' in ('{LOG_SOURCE}') | head {LIMIT}",
+    "action_filter": "'Log Source' in ('{LOG_SOURCE}') and Action in ('{ACTION}') | head {LIMIT}",
+    "field_exists": "'Log Source' in ('{LOG_SOURCE}') and '{FIELD}' is not null | head {LIMIT}",
+    "simple_stats": "'Log Source' in ('{LOG_SOURCE}') | stats count by Action | head {LIMIT}"
+  }
+}

@@ -1,0 +1,229 @@
+{
+  "version": "1.0",
+  "description": "Comprehensive Logan Security Dashboard Working Queries",
+  "last_updated": "2025-07-18",
+  "categories": {
+    "network_analysis": {
+      "name": "Network Analysis",
+      "description": "VCN Flow logs and network traffic analysis",
+      "queries": [
+        {
+          "id": "all_sources_count",
+          "name": "All Log Sources Count",
+          "description": "Count of log records by source type",
+          "query": "* | stats count as logrecords by 'Log Source' | sort -logrecords",
+          "category": "network_analysis",
+          "tags": ["overview", "sources", "statistics"],
+          "timeRange": "24h",
+          "maxResults": 100
+        },
+        {
+          "id": "network_traffic_volume",
+          "name": "All Network Traffic Volume",
+          "description": "Network traffic volume analysis with trend comparison",
+          "query": "'Log Source' = 'OCI VCN Flow Unified Schema Logs' | eval vol = unit('Content Size Out', byte) | stats sum(vol) as Volume, trend(sum(vol)) | compare timeshift = auto",
+          "category": "network_analysis",
+          "tags": ["traffic", "volume", "trend"],
+          "timeRange": "24h",
+          "maxResults": 500
+        },
+        {
+          "id": "top_denied_connections",
+          "name": "Top 10 Denied Connections by Source",
+          "description": "Most frequent denied/dropped connections by source IP",
+          "query": "'Log Source' in ('OCI VCN Flow Unified Schema Logs') and Action in (drop, reject) | rename 'Source IP' as Source | stats count by Source | top 10 Count",
+          "category": "network_analysis",
+          "tags": ["denied", "security", "top10"],
+          "timeRange": "24h",
+          "maxResults": 10
+        },
+        {
+          "id": "top_destination_ports",
+          "name": "Top 10 Destination Ports by Traffic",
+          "description": "Highest traffic destination ports analysis",
+          "query": "'Log Source' = 'OCI VCN Flow Unified Schema Logs' | eval vol = unit('Content Size Out', byte) | stats sum(vol) as Volume by 'Destination Port' | top 10 Volume",
+          "category": "network_analysis",
+          "tags": ["ports", "traffic", "top10"],
+          "timeRange": "24h",
+          "maxResults": 10
+        }
+      ]
+    },
+    "security_authentication": {
+      "name": "Security & Authentication",
+      "description": "Authentication failures and security events",
+      "queries": [
+        {
+          "id": "windows_failed_logins",
+          "name": "Top 10 Windows Failed Logins",
+          "description": "Failed Windows authentication attempts by account",
+          "query": "'Log Source' = 'Windows Security Events' and 'Security Result' = denied | fields 'Security Actor Endpoint Account', 'Security Category', 'Security Result', 'Security Command', 'Security Action', 'Security Actor Endpoint Name', 'Security Destination Endpoint Network Name', 'Security Destination Resource' | stats count by 'Security Destination Endpoint Account' | sort -Count | head 10",
+          "category": "security_authentication",
+          "tags": ["windows", "authentication", "failed", "top10"],
+          "timeRange": "24h",
+          "maxResults": 10
+        },
+        {
+          "id": "ssh_failed_logins",
+          "name": "Failed SSH Logins by Destination",
+          "description": "SSH authentication failures by destination",
+          "query": "'Security Original Name' in (sshd, ssh) and 'Security Category' = authentication.login and 'Security Result' = denied | fields 'Security Actor Endpoint Network Address' as Destination | timestats count as Count by Destination",
+          "category": "security_authentication",
+          "tags": ["ssh", "authentication", "failed", "linux"],
+          "timeRange": "24h",
+          "maxResults": 100
+        }
+      ]
+    },
+    "suricata_ids": {
+      "name": "Suricata IDS Analysis",
+      "description": "Suricata intrusion detection system logs and alerts",
+      "queries": [
+        {
+          "id": "suricata_signatures",
+          "name": "Suricata Signature Analysis",
+          "description": "Count of Suricata signatures triggered",
+          "query": "'Log Source' = com.oraclecloud.logging.custom.Suricatalogs | fields SuricataSignature, SuricataSignatureID | stats count as logrecords by SuricataSignature | sort -logrecords",
+          "category": "suricata_ids",
+          "tags": ["suricata", "signatures", "ids"],
+          "timeRange": "24h",
+          "maxResults": 100
+        },
+        {
+          "id": "suricata_signature_ids",
+          "name": "Suricata Signature IDs",
+          "description": "Analysis by Suricata signature ID frequency",
+          "query": "'Log Source' = com.oraclecloud.logging.custom.Suricatalogs | fields SuricataSignature, SuricataSignatureID | stats count as logrecords by SuricataSignatureID | sort -logrecords",
+          "category": "suricata_ids",
+          "tags": ["suricata", "signature-ids", "ids"],
+          "timeRange": "24h",
+          "maxResults": 100
+        },
+        {
+          "id": "suricata_alerts_by_signature",
+          "name": "Suricata Alert Signature Percentage",
+          "description": "Alert distribution by signature type",
+          "query": "'Log Source' = com.oraclecloud.logging.custom.Suricatalogs and 'Event Type' = alert | fields SuricataSignature, SuricataSignatureID, 'Event Type', -'Host Name (Server)', -Entity, -'Entity Type', -'Problem Priority', -Label, -'Log Source' | stats count as logrecords by SuricataSignature",
+          "category": "suricata_ids",
+          "tags": ["suricata", "alerts", "percentage"],
+          "timeRange": "24h",
+          "maxResults": 100
+        },
+        {
+          "id": "suricata_alerts_by_dest_ip",
+          "name": "Suricata Alert Destination IP Analysis",
+          "description": "Alert distribution by destination IP",
+          "query": "'Log Source' = com.oraclecloud.logging.custom.Suricatalogs and 'Event Type' = alert | fields SuricataSignature, SuricataSignatureID, 'Event Type', -'Host Name (Server)', -Entity, -'Entity Type', -'Problem Priority', -Label, -'Log Source' | stats count as logrecords by 'Destination IP'",
+          "category": "suricata_ids",
+          "tags": ["suricata", "alerts", "destination-ip"],
+          "timeRange": "24h",
+          "maxResults": 100
+        }
+      ]
+    },
+    "waf_protection": {
+      "name": "Web Application Firewall",
+      "description": "WAF protection rules and security analysis",
+      "queries": [
+        {
+          "id": "waf_protection_rules",
+          "name": "WAF Protection Rules Activity",
+          "description": "WAF protection rules triggered by client IP",
+          "query": "'Log Source' = 'OCI WAF Logs' and 'Request Protection Rule IDs' != null | stats count('Host IP Address (Client)') by 'Request Protection Rule IDs', 'Host IP Address (Client)'",
+          "category": "waf_protection",
+          "tags": ["waf", "protection", "rules"],
+          "timeRange": "24h",
+          "maxResults": 100
+        },
+        {
+          "id": "waf_protection_capabilities",
+          "name": "WAF Request Protection Capabilities",
+          "description": "Analysis of WAF protection capabilities with lookups",
+          "query": "'Log Source' = 'OCI WAF Logs' and 'Security Module' not like in ('%requestAccessControl%', '%responseAccessControl%', '%requestRateLimiting%', '%requestProtection%') and 'Security Module' != null and 'Request Protection Rule IDs Data' != null | rename 'Request Protection Rule IDs' as 'Request Protection Capabilities' | stats count by 'Request Protection Capabilities' | sort -Count | lookup table = 'Web Application Firewall Protection Capabilities' select Key as Key, Name, Description, Tags, _Version using 'Request Protection Capabilities' = 'Protection Capabilities' | fields Name, Key, Description, _Version | rename _Version as Version",
+          "category": "waf_protection",
+          "tags": ["waf", "capabilities", "lookup"],
+          "timeRange": "24h",
+          "maxResults": 100
+        }
+      ]
+    },
+    "windows_sysmon": {
+      "name": "Windows Sysmon Events",
+      "description": "Windows Sysmon event analysis and MITRE ATT&CK mapping",
+      "queries": [
+        {
+          "id": "sysmon_events_by_id",
+          "name": "Windows Sysmon Events by ID",
+          "description": "Sysmon events with MITRE lookup integration",
+          "query": "'Log Source' = 'Windows Sysmon Events' and 'Event ID' != null | stats count by 'Event ID' | sort -Count | lookup table = MITRE select 'Event ID' as 'Event ID', 'Event Name', Channel, 'Audit Category', 'OSSEM Id' using 'Event ID' | fields 'Event ID', 'Event Name', Channel, 'Audit Category', 'OSSEM Id'",
+          "category": "windows_sysmon",
+          "tags": ["sysmon", "events", "mitre", "lookup"],
+          "timeRange": "24h",
+          "maxResults": 100
+        },
+        {
+          "id": "sysmon_network_events",
+          "name": "Sysmon Network Events",
+          "description": "Sysmon network events excluding specific techniques",
+          "query": "'Log Source' = 'Windows Sysmon Events' and Technique_id != T1574.002 | fields Technique_id, 'Destination IP', 'Source IP' | timestats count as logrecords by 'Log Source'",
+          "category": "windows_sysmon",
+          "tags": ["sysmon", "network", "technique"],
+          "timeRange": "24h",
+          "maxResults": 100
+        }
+      ]
+    },
+    "mitre_attack": {
+      "name": "MITRE ATT&CK Analysis",
+      "description": "MITRE ATT&CK technique analysis and mapping",
+      "queries": [
+        {
+          "id": "mitre_technique_frequency",
+          "name": "MITRE Technique ID Frequency",
+          "description": "Analysis of MITRE technique usage by non-system users",
+          "query": "'Log Source' = 'Windows Sysmon Events' and User != 'NT AUTHORITY\\SYSTEM' | timestats count as logrecords by Technique_id",
+          "category": "mitre_attack",
+          "tags": ["mitre", "techniques", "frequency"],
+          "timeRange": "24h",
+          "maxResults": 100
+        }
+      ]
+    },
+    "comprehensive_security": {
+      "name": "Comprehensive Security Analysis",
+      "description": "Multi-source security analysis queries",
+      "queries": [
+        {
+          "id": "all_security_events",
+          "name": "All Security Events Overview",
+          "description": "Comprehensive security events across all sources",
+          "query": "'Security Result' != null | stats count by 'Log Source', 'Security Result' | sort -count",
+          "category": "comprehensive_security",
+          "tags": ["security", "overview", "multi-source"],
+          "timeRange": "24h",
+          "maxResults": 200
+        },
+        {
+          "id": "failed_authentications_all",
+          "name": "All Failed Authentication Events",
+          "description": "Failed authentication across all systems",
+          "query": "'Security Result' in (denied, failed, failure) | fields 'Log Source', 'Principal Name', 'IP Address', 'Security Result', Time | sort -Time",
+          "category": "comprehensive_security",
+          "tags": ["authentication", "failed", "security"],
+          "timeRange": "24h",
+          "maxResults": 500
+        },
+        {
+          "id": "ip_activity_analysis",
+          "name": "IP Address Activity Analysis",
+          "description": "Comprehensive IP address activity across all sources",
+          "query": "'IP Address' != null | stats count by 'IP Address', 'Log Source' | sort -count | head 50",
+          "category": "comprehensive_security",
+          "tags": ["ip-analysis", "activity", "overview"],
+          "timeRange": "24h",
+          "maxResults": 50
+        }
+      ]
+    }
+  }
+}

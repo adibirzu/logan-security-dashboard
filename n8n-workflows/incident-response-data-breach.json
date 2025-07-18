@@ -1,0 +1,350 @@
+{
+  "name": "Logan - Data Breach Response",
+  "nodes": [
+    {
+      "parameters": {},
+      "name": "Webhook - Data Breach Alert",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [240, 300],
+      "webhookId": "logan-data-breach-response"
+    },
+    {
+      "parameters": {
+        "url": "{{ $json.firewall_api }}/block",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "options": {
+          "bodyContentType": "json"
+        },
+        "bodyParametersJson": "={\n  \"source_ip\": \"{{ $json.source_ip }}\",\n  \"destination_ip\": \"{{ $json.external_ip }}\",\n  \"action\": \"deny\",\n  \"reason\": \"Data exfiltration detected - automatic block\",\n  \"duration\": \"24h\"\n}"
+      },
+      "name": "Block External Communication",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 3,
+      "position": [460, 200],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "firewall-api-key",
+          "name": "Firewall API Key"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "{{ $json.pagerduty_api }}/incidents",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "options": {
+          "bodyContentType": "json"
+        },
+        "bodyParametersJson": "={\n  \"incident\": {\n    \"type\": \"incident\",\n    \"title\": \"CRITICAL: Potential Data Breach Detected\",\n    \"service\": {\n      \"id\": \"{{ $json.pagerduty_service_id }}\",\n      \"type\": \"service_reference\"\n    },\n    \"urgency\": \"high\",\n    \"escalation_policy\": {\n      \"id\": \"{{ $json.data_breach_escalation_policy }}\",\n      \"type\": \"escalation_policy_reference\"\n    },\n    \"body\": {\n      \"type\": \"incident_body\",\n      \"details\": \"IMMEDIATE ATTENTION REQUIRED\\n\\nPotential data breach detected:\\n\\nIncident: {{ $json.incident_id }}\\nSource: {{ $json.source_ip }}\\nExternal IP: {{ $json.external_ip }}\\nData Volume: {{ $json.bytes_transferred }}\\nTime: {{ $json.detection_time }}\\n\\nAutomatic containment initiated.\"\n    }\n  }\n}"
+      },
+      "name": "Page Security Manager",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 3,
+      "position": [680, 200],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "pagerduty-api",
+          "name": "PagerDuty API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "channel": "C1234567890",
+        "text": "🚨 **CRITICAL DATA BREACH ALERT** 🚨\n\n**IMMEDIATE CONTAINMENT ACTIONS TAKEN**\n\n**Incident ID:** {{ $json.incident_id }}\n**Source Host:** {{ $json.source_hostname }} ({{ $json.source_ip }})\n**External IP:** {{ $json.external_ip }}\n**Data Transferred:** {{ $json.bytes_transferred }} bytes\n**Detection Time:** {{ $json.detection_time }}\n\n**🔒 AUTOMATED RESPONSE:**\n✅ External communication blocked\n✅ Security manager paged\n✅ Legal team notified\n⏳ Evidence collection in progress\n⏳ Creating incident war room\n\n**NEXT STEPS:**\n1. Join incident war room: #incident-{{ $json.incident_id }}\n2. Review data classification\n3. Assess breach scope\n4. Prepare regulatory notifications\n\n@here @security-team @legal-team",
+        "attachments": [],
+        "options": {}
+      },
+      "name": "Emergency SOC Alert",
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 1,
+      "position": [460, 400],
+      "credentials": {
+        "slackApi": {
+          "id": "slack-soc-bot",
+          "name": "Slack SOC Bot"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "channel": "C9876543210",
+        "text": "⚖️ **LEGAL NOTIFICATION - DATA BREACH** ⚖️\n\n**Incident ID:** {{ $json.incident_id }}\n**Detection Time:** {{ $json.detection_time }}\n**Affected System:** {{ $json.source_hostname }}\n**Data Volume:** {{ $json.bytes_transferred }} bytes\n**External Destination:** {{ $json.external_ip }}\n\n**LEGAL CONSIDERATIONS:**\n• Potential regulatory notification requirements\n• Customer notification obligations\n• Evidence preservation needs\n• External counsel engagement\n\n**ACTION REQUIRED:**\n1. Review incident details in Logan Dashboard\n2. Assess notification requirements (GDPR, CCPA, etc.)\n3. Prepare breach assessment template\n4. Coordinate with incident response team\n\n**Timeline:** Regulatory notifications may be required within 72 hours.\n\nIncident war room: #incident-{{ $json.incident_id }}",
+        "attachments": [],
+        "options": {}
+      },
+      "name": "Notify Legal Team",
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 1,
+      "position": [680, 400],
+      "credentials": {
+        "slackApi": {
+          "id": "slack-soc-bot",
+          "name": "Slack SOC Bot"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "{{ $json.slack_api }}/conversations.create",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "options": {
+          "bodyContentType": "json"
+        },
+        "bodyParametersJson": "={\n  \"name\": \"incident-{{ $json.incident_id }}\",\n  \"is_private\": false,\n  \"team_id\": \"{{ $json.slack_team_id }}\"\n}"
+      },
+      "name": "Create Incident Channel",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 3,
+      "position": [900, 300],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "slack-bot-token",
+          "name": "Slack Bot Token"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "{{ $json.slack_api }}/conversations.invite",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "options": {
+          "bodyContentType": "json"
+        },
+        "bodyParametersJson": "={\n  \"channel\": \"{{ $json.incident_channel_id }}\",\n  \"users\": \"{{ $json.incident_response_team_ids }}\"\n}"
+      },
+      "name": "Invite Response Team",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 3,
+      "position": [1120, 300],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "slack-bot-token",
+          "name": "Slack Bot Token"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "{{ $json.forensics_api }}/snapshot",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "options": {
+          "bodyContentType": "json"
+        },
+        "bodyParametersJson": "={\n  \"host_id\": \"{{ $json.source_host_id }}\",\n  \"incident_id\": \"{{ $json.incident_id }}\",\n  \"priority\": \"critical\",\n  \"evidence_types\": [\n    \"memory_dump\",\n    \"disk_image\",\n    \"network_capture\",\n    \"process_list\",\n    \"file_system_timeline\",\n    \"registry_snapshot\",\n    \"event_logs\"\n  ],\n  \"preserve_chain_of_custody\": true\n}"
+      },
+      "name": "Preserve Digital Evidence",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 3,
+      "position": [1340, 300],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "forensics-api",
+          "name": "Forensics API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "{{ $json.dlp_api }}/analyze",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "options": {
+          "bodyContentType": "json"
+        },
+        "bodyParametersJson": "={\n  \"transfer_id\": \"{{ $json.transfer_id }}\",\n  \"source_ip\": \"{{ $json.source_ip }}\",\n  \"destination_ip\": \"{{ $json.external_ip }}\",\n  \"bytes_transferred\": \"{{ $json.bytes_transferred }}\",\n  \"analysis_types\": [\n    \"data_classification\",\n    \"pii_detection\",\n    \"financial_data\",\n    \"intellectual_property\",\n    \"regulatory_content\"\n  ]\n}"
+      },
+      "name": "Analyze Data Content",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 3,
+      "position": [1560, 300],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "dlp-api-key",
+          "name": "DLP API Key"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "{{ $json.ticketing_api }}/incidents",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpBasicAuth",
+        "options": {
+          "bodyContentType": "json"
+        },
+        "bodyParametersJson": "={\n  \"title\": \"CRITICAL: Data Breach Investigation - {{ $json.incident_id }}\",\n  \"description\": \"**CRITICAL DATA BREACH INCIDENT**\\n\\n**INCIDENT DETAILS:**\\n- Incident ID: {{ $json.incident_id }}\\n- Detection Time: {{ $json.detection_time }}\\n- Source Host: {{ $json.source_hostname }} ({{ $json.source_ip }})\\n- External IP: {{ $json.external_ip }}\\n- Data Volume: {{ $json.bytes_transferred }} bytes\\n- Transfer Duration: {{ $json.transfer_duration }}\\n\\n**AUTOMATED RESPONSE ACTIONS:**\\n✅ External communication blocked\\n✅ Emergency notifications sent\\n✅ Digital evidence preservation initiated\\n✅ Incident war room created\\n✅ Response team assembled\\n\\n**IMMEDIATE PRIORITIES:**\\n1. Confirm breach scope and affected data\\n2. Assess regulatory notification requirements\\n3. Coordinate with legal and compliance teams\\n4. Begin damage assessment\\n5. Prepare customer communications\\n\\n**REGULATORY CONSIDERATIONS:**\\n- GDPR notification deadline: 72 hours\\n- State law requirements: Various\\n- Industry-specific regulations: TBD\\n\\n**EVIDENCE PRESERVATION:**\\n- Memory dump: In progress\\n- Disk imaging: In progress\\n- Network captures: Available\\n- Chain of custody: Maintained\\n\\n**NEXT STEPS:**\\n- Join incident channel: #incident-{{ $json.incident_id }}\\n- Review DLP analysis results\\n- Coordinate with external counsel if needed\\n- Begin stakeholder notifications\",\n  \"severity\": \"critical\",\n  \"category\": \"Data Breach\",\n  \"source\": \"DLP - Automated Detection\",\n  \"assignee\": \"incident-commander\",\n  \"tags\": [\"data-breach\", \"critical\", \"automated\", \"regulatory\"],\n  \"iocs\": [\n    \"{{ $json.external_ip }}\",\n    \"{{ $json.source_ip }}\",\n    \"{{ $json.transfer_pattern }}\"\n  ],\n  \"affected_systems\": [\"{{ $json.source_hostname }}\"],\n  \"compliance_flags\": [\"gdpr\", \"ccpa\", \"hipaa\", \"pci-dss\"]\n}"
+      },
+      "name": "Create Critical Incident",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 3,
+      "position": [1780, 300],
+      "credentials": {
+        "httpBasicAuth": {
+          "id": "ticketing-system",
+          "name": "Ticketing System Auth"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "{{ $json.logan_api }}/incidents/{{ $json.incident_id }}/update",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "options": {
+          "bodyContentType": "json"
+        },
+        "bodyParametersJson": "={\n  \"status\": \"contained\",\n  \"priority\": \"critical\",\n  \"timeline\": [\n    {\n      \"timestamp\": \"{{ $now }}\",\n      \"type\": \"containment\",\n      \"description\": \"Automatic containment workflow completed - external communication blocked\",\n      \"author\": \"n8n Data Breach Response\",\n      \"automated\": true\n    },\n    {\n      \"timestamp\": \"{{ $now }}\",\n      \"type\": \"escalation\",\n      \"description\": \"Emergency response team activated - security manager paged\",\n      \"author\": \"n8n Data Breach Response\",\n      \"automated\": true\n    }\n  ],\n  \"artifacts\": [\n    {\n      \"name\": \"Network Traffic Capture\",\n      \"type\": \"pcap\",\n      \"url\": \"{{ $json.network_capture_url }}\"\n    },\n    {\n      \"name\": \"DLP Analysis Report\",\n      \"type\": \"document\",\n      \"url\": \"{{ $json.dlp_analysis_url }}\"\n    },\n    {\n      \"name\": \"Digital Evidence Inventory\",\n      \"type\": \"document\",\n      \"url\": \"{{ $json.evidence_inventory_url }}\"\n    }\n  ],\n  \"compliance_requirements\": {\n    \"gdpr_notification_deadline\": \"{{ $json.gdpr_deadline }}\",\n    \"affected_data_types\": \"{{ $json.data_classification }}\",\n    \"regulatory_bodies\": [\"ICO\", \"State AG\"],\n    \"customer_notification_required\": true\n  }\n}"
+      },
+      "name": "Update Logan Incident",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 3,
+      "position": [2000, 300],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "logan-api-key",
+          "name": "Logan API Key"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Webhook - Data Breach Alert": {
+      "main": [
+        [
+          {
+            "node": "Block External Communication",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Emergency SOC Alert",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Block External Communication": {
+      "main": [
+        [
+          {
+            "node": "Page Security Manager",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Page Security Manager": {
+      "main": [
+        [
+          {
+            "node": "Create Incident Channel",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Emergency SOC Alert": {
+      "main": [
+        [
+          {
+            "node": "Notify Legal Team",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Notify Legal Team": {
+      "main": [
+        [
+          {
+            "node": "Create Incident Channel",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Incident Channel": {
+      "main": [
+        [
+          {
+            "node": "Invite Response Team",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Invite Response Team": {
+      "main": [
+        [
+          {
+            "node": "Preserve Digital Evidence",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Preserve Digital Evidence": {
+      "main": [
+        [
+          {
+            "node": "Analyze Data Content",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Analyze Data Content": {
+      "main": [
+        [
+          {
+            "node": "Create Critical Incident",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Critical Incident": {
+      "main": [
+        [
+          {
+            "node": "Update Logan Incident",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "timezone": "UTC"
+  },
+  "staticData": null,
+  "tags": [
+    {
+      "createdAt": "2024-07-18T12:00:00.000Z",
+      "updatedAt": "2024-07-18T12:00:00.000Z",
+      "id": "logan-security",
+      "name": "Logan Security"
+    }
+  ],
+  "meta": {
+    "instanceId": "logan-security-dashboard"
+  }
+}
