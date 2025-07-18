@@ -178,20 +178,35 @@ export default function SecurityOverviewPage() {
   const [activeTab, setActiveTab] = useState('overview')
   const [refreshing, setRefreshing] = useState(false)
   const [lastUpdate, setLastUpdate] = useState(new Date())
+  const [stats, setStats] = useState(null)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(null)
+
+  const fetchStats = async () => {
+    setLoading(true)
+    setError(null)
+    try {
+      const response = await fetch('/api/mcp/dashboard-stats')
+      if (!response.ok) {
+        throw new Error('Failed to fetch dashboard stats')
+      }
+      const data = await response.json()
+      setStats(data)
+      setLastUpdate(new Date(data.lastUpdate))
+    } catch (err) {
+      setError(err.message)
+    } finally {
+      setLoading(false)
+    }
+  }
 
   useEffect(() => {
-    // Simulate real-time updates
-    const interval = setInterval(() => {
-      setLastUpdate(new Date())
-    }, 30000)
-
-    return () => clearInterval(interval)
+    fetchStats()
   }, [])
 
   const handleRefresh = async () => {
     setRefreshing(true)
-    await new Promise(resolve => setTimeout(resolve, 1000))
-    setLastUpdate(new Date())
+    await fetchStats()
     setRefreshing(false)
   }
 
@@ -270,47 +285,49 @@ export default function SecurityOverviewPage() {
 
           <TabsContent value="overview" className="space-y-6">
             {/* Security Metrics */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-              {(securityMetrics || []).map((metric) => {
-                const Icon = metric.icon
-                return (
-                  <Card key={metric.title} className="relative">
-                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                      <CardTitle className="text-sm font-medium text-gray-600">
-                        {metric.title}
-                      </CardTitle>
-                      <Icon className={`h-5 w-5 ${
-                        metric.color === 'emerald' ? 'text-emerald-600' :
-                        metric.color === 'red' ? 'text-red-600' :
-                        metric.color === 'blue' ? 'text-blue-600' :
-                        'text-green-600'
-                      }`} />
-                    </CardHeader>
-                    <CardContent>
-                      <div className="flex items-baseline space-x-2">
-                        <div className="text-3xl font-bold">{metric.value}</div>
-                        <div className="text-sm text-gray-500">{metric.unit}</div>
-                      </div>
-                      <div className="flex items-center mt-2">
-                        <div className={`flex items-center text-sm ${
-                          metric.trend === 'up' 
-                            ? metric.color === 'red' ? 'text-red-600' : 'text-green-600'
-                            : 'text-green-600'
-                        }`}>
-                          {metric.trend === 'up' ? 
-                            <ArrowUpRight className="h-4 w-4" /> : 
-                            <ArrowDownRight className="h-4 w-4" />
-                          }
-                          <span className="ml-1">{metric.change}</span>
-                        </div>
-                        <span className="text-xs text-gray-500 ml-2">vs last week</span>
-                      </div>
-                      <p className="text-xs text-gray-500 mt-2">{metric.description}</p>
-                    </CardContent>
-                  </Card>
-                )
-              })}
-            </div>
+            {loading && <p>Loading security metrics...</p>}
+            {error && <p className="text-red-500">Error: {error}</p>}
+            {stats && (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <Card>
+                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                    <CardTitle className="text-sm font-medium text-gray-600">Total Events</CardTitle>
+                    <Activity className="h-5 w-5 text-blue-600" />
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-3xl font-bold">{stats.totalEvents}</div>
+                  </CardContent>
+                </Card>
+                <Card>
+                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                    <CardTitle className="text-sm font-medium text-gray-600">Critical Alerts</CardTitle>
+                    <AlertTriangle className="h-5 w-5 text-red-600" />
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-3xl font-bold">{stats.criticalAlerts}</div>
+                  </CardContent>
+                </Card>
+                <Card>
+                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                    <CardTitle className="text-sm font-medium text-gray-600">Failed Logins</CardTitle>
+                    <Users className="h-5 w-5 text-yellow-600" />
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-3xl font-bold">{stats.failedLogins}</div>
+                  </CardContent>
+                </Card>
+                <Card>
+                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                    <CardTitle className="text-sm font-medium text-gray-600">System Health</CardTitle>
+                    <Shield className="h-5 w-5 text-green-600" />
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-3xl font-bold">{stats.systemHealth}%</div>
+                    <Progress value={stats.systemHealth} className="w-full h-2 mt-2" />
+                  </CardContent>
+                </Card>
+              </div>
+            )}
 
             {/* Quick Actions */}
             <Card>
