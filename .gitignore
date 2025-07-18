@@ -1,7 +1,7 @@
 # See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
 
-# dependencies
-/node_modules
+# Dependencies
+/node_modules/
 /.pnp
 .pnp.*
 .yarn/*
@@ -9,49 +9,224 @@
 !.yarn/plugins
 !.yarn/releases
 !.yarn/versions
-
-# testing
-/coverage
-
-# next.js
-/.next/
-/out/
-
-# build cache (may contain embedded credentials)
-.next
-
-# production
-/build
-
-# misc
-.DS_Store
-*.pem
-
-# debug
+node_modules/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
+package-lock.json.bak
 
-# env files (can opt-in for committing if needed)
+# Testing
+/coverage/
+coverage/
+*.lcov
+.nyc_output/
+
+# Next.js
+/.next/
+/out/
+.next/
+next-env.d.ts
+
+# Production builds
+/build/
+/dist/
+build/
+dist/
+
+# Environment variables
 .env*
+!.env.example
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
 
-# log files
+# Runtime data
+pids
+*.pid
+*.seed
+*.pid.lock
+.grunt
+lib-cov
+
+# Logs
+logs/
 *.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
 
-# python cache
+# Python
 __pycache__/
 *.py[cod]
 *$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+.nox/
+.coverage
+.pytest_cache/
+pytest.ini
 
-# vercel
+# IDEs and editors
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.project
+.classpath
+.c9/
+*.launch
+.settings/
+*.sublime-workspace
+*.sublime-project
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+Desktop.ini
+
+# SSL certificates and keys
+*.pem
+*.key
+*.crt
+*.csr
+*.p12
+*.pfx
+
+# Temporary files
+*.tmp
+*.temp
+.tmp/
+temp/
+tmp/
+
+# Cache directories
+.cache/
+.npm/
+.eslintcache
+.stylelintcache
+.parcel-cache/
+
+# Optional npm cache directory
+.npm
+
+# Optional eslint cache
+.eslintcache
+
+# Microbundle cache
+.rpt2_cache/
+.rts2_cache_cjs/
+.rts2_cache_es/
+.rts2_cache_umd/
+
+# Optional REPL history
+.node_repl_history
+
+# Output of 'npm pack'
+*.tgz
+
+# Yarn Integrity file
+.yarn-integrity
+
+# dotenv environment variables file
+.env
+.env.test
+
+# parcel-bundler cache (https://parceljs.org/)
+.cache
+.parcel-cache
+
+# Next.js build output
+.next
+
+# Nuxt.js build / generate output
+.nuxt
+dist
+
+# Gatsby files
+.cache/
+public
+
+# Storybook build outputs
+.out
+.storybook-out
+
+# Rollup.js default build output
+dist/
+
+# Serverless directories
+.serverless/
+
+# FuseBox cache
+.fusebox/
+
+# DynamoDB Local files
+.dynamodb/
+
+# TernJS port file
+.tern-port
+
+# Stores VSCode versions used for testing VSCode extensions
+.vscode-test
+
+# yarn v2
+.yarn/cache
+.yarn/unplugged
+.yarn/build-state.yml
+.yarn/install-state.gz
+.pnp.*
+
+# TypeScript
+*.tsbuildinfo
+
+# Vercel
 .vercel
 
-# typescript
-*.tsbuildinfo
-next-env.d.ts
+# Docker
+.dockerignore
+docker-compose.override.yml
 
-# AI development files and session artifacts
+# Database
+*.db
+*.sqlite
+*.sqlite3
+*.db-journal
+
+# Backup files
+*.bak
+*.backup
+*.old
+*.orig
+
+# Development artifacts and session files
 .claude/
 .claude
 CLAUDE.md
@@ -60,3 +235,36 @@ CLAUDE.md
 *claude*.txt
 *ai-coding*.txt
 *ai_coding*.txt
+*ai-session*
+*development-session*
+*.chat.history*
+*.aider*
+.continue/
+.cursor/
+
+# Local development tools
+.history/
+.vscode-server/
+.devcontainer/
+.remote-sync.json
+
+# Package manager lock files (choose one)
+# yarn.lock
+# package-lock.json
+# pnpm-lock.yaml
+
+# Local configuration files
+local.json
+local.*.json
+config.local.*
+.localrc
+
+# Runtime logs and debugging
+debug.log
+error.log
+combined.log
+access.log
+
+# Memory dumps
+*.heapsnapshot
+*.cpuprofile
