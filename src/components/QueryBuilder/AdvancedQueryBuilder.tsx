@@ -158,7 +158,6 @@ export default function AdvancedQueryBuilder({ onExecute, onSave, savedQueries =
     bypassValidation: false,
     format: 'table'
   })
-  const [selectedTemplate, setSelectedTemplate] = useState('')
   const [queryName, setQueryName] = useState('')
   const [queryCategory, setQueryCategory] = useState('Custom')
   const [showSaveDialog, setShowSaveDialog] = useState(false)

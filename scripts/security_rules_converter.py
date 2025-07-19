@@ -9,7 +9,6 @@ import yaml
 import toml
 import re
 import os
-import sys
 from datetime import datetime
 from typing import Dict, List, Any, Optional
 from dataclasses import dataclass, asdict
@@ -436,7 +435,7 @@ class SecurityRulesConverter:
         
         print(f"Exported {len(rules)} rules to {output_file}")
 
-def main():
+if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Convert security rules to OCI Logging Analytics format')
     parser.add_argument('action', choices=['generate', 'convert', 'export'], help='Action to perform')
     parser.add_argument('--count', type=int, default=100, help='Number of rules to generate (for generate action)')
@@ -464,18 +463,16 @@ def main():
         print(f"Categories: {categories}")
         print(f"Sources: {sources}")
         
-        return {"success": True, "rules": [asdict(rule) for rule in rules]}
+        result = {"success": True, "rules": [asdict(rule) for rule in rules]}
     
     elif args.action == 'export':
         # For now, just generate sample rules
         rules = converter.generate_sample_rules(args.count)
         converter.export_rules_to_json(rules, args.output)
-        return {"success": True, "message": f"Exported {len(rules)} rules to {args.output}"}
+        result = {"success": True, "message": f"Exported {len(rules)} rules to {args.output}"}
     
     else:
         print("Convert action not yet implemented")
-        return {"success": False, "error": "Convert action not implemented"}
+        result = {"success": False, "error": "Convert action not implemented"}
 
-if __name__ == "__main__":
-    result = main()
     print(json.dumps(result))

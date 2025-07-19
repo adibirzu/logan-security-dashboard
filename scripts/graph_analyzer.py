@@ -4,27 +4,18 @@ Graph-based Security Analysis with Neo4j and NetworkX
 Dynamic visualization of security relationships and threat patterns
 """
 
-import json
-import sys
-import os
-import argparse
 import networkx as nx
-import plotly.graph_objects as go
-import plotly.express as px
 from datetime import datetime, timedelta
-from collections import defaultdict, Counter
+from collections import defaultdict
 from dataclasses import dataclass
 from typing import Dict, List, Tuple, Optional, Set, Any
 import ipaddress
-import hashlib
 
 # Try to import Neo4j (optional dependency)
 try:
     from neo4j import GraphDatabase
-    NEO4J_AVAILABLE = True
 except ImportError:
-    NEO4J_AVAILABLE = False
-    print("Neo4j driver not available. Install with: pip install neo4j", file=sys.stderr)
+    pass
 
 from logan_client import LoganClient
 from field_mapping import LogFieldMapper
@@ -53,9 +44,6 @@ class Neo4jGraphStore:
     """Neo4j integration for storing security relationships"""
     
     def __init__(self, uri: str = "bolt://localhost:7687", user: str = "neo4j", password: str = None):
-        if not NEO4J_AVAILABLE:
-            raise RuntimeError("Neo4j driver not available")
-        
         # Get password from environment variable if not provided
         if password is None:
             password = os.getenv("NEO4J_PASSWORD", "password")

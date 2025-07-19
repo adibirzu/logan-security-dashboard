@@ -178,9 +178,9 @@ export default function SecurityOverviewPage() {
   const [activeTab, setActiveTab] = useState('overview')
   const [refreshing, setRefreshing] = useState(false)
   const [lastUpdate, setLastUpdate] = useState(new Date())
-  const [stats, setStats] = useState<any>(null)
+  const [stats, setStats] = useState(null)
   const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
+  const [error, setError] = useState(null)
 
   const fetchStats = async () => {
     setLoading(true)
@@ -194,7 +194,7 @@ export default function SecurityOverviewPage() {
       setStats(data)
       setLastUpdate(new Date(data.lastUpdate))
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'An error occurred')
+      setError(err.message)
     } finally {
       setLoading(false)
     }

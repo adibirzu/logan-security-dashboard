@@ -15,7 +15,6 @@ import AdvancedQueryBuilder from '@/components/QueryBuilder/AdvancedQueryBuilder
 import { AdvancedVisualizationSuite } from '@/components/Visualization/AdvancedCharts'
 import InteractiveDashboard from '@/components/Dashboard/InteractiveDashboard'
 import QueryHistoryManager from '@/components/QueryHistory/QueryHistoryManager'
-import StreamingQueryExecutor from '@/components/QueryExecution/StreamingQueryExecutor'
 import AdvancedDataExporter from '@/components/DataExport/AdvancedDataExporter'
 import { SecurityRulesBrowser } from '@/components/SecurityRules/SecurityRulesBrowser'
 import { UnifiedTimeFilter, TimeRange, useTimeRange } from '@/components/TimeFilter/UnifiedTimeFilter'
@@ -32,10 +31,8 @@ import {
   Settings,
   PieChart,
   Activity,
-  Globe,
   AlertTriangle,
   Search,
-  Sparkles,
   TrendingUp,
   Layout,
   History,
@@ -120,7 +117,7 @@ export default function QueryBuilderPage() {
     preset: '240',
     minutes: 240
   })
-  const { getTimeRangeInMinutes, getDateRange, getOCITimeFilter } = useTimeRange(timeRange)
+  const { getTimeRangeInMinutes } = useTimeRange(timeRange)
   
   // Logan queries state
   const [loganQueries, setLoganQueries] = useState<Record<string, LoganCategory>>({})
