@@ -181,7 +181,7 @@
           "id": "mitre_technique_frequency",
           "name": "MITRE Technique ID Frequency",
           "description": "Analysis of MITRE technique usage by non-system users",
-          "query": "'Log Source' = 'Windows Sysmon Events' and not contains(User, 'SYSTEM') | timestats count as logrecords by Technique_id",
+          "query": "'Log Source' = 'Windows Sysmon Events' and User != 'NT AUTHORITY\\SYSTEM' | timestats count as logrecords by Technique_id",
           "category": "mitre_attack",
           "tags": ["mitre", "techniques", "frequency"],
           "timeRange": "24h",

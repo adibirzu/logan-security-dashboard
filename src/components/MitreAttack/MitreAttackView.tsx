@@ -153,7 +153,7 @@ export function MitreAttackView({ timeRangeMinutes }: MitreAttackViewProps) {
           </p>
         </div>
         <div className="flex items-center gap-2">
-          <Button onClick={() => fetchMitreLayer()} disabled={isLoading}>
+          <Button onClick={fetchMitreLayer} disabled={isLoading}>
             <RefreshCw className={`h-4 w-4 mr-2 ${isLoading ? 'animate-spin' : ''}`} />
             {isLoading ? 'Loading...' : 'Refresh'}
           </Button>

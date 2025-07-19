@@ -21,8 +21,8 @@ import {
 export default function RITADiscoveryPage() {
   const [timeRange, setTimeRange] = useState<TimeRange>({
     type: 'preset',
-    preset: '60',
-    minutes: 60
+    preset: '240',
+    minutes: 240
   });
   const [selectedIP, setSelectedIP] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState('overview');
@@ -58,112 +58,86 @@ export default function RITADiscoveryPage() {
         />
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid w-full grid-cols-2 lg:grid-cols-5 gap-1">
-          <TabsTrigger value="overview" className="flex items-center gap-1 text-xs sm:text-sm">
-            <BarChart3 className="w-3 h-3 sm:w-4 sm:h-4" />
-            <span className="hidden sm:inline">Overview</span>
-            <span className="sm:hidden">View</span>
+        <TabsList className="grid w-full grid-cols-5">
+          <TabsTrigger value="overview" className="flex items-center gap-2">
+            <BarChart3 className="w-4 h-4" />
+            Overview
           </TabsTrigger>
-          <TabsTrigger value="applications" className="flex items-center gap-1 text-xs sm:text-sm">
-            <Activity className="w-3 h-3 sm:w-4 sm:h-4" />
-            <span className="hidden sm:inline">Applications</span>
-            <span className="sm:hidden">Apps</span>
+          <TabsTrigger value="applications" className="flex items-center gap-2">
+            <Activity className="w-4 h-4" />
+            Applications
           </TabsTrigger>
-          <TabsTrigger value="communications" className="flex items-center gap-1 text-xs sm:text-sm">
-            <Globe className="w-3 h-3 sm:w-4 sm:h-4" />
-            <span className="hidden sm:inline">Communications</span>
-            <span className="sm:hidden">Comm</span>
+          <TabsTrigger value="communications" className="flex items-center gap-2">
+            <Globe className="w-4 h-4" />
+            Communications
           </TabsTrigger>
-          <TabsTrigger value="network-graph" className="flex items-center gap-1 text-xs sm:text-sm">
-            <Network className="w-3 h-3 sm:w-4 sm:h-4" />
-            <span className="hidden sm:inline">Network Graph</span>
-            <span className="sm:hidden">Graph</span>
+          <TabsTrigger value="network-graph" className="flex items-center gap-2">
+            <Network className="w-4 h-4" />
+            Network Graph
           </TabsTrigger>
-          <TabsTrigger value="ip-details" className="col-span-2 lg:col-span-1 flex items-center gap-1 text-xs sm:text-sm">
-            <Eye className="w-3 h-3 sm:w-4 sm:h-4" />
-            <span className="hidden sm:inline">IP Details</span>
-            <span className="sm:hidden">IPs</span>
+          <TabsTrigger value="ip-details" className="flex items-center gap-2">
+            <Eye className="w-4 h-4" />
+            IP Details
             {selectedIP && (
-              <span className="ml-1 text-xs bg-primary text-primary-foreground px-1 rounded truncate max-w-[80px]">
+              <span className="ml-1 text-xs bg-primary text-primary-foreground px-1 rounded">
                 {selectedIP}
               </span>
             )}
           </TabsTrigger>
         </TabsList>
 
-        <TabsContent value="overview" className="space-y-6 mt-6">
-          <div className="grid grid-cols-1 gap-6">
-            {/* Summary Stats */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <Card>
-                <CardHeader className="pb-3">
-                  <CardTitle className="text-sm font-medium flex items-center gap-2">
-                    <Activity className="w-4 h-4" />
-                    Applications
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">Loading...</div>
-                  <p className="text-xs text-muted-foreground">Unique applications</p>
-                </CardContent>
-              </Card>
-              
-              <Card>
-                <CardHeader className="pb-3">
-                  <CardTitle className="text-sm font-medium flex items-center gap-2">
-                    <Globe className="w-4 h-4" />
-                    Communications
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">Loading...</div>
-                  <p className="text-xs text-muted-foreground">Active connections</p>
-                </CardContent>
-              </Card>
-              
-              <Card>
-                <CardHeader className="pb-3">
-                  <CardTitle className="text-sm font-medium flex items-center gap-2">
-                    <Network className="w-4 h-4" />
-                    Network Nodes
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">Loading...</div>
-                  <p className="text-xs text-muted-foreground">Unique IPs</p>
-                </CardContent>
-              </Card>
-            </div>
-            
-            {/* Network Graph */}
-            <Card className="col-span-full">
+        <TabsContent value="overview" className="space-y-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <Network className="w-5 h-5" />
-                  Network Topology
+                  <Activity className="w-5 h-5" />
+                  Application Overview
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="h-[500px]">
-                  <NetworkGraphVisualization
-                    timeRange={getLegacyTimeRangeString()}
-                    onIpClick={handleIPClick}
-                  />
-                </div>
+                <RITAApplicationAnalysis />
+              </CardContent>
+            </Card>
+            
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Globe className="w-5 h-5" />
+                  Communication Overview
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <RITAIPCommunications />
               </CardContent>
             </Card>
           </div>
+
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Network className="w-5 h-5" />
+                Network Topology
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <NetworkGraphVisualization
+                timeRange={getLegacyTimeRangeString()}
+                onIpClick={handleIPClick}
+              />
+            </CardContent>
+          </Card>
         </TabsContent>
 
-        <TabsContent value="applications" className="mt-6">
-          <RITAApplicationAnalysis timeRange={getLegacyTimeRangeString()} />
+        <TabsContent value="applications">
+          <RITAApplicationAnalysis />
         </TabsContent>
 
-        <TabsContent value="communications" className="mt-6">
-          <RITAIPCommunications timeRange={getLegacyTimeRangeString()} />
+        <TabsContent value="communications">
+          <RITAIPCommunications />
         </TabsContent>
 
-        <TabsContent value="network-graph" className="mt-6">
+        <TabsContent value="network-graph">
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
@@ -172,17 +146,15 @@ export default function RITADiscoveryPage() {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="h-[600px]">
-                <NetworkGraphVisualization
-                  timeRange={getLegacyTimeRangeString()}
-                  onIpClick={handleIPClick}
-                />
-              </div>
+              <NetworkGraphVisualization
+                timeRange={getLegacyTimeRangeString()}
+                onIpClick={handleIPClick}
+              />
             </CardContent>
           </Card>
         </TabsContent>
 
-        <TabsContent value="ip-details" className="mt-6">
+        <TabsContent value="ip-details">
           {selectedIP ? (
             <IPLogViewer
               ip={selectedIP}
