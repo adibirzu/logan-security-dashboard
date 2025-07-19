@@ -17,7 +17,8 @@ import {
   HardDrive,
   Zap,
   AlertTriangle,
-  Users
+  Users,
+  HelpCircle
 } from 'lucide-react'
 
 import { ModuleDefinition, moduleRegistry } from './ModuleRegistry'
@@ -37,9 +38,52 @@ import StorageAnalyticsPage from '@/app/storage-analytics/page'
 import SecurityOverviewPage from '@/app/security-overview/page'
 import QueryLogsPage from '@/app/query-logs/page'
 import NetworkAnalysisPage from '@/app/network-analysis/page'
+import HelpPage from '@/app/help/page'
 
 // Core security modules
 const coreModules: ModuleDefinition[] = [
+  {
+    id: 'security-overview',
+    name: 'Security Overview',
+    version: '1.0.0',
+    description: 'Comprehensive security metrics dashboard and overview',
+    author: 'Logan Security Team',
+    dependencies: [],
+    category: 'security',
+    tags: ['security', 'overview', 'dashboard', 'metrics'],
+    permissions: ['security:read'],
+    icon: Shield,
+    routes: [
+      {
+        path: '/security-overview',
+        component: SecurityOverviewPage,
+        name: 'Security Overview',
+        description: 'Comprehensive security metrics and analysis',
+        icon: Shield
+      }
+    ],
+    api: {
+      baseUrl: '/api/dashboard',
+      endpoints: {
+        metrics: '/api/dashboard/metrics',
+        threats: '/api/dashboard/threats',
+        activities: '/api/dashboard/activities'
+      },
+      version: '1.0.0'
+    },
+    config: {
+      enabled: true,
+      settings: {
+        enableRealTimeUpdates: true,
+        refreshInterval: 30000
+      },
+      features: {
+        realTimeUpdates: true,
+        metricsDisplay: true,
+        threatAnalysis: true
+      }
+    }
+  },
   {
     id: 'query-builder',
     name: 'Query Builder',
@@ -397,7 +441,7 @@ const coreModules: ModuleDefinition[] = [
     description: 'Application settings and configuration management',
     author: 'Logan Security Team',
     dependencies: [],
-    category: 'security',
+    category: 'compliance',
     tags: ['settings', 'configuration', 'management'],
     permissions: ['settings:read', 'settings:write'],
     icon: Settings,
@@ -427,6 +471,44 @@ const coreModules: ModuleDefinition[] = [
         healthChecks: true,
         serviceMonitoring: true,
         configuration: true
+      }
+    }
+  },
+  {
+    id: 'help',
+    name: 'Help & Documentation',
+    version: '1.0.0',
+    description: 'Scoring methodology and system documentation',
+    author: 'Logan Security Team',
+    dependencies: [],
+    category: 'compliance',
+    tags: ['help', 'documentation', 'scoring', 'methodology'],
+    permissions: ['help:read'],
+    icon: HelpCircle,
+    routes: [
+      {
+        path: '/help',
+        component: HelpPage,
+        name: 'Help',
+        description: 'Scoring methodology and system documentation',
+        icon: HelpCircle
+      }
+    ],
+    api: {
+      baseUrl: '/help',
+      endpoints: {},
+      version: '1.0.0'
+    },
+    config: {
+      enabled: true,
+      settings: {
+        enableDocumentation: true,
+        enableMethodologyGuide: true
+      },
+      features: {
+        documentation: true,
+        methodologyGuide: true,
+        scoringExplanation: true
       }
     }
   }

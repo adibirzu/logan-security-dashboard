@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { Shield, Database, Activity, Search, ChartBar, Users, Settings, Home, Sparkles, HardDrive, Target } from 'lucide-react'
+import { Shield, Database, Activity, Search, ChartBar, Users, Settings, Home, Sparkles, HardDrive, Target, HelpCircle } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { SimpleThemeToggle } from '@/components/ui/theme-toggle'
 
@@ -42,6 +42,12 @@ const navigation = [
     href: '/threat-hunting',
     icon: Target,
     description: 'Threat intelligence, hunting playbooks, and IOC management'
+  },
+  {
+    name: 'Help',
+    href: '/help',
+    icon: HelpCircle,
+    description: 'Scoring methodology and system documentation'
   }
 ]
 

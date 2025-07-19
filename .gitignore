@@ -271,3 +271,16 @@ access.log
 
 # Internal documentation and change tracking
 changes.md
+DetectionRulesPlan.md
+
+# MCP Screenshot Server (separate project)
+mcp-screenshot-server/
+claude_desktop_config.json
+MCP_SCREENSHOT_SETUP.md
+SCREENSHOT_INDEX.md
+SCREENSHOT_GUIDE.md
+QUICK_REFERENCE.md
+
+# Screenshots and documentation artifacts
+
+#guide.html
