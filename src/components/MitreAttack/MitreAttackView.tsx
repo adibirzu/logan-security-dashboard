@@ -39,7 +39,7 @@ export function MitreAttackView({ timeRangeMinutes }: MitreAttackViewProps) {
   const [isSearching, setIsSearching] = useState(false);
   const [customSearchResults, setCustomSearchResults] = useState<any[] | null>(null);
 
-  const fetchMitreLayer = useCallback(async () => {
+  const fetchMitreLayer = useCallback(async (query = '*') => {
     setIsLoading(true);
     setError(null);
     setMitreLayer(null);
@@ -47,25 +47,14 @@ export function MitreAttackView({ timeRangeMinutes }: MitreAttackViewProps) {
     setRawTechniques([]);
 
     try {
-      // First, fetch some log data to map to MITRE ATT&CK techniques
-      const api = getMCPApi();
-      const logResponse = await api.searchLogs('*', { maxCount: 500, timeRange: timeRangeMinutes });
-
-      if (!logResponse.success || !logResponse.data || logResponse.data.length === 0) {
-        setError('No log data found for MITRE ATT&CK mapping in the selected time range.');
-        setIsLoading(false);
-        return;
-      }
-
-      // Then, send the log data to the API to generate the MITRE ATT&CK layer
-      const response = await fetch('/api/mitre/layer', {
+      const response = await fetch('/api/mitre/generate-layer', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          logDataArray: logResponse.data,
-          layerName: `OCI Security Events (${timeRangeMinutes}m)`
+          query,
+          timeRangeMinutes,
         }),
       });
 
@@ -132,86 +121,8 @@ export function MitreAttackView({ timeRangeMinutes }: MitreAttackViewProps) {
 
   const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!searchTerm.trim()) {
-      // If no search term, just fetch default data
-      fetchMitreLayer();
-      return;
-    }
-
-    setIsSearching(true);
-    setError(null);
-    setCustomSearchResults(null);
-
-    try {
-      // Use the custom search term to query logs
-      const api = getMCPApi();
-      const logResponse = await api.searchLogs(searchTerm, { 
-        maxCount: 500, 
-        timeRange: timeRangeMinutes 
-      });
-
-      if (!logResponse.success || !logResponse.data || logResponse.data.length === 0) {
-        setError(`No log data found for search term: "${searchTerm}"`);
-        setIsSearching(false);
-        return;
-      }
-
-      setCustomSearchResults(logResponse.data);
-
-      // Generate MITRE layer from search results
-      const response = await fetch('/api/mitre/layer', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          logDataArray: logResponse.data,
-          layerName: `Custom Search: ${searchTerm} (${timeRangeMinutes}m)`
-        }),
-      });
-
-      const result = await response.json();
-
-      if (response.ok && result.success) {
-        setMitreLayer(result.layer);
-        
-        // Convert layer techniques to TechniqueHitData format for the navigator
-        const hits: TechniqueHitData[] = (result.layer.techniques || []).map((tech: any) => ({
-          techniqueId: tech.techniqueID,
-          count: tech.score || 1,
-          color: tech.color || '#e5e7eb',
-          metadata: {
-            lastSeen: new Date().toISOString(),
-            severity: tech.score > 5 ? 'high' : tech.score > 2 ? 'medium' : 'low',
-            sources: ['Custom Search'],
-            searchTerm: searchTerm
-          }
-        }));
-        
-        setTechniqueHits(hits);
-        
-        // Create raw techniques for the techniques tab
-        const rawTechs = (result.layer.techniques || []).map((tech: any) => ({
-          id: tech.techniqueID,
-          name: getMitreTechniqueById(tech.techniqueID)?.name || 'Unknown Technique',
-          description: tech.comment || 'No description available',
-          count: tech.score || 1,
-          severity: tech.score > 5 ? 'high' : tech.score > 2 ? 'medium' : 'low',
-          lastSeen: new Date().toISOString(),
-          sources: ['Custom Search'],
-          searchTerm: searchTerm
-        }));
-        
-        setRawTechniques(rawTechs);
-      } else {
-        setError(result.error || 'Failed to generate MITRE ATT&CK layer from search results.');
-      }
-    } catch (err: any) {
-      console.error('Error searching and analyzing logs:', err);
-      setError(err.message || 'An unexpected error occurred while searching logs.');
-    } finally {
-      setIsSearching(false);
-    }
+    const query = searchTerm.trim() || '*';
+    fetchMitreLayer(query);
   };
 
   const handleTechniqueClick = (technique: MitreTechniqueDetail, hitData?: TechniqueHitData) => {

@@ -8,6 +8,7 @@ import json
 import sys
 import os
 import argparse
+from datetime import datetime
 from logan_client import LoganClient
 from query_mapper import QueryMapper
 from query_validator import QueryValidator
@@ -130,7 +131,7 @@ class SecurityAnalyzer:
                 "blocked_connections": 0,
                 "unique_sources": 0,
                 "active_monitoring": True,
-                "system_health": 95,
+                "system_health": 0,
                 "threat_level": "low",
                 "last_update": "",
                 "success": True
@@ -171,7 +172,8 @@ class SecurityAnalyzer:
                     critical_count += len(high_severity_events)
             
             stats["critical_alerts"] = critical_count
-            stats["resolved_threats"] = max(0, int(critical_count * 0.8))  # Assume 80% resolved
+            # TODO: Implement logic to calculate resolved threats from a reliable source
+            stats["resolved_threats"] = 0
             
             # Determine threat level
             if critical_count > 10:
@@ -184,7 +186,7 @@ class SecurityAnalyzer:
                 stats["threat_level"] = "low"
                 stats["system_health"] = 95
             
-            stats["last_update"] = "2025-01-10T12:30:00Z"
+            stats["last_update"] = datetime.utcnow().isoformat() + "Z"
             
             return stats
             

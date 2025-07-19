@@ -15,7 +15,6 @@ import AdvancedQueryBuilder from '@/components/QueryBuilder/AdvancedQueryBuilder
 import { AdvancedVisualizationSuite } from '@/components/Visualization/AdvancedCharts'
 import InteractiveDashboard from '@/components/Dashboard/InteractiveDashboard'
 import QueryHistoryManager from '@/components/QueryHistory/QueryHistoryManager'
-import StreamingQueryExecutor from '@/components/QueryExecution/StreamingQueryExecutor'
 import AdvancedDataExporter from '@/components/DataExport/AdvancedDataExporter'
 import { SecurityRulesBrowser } from '@/components/SecurityRules/SecurityRulesBrowser'
 import { UnifiedTimeFilter, TimeRange, useTimeRange } from '@/components/TimeFilter/UnifiedTimeFilter'
@@ -32,10 +31,8 @@ import {
   Settings,
   PieChart,
   Activity,
-  Globe,
   AlertTriangle,
   Search,
-  Sparkles,
   TrendingUp,
   Layout,
   History,
@@ -103,69 +100,6 @@ const generateMockData = (count = 1000) => {
   }))
 }
 
-// Mock query history data
-const mockQueryHistory = [
-  {
-    id: 'query-1',
-    query: "'Log Source' = 'Windows Security Events' and 'Security Result' = 'denied'",
-    executedAt: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
-    executionTime: 2.34,
-    resultCount: 156,
-    success: true,
-    timePeriod: 1440,
-    parameters: { maxResults: 100 },
-    isFavorite: true,
-    tags: ['security', 'windows', 'failed-auth'],
-    description: 'Failed Windows authentication attempts'
-  },
-  {
-    id: 'query-2',
-    query: "'IP Address' != null | stats count by 'IP Address' | sort count desc",
-    executedAt: new Date(Date.now() - 4 * 60 * 60 * 1000).toISOString(),
-    executionTime: 5.67,
-    resultCount: 234,
-    success: true,
-    timePeriod: 720,
-    parameters: { maxResults: 50 },
-    isFavorite: false,
-    tags: ['network', 'ip-analysis'],
-    description: 'Top IP addresses by activity'
-  }
-]
-
-// Mock saved queries
-const mockSavedQueries = [
-  {
-    id: 'saved-1',
-    name: 'Failed Login Analysis',
-    description: 'Comprehensive analysis of failed login attempts across all systems',
-    query: "'Log Source' in ('Windows Security Events', 'Linux Secure Logs') and 'Security Result' = 'denied'",
-    category: 'Security',
-    tags: ['authentication', 'security', 'monitoring'],
-    createdAt: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(),
-    lastUsed: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
-    usageCount: 15,
-    isFavorite: true,
-    isPublic: true,
-    author: 'Security Team',
-    parameters: { timePeriod: 1440, maxResults: 500 }
-  },
-  {
-    id: 'saved-2',
-    name: 'Network Traffic Analysis',
-    description: 'Monitor unusual network connection patterns',
-    query: "'Log Source' contains 'Network' | stats count by 'Source IP', 'Destination IP' | where count > 10",
-    category: 'Network',
-    tags: ['network', 'traffic', 'anomaly-detection'],
-    createdAt: new Date(Date.now() - 14 * 24 * 60 * 60 * 1000).toISOString(),
-    lastUsed: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(),
-    usageCount: 8,
-    isFavorite: false,
-    isPublic: false,
-    author: 'Network Team',
-    parameters: { timePeriod: 720, maxResults: 100 }
-  }
-]
 
 export default function QueryBuilderPage() {
   const [results, setResults] = useState<QueryResult[]>([])
@@ -183,7 +117,7 @@ export default function QueryBuilderPage() {
     preset: '240',
     minutes: 240
   })
-  const { getTimeRangeInMinutes, getDateRange, getOCITimeFilter } = useTimeRange(timeRange)
+  const { getTimeRangeInMinutes } = useTimeRange(timeRange)
   
   // Logan queries state
   const [loganQueries, setLoganQueries] = useState<Record<string, LoganCategory>>({})
@@ -192,8 +126,8 @@ export default function QueryBuilderPage() {
   
   // Advanced analytics state
   const [currentData, setCurrentData] = useState<Record<string, unknown>[]>([])
-  const [queryHistory, setQueryHistory] = useState<any[]>(mockQueryHistory)
-  const [savedQueries, setSavedQueries] = useState<any[]>(mockSavedQueries)
+  const [queryHistory, setQueryHistory] = useState<any[]>([])
+  const [savedQueries, setSavedQueries] = useState<any[]>([])
 
   // Load Logan working queries and initialize mock data on component mount
   useEffect(() => {
@@ -215,8 +149,40 @@ export default function QueryBuilderPage() {
         setLoadingQueries(false)
       }
     }
+
+    const loadQueryHistory = async () => {
+      try {
+        const response = await fetch('/api/mcp/query-history')
+        const data = await response.json()
+        if (data.success) {
+          setQueryHistory(data.data)
+        } else {
+          toast.error('Failed to load query history')
+        }
+      } catch (error) {
+        console.error('Error loading query history:', error)
+        toast.error('Failed to load query history')
+      }
+    }
+
+    const loadSavedQueries = async () => {
+      try {
+        const response = await fetch('/api/mcp/saved-queries')
+        const data = await response.json()
+        if (data.success) {
+          setSavedQueries(data.data)
+        } else {
+          toast.error('Failed to load saved queries')
+        }
+      } catch (error) {
+        console.error('Error loading saved queries:', error)
+        toast.error('Failed to load saved queries')
+      }
+    }
     
     loadLoganQueries()
+    loadQueryHistory()
+    loadSavedQueries()
     // Initialize mock data for advanced analytics
     setCurrentData(generateMockData(500))
   }, [])
@@ -282,7 +248,8 @@ export default function QueryBuilderPage() {
         
         toast.success(`Query executed successfully! Found ${queryResults.length} results.`)
       } else {
-        toast.error(data.error || 'Query execution failed')
+        const errorMessage = data.error || 'Query execution failed'
+        toast.error(errorMessage)
         setResults([])
         
         // Add failed query to history
@@ -293,7 +260,7 @@ export default function QueryBuilderPage() {
           executionTime: 0,
           resultCount: 0,
           success: false,
-          error: data.error || 'Query execution failed',
+          error: errorMessage,
           timePeriod: options.timePeriodMinutes || getTimeRangeInMinutes(),
           parameters: options,
           isFavorite: false,

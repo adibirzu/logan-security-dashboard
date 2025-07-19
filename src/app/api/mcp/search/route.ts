@@ -83,7 +83,16 @@ export async function POST(request: NextRequest) {
     }
 
     // Execute custom search using Python security analyzer
-    const result = await callPythonScript('security_analyzer.py', args)
+    let result;
+    try {
+      result = await callPythonScript('security_analyzer.py', args)
+    } catch (error) {
+      console.error('Python script execution error:', error)
+      return NextResponse.json({
+        success: false,
+        error: 'Failed to execute search query. The backend script may have crashed.'
+      }, { status: 500 })
+    }
 
     if (result.success) {
       // Transform raw query results into security events format
