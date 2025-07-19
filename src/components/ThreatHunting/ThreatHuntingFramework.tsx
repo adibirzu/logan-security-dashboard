@@ -276,6 +276,7 @@ interface HuntingSession {
 export default function ThreatHuntingFramework() {
   const [selectedMethodology, setSelectedMethodology] = useState<HuntingMethodology>(THREAT_HUNTING_METHODOLOGIES[0])
   const [activeSessions, setActiveSessions] = useState<HuntingSession[]>([])
+  const [activeTab, setActiveTab] = useState('methodologies')
   const [huntingMetrics, setHuntingMetrics] = useState({
     totalHunts: 12,
     activeHunts: 3,
@@ -283,6 +284,17 @@ export default function ThreatHuntingFramework() {
     avgDuration: 4.2,
     successRate: 67
   })
+
+  // Check for tab parameter in URL
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const urlParams = new URLSearchParams(window.location.search)
+      const tabParam = urlParams.get('tab')
+      if (tabParam && ['methodologies', 'active-sessions', 'playbooks', 'intelligence'].includes(tabParam)) {
+        setActiveTab(tabParam)
+      }
+    }
+  }, [])
 
   const startHuntingSession = (methodology: HuntingMethodology) => {
     const newSession: HuntingSession = {
@@ -409,7 +421,7 @@ export default function ThreatHuntingFramework() {
         </Card>
       </div>
 
-      <Tabs defaultValue="methodologies" className="space-y-6">
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
         <TabsList>
           <TabsTrigger value="methodologies">Hunting Methodologies</TabsTrigger>
           <TabsTrigger value="active-sessions">Active Sessions</TabsTrigger>

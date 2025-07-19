@@ -20,8 +20,7 @@ try:
         IndicatorSummary,
         IndicatorAttribute,
         SummarizeIndicatorsDetails,
-        IndicatorCountDimension,
-        IndicatorCountSortBy
+        IndicatorCountDimensions
     )
 except ImportError as e:
     print(json.dumps({
@@ -77,11 +76,13 @@ class OCIThreatIntelligence:
             
             # Search for the indicator
             details = SummarizeIndicatorsDetails(
-                compartment_id=compartment_id,
                 indicator_value=indicator_value
             )
             
-            response = self.client.summarize_indicators(details)
+            response = self.client.summarize_indicators(
+                compartment_id=compartment_id,
+                summarize_indicators_details=details
+            )
             
             # Process response
             indicators = response.data.items if response.data else []
@@ -179,14 +180,15 @@ class OCIThreatIntelligence:
             if not compartment_id:
                 compartment_id = self.config["tenancy"]
             
-            details = SummarizeIndicatorsDetails(
-                compartment_id=compartment_id
-            )
+            details = SummarizeIndicatorsDetails()
             
             if indicator_type:
                 details.indicator_type = indicator_type
             
-            response = self.client.summarize_indicators(details)
+            response = self.client.summarize_indicators(
+                compartment_id=compartment_id,
+                summarize_indicators_details=details
+            )
             
             return {
                 "success": True,

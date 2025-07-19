@@ -11,6 +11,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Separator } from '@/components/ui/separator'
 import { toast } from 'sonner'
+import IPLogViewer from './IPLogViewer'
 import {
   Globe,
   Shield,
@@ -194,6 +195,37 @@ export default function ThreatIntelligence() {
   const [ociConnectionStatus, setOciConnectionStatus] = useState<'unknown' | 'connected' | 'error'>('unknown')
   const [newIndicator, setNewIndicator] = useState('')
   const [newIndicatorType, setNewIndicatorType] = useState('ip')
+  const [activeTab, setActiveTab] = useState('iocs')
+  const [logViewerIP, setLogViewerIP] = useState<string | undefined>()
+
+  // Check for pre-filled search from threat analytics navigation
+  useEffect(() => {
+    const searchTerm = localStorage.getItem('threat-intel-search')
+    if (searchTerm) {
+      setSearchQuery(searchTerm)
+      setNewIndicator(searchTerm)
+      // Auto-detect IP vs domain
+      const isIP = /^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$/.test(searchTerm)
+      setNewIndicatorType(isIP ? 'ip' : 'domain')
+      localStorage.removeItem('threat-intel-search') // Clear after use
+      
+      // If it's an IP, navigate to logs tab and show IP logs
+      if (isIP) {
+        setActiveTab('logs')
+        setLogViewerIP(searchTerm)
+        
+        // Also check with OCI
+        setTimeout(() => {
+          checkIndicatorWithOCI(searchTerm, 'ip')
+        }, 1000)
+      } else {
+        // For domains, stay on IOCs tab and check with OCI
+        setTimeout(() => {
+          checkIndicatorWithOCI(searchTerm, 'domain')
+        }, 1000)
+      }
+    }
+  }, [])
 
   const getTypeIcon = (type: string) => {
     switch (type) {
@@ -471,11 +503,12 @@ export default function ThreatIntelligence() {
         </div>
       </div>
 
-      <Tabs defaultValue="iocs" className="space-y-6">
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
         <TabsList>
           <TabsTrigger value="iocs">IOCs & Indicators</TabsTrigger>
           <TabsTrigger value="actors">Threat Actors</TabsTrigger>
           <TabsTrigger value="campaigns">Campaigns</TabsTrigger>
+          <TabsTrigger value="logs">IP Log Analysis</TabsTrigger>
           <TabsTrigger value="feeds">Intel Feeds</TabsTrigger>
         </TabsList>
 
@@ -887,6 +920,10 @@ export default function ThreatIntelligence() {
               </Card>
             ))}
           </div>
+        </TabsContent>
+
+        <TabsContent value="logs" className="space-y-6">
+          <IPLogViewer ip={logViewerIP} />
         </TabsContent>
 
         <TabsContent value="feeds" className="space-y-6">

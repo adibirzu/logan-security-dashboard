@@ -268,3 +268,6 @@ access.log
 # Memory dumps
 *.heapsnapshot
 *.cpuprofile
+
+# Internal documentation and change tracking
+changes.md

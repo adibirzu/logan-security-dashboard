@@ -125,7 +125,8 @@ class VCNFlowAnalyzer:
             if not flows:
                 return {"success": False, "error": "No VCN flow data found"}
             
-            sys.stderr.write(f"VCN Analyzer: Processing {len(flows)} flow records\n")
+            # Log processing count to result instead of stderr
+            processing_info = f"Processing {len(flows)} flow records"
             
             # Parse flows into structured records
             flow_records = self._parse_flow_records(flows)
@@ -147,6 +148,7 @@ class VCNFlowAnalyzer:
                 "success": True,
                 "stats": stats,
                 "threats": all_threats,
+                "processing_info": processing_info,
                 "analysis_details": {
                     "beacons": len(beacons),
                     "long_connections": len(long_connections),

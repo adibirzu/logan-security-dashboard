@@ -138,6 +138,15 @@ class QueryMapper:
             "time_period_minutes": time_period_minutes
         }
 
+    def _escape_query_value(self, value):
+        """Escape special characters in query values for OCI Logging Analytics"""
+        if not isinstance(value, str):
+            value = str(value)
+        
+        # Escape backslashes first, then single quotes and double quotes
+        escaped = value.replace('\\', '\\\\').replace('"', '\\"').replace("'", "\\'")
+        return escaped
+
     def _get_time_filter(self, time_period_minutes):
         """Generate time filter for queries using timefilter command"""
         if time_period_minutes <= 0:
@@ -172,10 +181,11 @@ class QueryMapper:
         time_filter = self._get_time_filter(time_period_minutes)
         query_parts = [time_filter] if time_filter else []
 
-        # Create search conditions
+        # Create search conditions with proper escaping
         search_conditions = []
         for term in search_terms:
-            search_conditions.append(f'contains("Log Entry", "{term}") or contains("Message", "{term}")')
+            escaped_term = self._escape_query_value(term)
+            search_conditions.append(f'contains("Log Entry", "{escaped_term}") or contains("Message", "{escaped_term}")')
         
         if search_conditions:
             query_parts.append(f'* | where {" or ".join(search_conditions)}')

@@ -13,7 +13,7 @@
       {
         "id": "mitre_sysmon_technique_overview",
         "name": "MITRE Sysmon Technique Overview",
-        "query": "'Log Source' = 'Windows Sysmon Events' and User != 'NT AUTHORITY\\SYSTEM' and Technique_id != null | timestats count as logrecords by Technique_id | sort -logrecords",
+        "query": "'Log Source' = 'Windows Sysmon Events' and User != 'NT AUTHORITY\\\\SYSTEM' and Technique_id != null | timestats count as logrecords by Technique_id | sort -logrecords",
         "category": "mitre-attack",
         "status": "ENHANCED",
         "test_date": "2025-01-18",
@@ -32,7 +32,7 @@
       {
         "id": "mitre_credential_access_techniques",
         "name": "Credential Access Techniques",
-        "query": "'Log Source' = 'Windows Sysmon Events' and User != 'NT AUTHORITY\\SYSTEM' and (Technique_id like 'T1003*' or Technique_id like 'T1110*' or Technique_id like 'T1555*' or Technique_id like 'T1212*') | timestats count as events by Technique_id, User | sort -events",
+        "query": "'Log Source' = 'Windows Sysmon Events' and User != 'NT AUTHORITY\\\\SYSTEM' and (Technique_id like 'T1003*' or Technique_id like 'T1110*' or Technique_id like 'T1555*' or Technique_id like 'T1212*') | timestats count as events by Technique_id, User | sort -events",
         "category": "mitre-attack",
         "status": "ENHANCED",
         "test_date": "2025-01-18",
@@ -52,7 +52,7 @@
       {
         "id": "mitre_execution_techniques",
         "name": "Execution Techniques",
-        "query": "'Log Source' = 'Windows Sysmon Events' and User != 'NT AUTHORITY\\SYSTEM' and (Technique_id like 'T1059*' or Technique_id like 'T1203*' or Technique_id like 'T1204*' or Technique_id like 'T1047*') | timestats count as events by Technique_id, 'Process Name' | sort -events",
+        "query": "'Log Source' = 'Windows Sysmon Events' and User != 'NT AUTHORITY\\\\SYSTEM' and (Technique_id like 'T1059*' or Technique_id like 'T1203*' or Technique_id like 'T1204*' or Technique_id like 'T1047*') | timestats count as events by Technique_id, 'Process Name' | sort -events",
         "category": "mitre-attack",
         "status": "ENHANCED",
         "test_date": "2025-01-18",
@@ -72,7 +72,7 @@
       {
         "id": "mitre_persistence_techniques",
         "name": "Persistence Techniques",
-        "query": "'Log Source' = 'Windows Sysmon Events' and User != 'NT AUTHORITY\\SYSTEM' and (Technique_id like 'T1053*' or Technique_id like 'T1078*' or Technique_id like 'T1547*' or Technique_id like 'T1543*') | timestats count as events by Technique_id, 'Host Name' | sort -events",
+        "query": "'Log Source' = 'Windows Sysmon Events' and User != 'NT AUTHORITY\\\\SYSTEM' and (Technique_id like 'T1053*' or Technique_id like 'T1078*' or Technique_id like 'T1547*' or Technique_id like 'T1543*') | timestats count as events by Technique_id, 'Host Name' | sort -events",
         "category": "mitre-attack",
         "status": "ENHANCED",
         "test_date": "2025-01-18",
@@ -92,7 +92,7 @@
       {
         "id": "mitre_privilege_escalation_techniques",
         "name": "Privilege Escalation Techniques",
-        "query": "'Log Source' = 'Windows Sysmon Events' and User != 'NT AUTHORITY\\SYSTEM' and (Technique_id like 'T1548*' or Technique_id like 'T1055*' or Technique_id like 'T1134*' or Technique_id like 'T1068*') | timestats count as events by Technique_id, User, 'Process Name' | sort -events",
+        "query": "'Log Source' = 'Windows Sysmon Events' and User != 'NT AUTHORITY\\\\SYSTEM' and (Technique_id like 'T1548*' or Technique_id like 'T1055*' or Technique_id like 'T1134*' or Technique_id like 'T1068*') | timestats count as events by Technique_id, User, 'Process Name' | sort -events",
         "category": "mitre-attack",
         "status": "ENHANCED",
         "test_date": "2025-01-18",
@@ -112,7 +112,7 @@
       {
         "id": "mitre_defense_evasion_techniques",
         "name": "Defense Evasion Techniques",
-        "query": "'Log Source' = 'Windows Sysmon Events' and User != 'NT AUTHORITY\\SYSTEM' and (Technique_id like 'T1055*' or Technique_id like 'T1112*' or Technique_id like 'T1027*' or Technique_id like 'T1140*') | timestats count as events by Technique_id, 'Event ID' | sort -events",
+        "query": "'Log Source' = 'Windows Sysmon Events' and User != 'NT AUTHORITY\\\\SYSTEM' and (Technique_id like 'T1055*' or Technique_id like 'T1112*' or Technique_id like 'T1027*' or Technique_id like 'T1140*') | timestats count as events by Technique_id, 'Event ID' | sort -events",
         "category": "mitre-attack",
         "status": "ENHANCED",
         "test_date": "2025-01-18",
@@ -132,7 +132,7 @@
       {
         "id": "mitre_discovery_techniques",
         "name": "Discovery Techniques",
-        "query": "'Log Source' = 'Windows Sysmon Events' and User != 'NT AUTHORITY\\SYSTEM' and (Technique_id like 'T1082*' or Technique_id like 'T1083*' or Technique_id like 'T1087*' or Technique_id like 'T1046*') | timestats count as events by Technique_id, 'Command Line' | sort -events",
+        "query": "'Log Source' = 'Windows Sysmon Events' and User != 'NT AUTHORITY\\\\SYSTEM' and (Technique_id like 'T1082*' or Technique_id like 'T1083*' or Technique_id like 'T1087*' or Technique_id like 'T1046*') | timestats count as events by Technique_id, 'Command Line' | sort -events",
         "category": "mitre-attack",
         "status": "ENHANCED",
         "test_date": "2025-01-18",
@@ -152,7 +152,7 @@
       {
         "id": "mitre_lateral_movement_techniques",
         "name": "Lateral Movement Techniques",
-        "query": "'Log Source' = 'Windows Sysmon Events' and User != 'NT AUTHORITY\\SYSTEM' and (Technique_id like 'T1021*' or Technique_id like 'T1570*' or Technique_id like 'T1550*') | timestats count as events by Technique_id, 'Source IP', 'Destination IP' | sort -events",
+        "query": "'Log Source' = 'Windows Sysmon Events' and User != 'NT AUTHORITY\\\\SYSTEM' and (Technique_id like 'T1021*' or Technique_id like 'T1570*' or Technique_id like 'T1550*') | timestats count as events by Technique_id, 'Source IP', 'Destination IP' | sort -events",
         "category": "mitre-attack",
         "status": "ENHANCED",
         "test_date": "2025-01-18",
@@ -172,7 +172,7 @@
       {
         "id": "mitre_command_control_techniques",
         "name": "Command and Control Techniques",
-        "query": "'Log Source' = 'Windows Sysmon Events' and User != 'NT AUTHORITY\\SYSTEM' and (Technique_id like 'T1071*' or Technique_id like 'T1090*' or Technique_id like 'T1095*' or Technique_id like 'T1573*') | timestats count as events by Technique_id, 'Destination IP', 'Destination Port' | sort -events",
+        "query": "'Log Source' = 'Windows Sysmon Events' and User != 'NT AUTHORITY\\\\SYSTEM' and (Technique_id like 'T1071*' or Technique_id like 'T1090*' or Technique_id like 'T1095*' or Technique_id like 'T1573*') | timestats count as events by Technique_id, 'Destination IP', 'Destination Port' | sort -events",
         "category": "mitre-attack",
         "status": "ENHANCED",
         "test_date": "2025-01-18",
@@ -192,7 +192,7 @@
       {
         "id": "mitre_technique_timeline",
         "name": "MITRE Technique Timeline",
-        "query": "'Log Source' = 'Windows Sysmon Events' and User != 'NT AUTHORITY\\SYSTEM' and Technique_id != null | link span=1hour Time | stats count as events by Time, Technique_id | sort Time",
+        "query": "'Log Source' = 'Windows Sysmon Events' and User != 'NT AUTHORITY\\\\SYSTEM' and Technique_id != null | link span=1hour Time | stats count as events by Time, Technique_id | sort Time",
         "category": "mitre-attack",
         "status": "ENHANCED",
         "test_date": "2025-01-18",
@@ -211,7 +211,7 @@
       {
         "id": "mitre_high_severity_techniques",
         "name": "High Severity MITRE Techniques",
-        "query": "'Log Source' = 'Windows Sysmon Events' and User != 'NT AUTHORITY\\SYSTEM' and Technique_id != null | timestats count as events by Technique_id | where events >= 50 | sort -events",
+        "query": "'Log Source' = 'Windows Sysmon Events' and User != 'NT AUTHORITY\\\\SYSTEM' and Technique_id != null | timestats count as events by Technique_id | where events >= 50 | sort -events",
         "category": "mitre-attack",
         "status": "ENHANCED",
         "test_date": "2025-01-18",
@@ -230,7 +230,7 @@
       {
         "id": "mitre_user_technique_correlation",
         "name": "User-Technique Correlation",
-        "query": "'Log Source' = 'Windows Sysmon Events' and User != 'NT AUTHORITY\\SYSTEM' and Technique_id != null | stats count as events, dc(Technique_id) as unique_techniques by User | where unique_techniques >= 5 | sort -unique_techniques",
+        "query": "'Log Source' = 'Windows Sysmon Events' and User != 'NT AUTHORITY\\\\SYSTEM' and Technique_id != null | stats count as events, dc(Technique_id) as unique_techniques by User | where unique_techniques >= 5 | sort -unique_techniques",
         "category": "mitre-attack",
         "status": "ENHANCED",
         "test_date": "2025-01-18",
