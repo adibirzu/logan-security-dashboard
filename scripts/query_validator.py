@@ -42,7 +42,8 @@ class QueryValidator:
             'action_filter': "'Log Source' in ('OCI VCN Flow Unified Schema Logs') and Action in ('drop', 'reject') | head 10",
             'simple_stats': "'Log Source' in ('OCI VCN Flow Unified Schema Logs') | stats count by Action | head 10",
             'source_ip_stats': "'Log Source' in ('OCI VCN Flow Unified Schema Logs') | stats count by SourceIP | sort -count | head 10",
-            'action_stats': "'Log Source' in ('OCI VCN Flow Unified Schema Logs') and Action in ('drop', 'reject') | stats count by Action | head 10"
+            'action_stats': "'Log Source' in ('OCI VCN Flow Unified Schema Logs') and Action in ('drop', 'reject') | stats count by Action | head 10",
+            'timestats': "* | timestats count by 'Log Source' span=1h"
         }
     
     def validate_and_fix_query(self, query):
@@ -262,7 +263,9 @@ class QueryValidator:
     
     def _suggest_alternative(self, query):
         """Suggest alternative working queries"""
-        if "VCN" in query or "Flow" in query or "network" in query.lower():
+        if "timestats" in query.lower():
+            return self.working_patterns['timestats']
+        elif "VCN" in query or "Flow" in query or "network" in query.lower():
             return self.working_patterns['vcn_flow_logs']
         elif "audit" in query.lower() or "event" in query.lower():
             return self.working_patterns['audit_logs']
