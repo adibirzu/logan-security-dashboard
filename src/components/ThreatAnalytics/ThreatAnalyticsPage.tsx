@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
+import { useRouter } from 'next/navigation'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Badge } from '@/components/ui/badge'
@@ -80,6 +81,7 @@ const THREAT_TYPE_LABELS = {
 }
 
 export default function ThreatAnalyticsPage() {
+  const router = useRouter()
   const [threats, setThreats] = useState<ThreatAnalysis[]>([])
   const [stats, setStats] = useState<ThreatStats | null>(null)
   const [loading, setLoading] = useState(false)
@@ -162,6 +164,24 @@ export default function ThreatAnalyticsPage() {
     if (score >= 50) return 'text-yellow-600'
     return 'text-blue-600'
   }
+
+  // Navigate to threat intelligence with IP pre-filled
+  const navigateToThreatIntelligence = (ip: string) => {
+    // Store the IP in localStorage for the threat intelligence page to pick up
+    localStorage.setItem('threat-intel-search', ip)
+    router.push('/threat-hunting?tab=intelligence')
+  }
+
+  // Component to render clickable IP addresses
+  const ClickableIP = ({ ip }: { ip: string }) => (
+    <button
+      onClick={() => navigateToThreatIntelligence(ip)}
+      className="text-blue-600 hover:text-blue-800 hover:underline font-medium cursor-pointer"
+      title={`Search ${ip} in threat intelligence`}
+    >
+      {ip}
+    </button>
+  )
 
   const filteredThreats = (threats || []).filter(threat => {
     if (!threat) return false
@@ -368,8 +388,8 @@ export default function ThreatAnalyticsPage() {
                               </div>
                               <div className="text-sm text-muted-foreground space-y-1">
                                 <div className="flex items-center gap-4">
-                                  <span>Source: {threat.source_ip}</span>
-                                  <span>Destination: {threat.destination_ip}</span>
+                                  <span>Source: <ClickableIP ip={threat.source_ip} /></span>
+                                  <span>Destination: <ClickableIP ip={threat.destination_ip} /></span>
                                   {threat.destination_host && (
                                     <span>Host: {threat.destination_host}</span>
                                   )}

@@ -21,7 +21,7 @@ async function callPythonScript(scriptName: string, args: string[] = []) {
         LOGAN_REGION: process.env.NEXT_PUBLIC_LOGAN_REGION || 'eu-frankfurt-1',
         LOGAN_COMPARTMENT_ID: process.env.NEXT_PUBLIC_LOGAN_COMPARTMENT_ID || '',
       },
-      timeout: 45000 // 45 second timeout for threat analysis
+      timeout: 120000 // 2 minute timeout for threat analysis
     })
     
     if (stderr) {

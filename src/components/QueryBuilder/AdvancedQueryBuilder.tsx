@@ -26,6 +26,7 @@ import {
   Calendar,
   Database
 } from 'lucide-react'
+import { escapeQueryValue, createStringLiteral, createContainsCall } from '@/lib/utils/query-escaping'
 
 interface QueryCondition {
   id: string
@@ -116,9 +117,9 @@ const TIME_PERIODS = [
 const QUERY_TEMPLATES = [
   {
     name: "Failed Logins",
-    category: "Security",
+    category: "Security", 
     description: "Find failed login attempts",
-    query: "'Log Source' in ('Windows Security Events', 'Linux Secure Logs') and 'Security Result' = denied"
+    query: "'Log Source' in ('Windows Security Events', 'Linux Secure Logs') and 'Security Result' = 'denied'"
   },
   {
     name: "High Risk IPs",
@@ -161,6 +162,7 @@ export default function AdvancedQueryBuilder({ onExecute, onSave, savedQueries =
   const [queryName, setQueryName] = useState('')
   const [queryCategory, setQueryCategory] = useState('Custom')
   const [showSaveDialog, setShowSaveDialog] = useState(false)
+  const [selectedTemplate, setSelectedTemplate] = useState('')
 
   const addCondition = useCallback(() => {
     const newCondition: QueryCondition = {
@@ -188,6 +190,7 @@ export default function AdvancedQueryBuilder({ onExecute, onSave, savedQueries =
     return field?.type || 'string'
   }
 
+
   const buildQueryFromConditions = useCallback(() => {
     if (conditions.length === 0 || !conditions[0].field) return ''
 
@@ -206,14 +209,14 @@ export default function AdvancedQueryBuilder({ onExecute, onSave, savedQueries =
 
       // Handle different value types and operators
       if (fieldType === 'string' && !condition.operator.includes('contains')) {
-        valueStr = `'${condition.value}'`
+        valueStr = createStringLiteral(condition.value)
       } else if (condition.operator === 'in' || condition.operator === '!in') {
-        const values = condition.value.split(',').map(v => `'${v.trim()}'`).join(', ')
+        const values = condition.value.split(',').map(v => createStringLiteral(v.trim())).join(', ')
         valueStr = `(${values})`
       }
 
       if (condition.operator.includes('contains')) {
-        conditionStr += `${condition.field} ${condition.operator}('${condition.value}')`
+        conditionStr += createContainsCall(condition.field, condition.value)
       } else {
         conditionStr += `${condition.field} ${condition.operator} ${valueStr}`
       }

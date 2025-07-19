@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { Shield, Database, Activity, Search, ChartBar, Users, Settings, Home, Sparkles, HardDrive } from 'lucide-react'
+import { Shield, Database, Activity, Search, ChartBar, Users, Settings, Home, Sparkles, HardDrive, Target } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { SimpleThemeToggle } from '@/components/ui/theme-toggle'
 
@@ -38,10 +38,10 @@ const navigation = [
     description: 'OCI Logging Analytics storage usage monitoring and analysis'
   },
   {
-    name: 'Settings',
-    href: '/settings',
-    icon: Settings,
-    description: 'System configuration and service status monitoring'
+    name: 'Threat Hunting',
+    href: '/threat-hunting',
+    icon: Target,
+    description: 'Threat intelligence, hunting playbooks, and IOC management'
   }
 ]
 
@@ -94,8 +94,21 @@ export function Navigation({ className }: NavigationProps) {
             </div>
           </div>
 
-          {/* Theme Toggle */}
-          <div className="flex items-center">
+          {/* Settings and Theme Toggle */}
+          <div className="flex items-center gap-2">
+            <Link
+              href="/settings"
+              className={cn(
+                'p-2 rounded-md text-sm font-medium transition-colors flex items-center gap-2',
+                pathname === '/settings'
+                  ? 'bg-primary text-primary-foreground'
+                  : 'text-muted-foreground hover:text-foreground hover:bg-accent'
+              )}
+              title="System configuration and service status monitoring"
+            >
+              <Settings className="h-4 w-4" />
+              <span className="hidden lg:inline">Settings</span>
+            </Link>
             <SimpleThemeToggle />
           </div>
         </div>
@@ -126,6 +139,25 @@ export function Navigation({ className }: NavigationProps) {
                 </Link>
               )
             })}
+            
+            {/* Settings in Mobile Navigation */}
+            <Link
+              href="/settings"
+              className={cn(
+                'block px-3 py-2 rounded-md text-base font-medium transition-colors',
+                pathname === '/settings'
+                  ? 'bg-primary text-primary-foreground'
+                  : 'text-muted-foreground hover:text-foreground hover:bg-accent'
+              )}
+            >
+              <div className="flex items-center gap-2">
+                <Settings className="h-4 w-4" />
+                Settings
+              </div>
+              <p className="text-xs text-muted-foreground mt-1">
+                System configuration and service status monitoring
+              </p>
+            </Link>
           </div>
         </div>
       </div>

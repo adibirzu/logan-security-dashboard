@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { spawn } from 'child_process'
+import { exec } from 'child_process'
+import { promisify } from 'util'
 import path from 'path'
+
+const execAsync = promisify(exec)
 
 interface IndicatorRequest {
   action: 'check' | 'batch' | 'stats' | 'submit'
@@ -42,34 +45,34 @@ interface BatchResult {
   indicators: IndicatorResult[]
 }
 
-function executeOCIThreatIntel(args: string[]): Promise<string> {
-  return new Promise((resolve, reject) => {
+async function executeOCIThreatIntel(args: string[]): Promise<string> {
+  try {
     const scriptPath = path.join(process.cwd(), 'scripts', 'oci_threat_intel.py')
-    const pythonProcess = spawn('python3', [scriptPath, ...args])
     
-    let stdout = ''
-    let stderr = ''
-    
-    pythonProcess.stdout.on('data', (data) => {
-      stdout += data.toString()
+    const escapedArgs = args.map(arg => {
+      return `'${arg.replace(/'/g, "\\\\'")}'`
     })
     
-    pythonProcess.stderr.on('data', (data) => {
-      stderr += data.toString()
+    const command = `python3 "${scriptPath}" ${escapedArgs.join(' ')}`
+    
+    const { stdout, stderr } = await execAsync(command, {
+      env: {
+        ...process.env,
+        LOGAN_REGION: process.env.NEXT_PUBLIC_LOGAN_REGION || 'eu-frankfurt-1',
+        LOGAN_COMPARTMENT_ID: process.env.NEXT_PUBLIC_LOGAN_COMPARTMENT_ID || '',
+      },
+      timeout: 30000 // 30 second timeout for threat intel queries
     })
     
-    pythonProcess.on('close', (code) => {
-      if (code === 0) {
-        resolve(stdout)
-      } else {
-        reject(new Error(`Python script failed with code ${code}: ${stderr}`))
-      }
-    })
+    if (stderr) {
+      console.warn('OCI Threat Intel script warning:', stderr)
+    }
     
-    pythonProcess.on('error', (error) => {
-      reject(new Error(`Failed to start Python script: ${error.message}`))
-    })
-  })
+    return stdout
+  } catch (error) {
+    console.error('OCI Threat Intel script error:', error)
+    throw error
+  }
 }
 
 export async function POST(request: NextRequest) {
