@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useCallback } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -198,35 +198,6 @@ export default function ThreatIntelligence() {
   const [activeTab, setActiveTab] = useState('iocs')
   const [logViewerIP, setLogViewerIP] = useState<string | undefined>()
 
-  // Check for pre-filled search from threat analytics navigation
-  useEffect(() => {
-    const searchTerm = localStorage.getItem('threat-intel-search')
-    if (searchTerm) {
-      setSearchQuery(searchTerm)
-      setNewIndicator(searchTerm)
-      // Auto-detect IP vs domain
-      const isIP = /^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$/.test(searchTerm)
-      setNewIndicatorType(isIP ? 'ip' : 'domain')
-      localStorage.removeItem('threat-intel-search') // Clear after use
-      
-      // If it's an IP, navigate to logs tab and show IP logs
-      if (isIP) {
-        setActiveTab('logs')
-        setLogViewerIP(searchTerm)
-        
-        // Also check with OCI
-        setTimeout(() => {
-          checkIndicatorWithOCI(searchTerm, 'ip')
-        }, 1000)
-      } else {
-        // For domains, stay on IOCs tab and check with OCI
-        setTimeout(() => {
-          checkIndicatorWithOCI(searchTerm, 'domain')
-        }, 1000)
-      }
-    }
-  }, [])
-
   const getTypeIcon = (type: string) => {
     switch (type) {
       case 'ip': return <Wifi className="h-4 w-4" />
@@ -289,7 +260,7 @@ export default function ThreatIntelligence() {
   }
 
   // Check single indicator with OCI
-  const checkIndicatorWithOCI = async (indicator: string, type?: string) => {
+  const checkIndicatorWithOCI = useCallback(async (indicator: string, type?: string) => {
     try {
       setLoading(true)
       const response = await fetch('/api/threat-intelligence', {
@@ -361,7 +332,36 @@ export default function ThreatIntelligence() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [threatIntel])
+
+  // Check for pre-filled search from threat analytics navigation
+  useEffect(() => {
+    const searchTerm = localStorage.getItem('threat-intel-search')
+    if (searchTerm) {
+      setSearchQuery(searchTerm)
+      setNewIndicator(searchTerm)
+      // Auto-detect IP vs domain
+      const isIP = /^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$/.test(searchTerm)
+      setNewIndicatorType(isIP ? 'ip' : 'domain')
+      localStorage.removeItem('threat-intel-search') // Clear after use
+      
+      // If it's an IP, navigate to logs tab and show IP logs
+      if (isIP) {
+        setActiveTab('logs')
+        setLogViewerIP(searchTerm)
+        
+        // Also check with OCI
+        setTimeout(() => {
+          checkIndicatorWithOCI(searchTerm, 'ip')
+        }, 1000)
+      } else {
+        // For domains, stay on IOCs tab and check with OCI
+        setTimeout(() => {
+          checkIndicatorWithOCI(searchTerm, 'domain')
+        }, 1000)
+      }
+    }
+  }, [checkIndicatorWithOCI])
 
   // Batch check multiple indicators
   const batchCheckWithOCI = async () => {

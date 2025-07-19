@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useCallback } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -8,8 +8,6 @@ import { Progress } from '@/components/ui/progress'
 import { 
   Shield, 
   AlertTriangle, 
-  TrendingUp, 
-  TrendingDown,
   Activity, 
   Users, 
   Server, 
@@ -18,165 +16,165 @@ import {
   Zap,
   Clock,
   CheckCircle,
-  XCircle,
-  Wifi,
   Database,
   BarChart3,
-  PieChart,
   Target,
   Network,
-  FileText,
   Settings,
   RefreshCw,
-  ExternalLink,
   ArrowUpRight,
   ArrowDownRight,
-  Minus
+  Minus,
+  Loader2,
+  HelpCircle
 } from 'lucide-react'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 
-// Security Metrics Cards
-const securityMetrics = [
+// Icon mapping for dynamic icons
+const iconMap = {
+  AlertTriangle,
+  Users,
+  Network,
+  CheckCircle,
+  Activity,
+  Settings
+}
+
+// Types for data structures
+interface SecurityMetric {
+  value: number
+  change: string
+  trend: string
+}
+
+interface SecurityMetrics {
+  securityScore: SecurityMetric
+  activeThreats: SecurityMetric
+  riskEvents: SecurityMetric
+  compliance: SecurityMetric
+}
+
+interface SystemStatusItem {
+  name: string
+  status: string
+  latency: string
+  uptime: string
+}
+
+interface Activity {
+  id: number
+  type: string
+  title: string
+  description: string
+  time: string
+  severity: string
+  icon: string
+}
+
+interface ThreatSource {
+  country: string
+  count: number
+  percentage: number
+}
+
+// Static metrics configuration
+const metricsConfig = [
   {
+    key: 'securityScore' as keyof SecurityMetrics,
     title: 'Security Score',
-    value: '94',
     unit: '/100',
-    change: '+2.1%',
-    trend: 'up',
     icon: Shield,
     color: 'emerald',
     description: 'Overall security posture'
   },
   {
+    key: 'activeThreats' as keyof SecurityMetrics,
     title: 'Active Threats',
-    value: '12',
     unit: '',
-    change: '-15%',
-    trend: 'down',
     icon: AlertTriangle,
     color: 'red',
     description: 'Detected security threats'
   },
   {
+    key: 'riskEvents' as keyof SecurityMetrics,
     title: 'Risk Events',
-    value: '247',
     unit: '',
-    change: '+5.2%',
-    trend: 'up',
     icon: Activity,
     color: 'orange',
     description: 'Risk events this week'
   },
   {
+    key: 'compliance' as keyof SecurityMetrics,
     title: 'Compliance',
-    value: '98.7',
     unit: '%',
-    change: '+0.3%',
-    trend: 'up',
     icon: CheckCircle,
     color: 'blue',
     description: 'Compliance coverage'
   }
 ]
 
-// System Status Items
-const systemStatus = [
-  {
-    name: 'OCI Logging Analytics',
-    status: 'operational',
-    latency: '12ms',
-    uptime: '99.9%'
-  },
-  {
-    name: 'Threat Detection Engine',
-    status: 'operational',
-    latency: '8ms',
-    uptime: '99.8%'
-  },
-  {
-    name: 'Data Ingestion Pipeline',
-    status: 'warning',
-    latency: '45ms',
-    uptime: '99.5%'
-  },
-  {
-    name: 'Alert Processing',
-    status: 'operational',
-    latency: '3ms',
-    uptime: '99.9%'
-  }
-]
-
-// Recent Activities
-const recentActivities = [
-  {
-    id: 1,
-    type: 'threat',
-    title: 'Suspicious login attempt detected',
-    description: 'Multiple failed login attempts from IP 192.168.1.100',
-    time: '2 minutes ago',
-    severity: 'high',
-    icon: AlertTriangle
-  },
-  {
-    id: 2,
-    type: 'network',
-    title: 'Unusual network activity',
-    description: 'High data transfer volume detected in VCN subnet',
-    time: '15 minutes ago',
-    severity: 'medium',
-    icon: Network
-  },
-  {
-    id: 3,
-    type: 'compliance',
-    title: 'Compliance scan completed',
-    description: 'PCI DSS compliance check passed with 98.7% score',
-    time: '1 hour ago',
-    severity: 'low',
-    icon: CheckCircle
-  },
-  {
-    id: 4,
-    type: 'system',
-    title: 'System maintenance scheduled',
-    description: 'Scheduled maintenance window for security updates',
-    time: '2 hours ago',
-    severity: 'info',
-    icon: Settings
-  }
-]
-
-// Top Threat Sources
-const threatSources = [
-  { country: 'China', count: 45, percentage: 35 },
-  { country: 'Russia', count: 32, percentage: 25 },
-  { country: 'North Korea', count: 20, percentage: 15 },
-  { country: 'Iran', count: 15, percentage: 12 },
-  { country: 'Other', count: 17, percentage: 13 }
-]
 
 export default function ModernDashboard() {
   const [timeRange, setTimeRange] = useState('24h')
   const [refreshing, setRefreshing] = useState(false)
+  const [loading, setLoading] = useState(true)
   const [lastUpdate, setLastUpdate] = useState(new Date())
+  
+  // Real data state
+  const [metrics, setMetrics] = useState<SecurityMetrics | null>(null)
+  const [systemStatus, setSystemStatus] = useState<SystemStatusItem[]>([])
+  const [activities, setActivities] = useState<Activity[]>([])
+  const [threatSources, setThreatSources] = useState<ThreatSource[]>([])
+  const [error, setError] = useState<string | null>(null)
 
-  // Simulate real-time updates
-  useEffect(() => {
-    const interval = setInterval(() => {
+  // Fetch all dashboard data
+  const fetchDashboardData = useCallback(async () => {
+    try {
+      setError(null)
+      const [metricsRes, statusRes, activitiesRes, threatsRes] = await Promise.all([
+        fetch(`/api/dashboard/metrics?timeRange=${timeRange}`),
+        fetch('/api/dashboard/system-status'),
+        fetch('/api/dashboard/activities?limit=10'),
+        fetch(`/api/dashboard/threats?timeRange=${timeRange}`)
+      ])
+      
+      const [metricsData, statusData, activitiesData, threatsData] = await Promise.all([
+        metricsRes.json(),
+        statusRes.json(),
+        activitiesRes.json(),
+        threatsRes.json()
+      ])
+      
+      if (metricsData.success) setMetrics(metricsData.data)
+      if (statusData.success) setSystemStatus(statusData.data)
+      if (activitiesData.success) setActivities(activitiesData.data)
+      if (threatsData.success) setThreatSources(threatsData.data)
+      
       setLastUpdate(new Date())
-    }, 30000) // Update every 30 seconds
-
+    } catch (err) {
+      console.error('Failed to fetch dashboard data:', err)
+      setError('Failed to load dashboard data')
+    } finally {
+      setLoading(false)
+      setRefreshing(false)
+    }
+  }, [timeRange])
+  
+  // Initial data load and auto-refresh
+  useEffect(() => {
+    fetchDashboardData()
+    
+    const interval = setInterval(() => {
+      fetchDashboardData()
+    }, 60000) // Refresh every minute
+    
     return () => clearInterval(interval)
-  }, [])
+  }, [fetchDashboardData])
 
-  const handleRefresh = async () => {
+  const handleRefresh = useCallback(async () => {
     setRefreshing(true)
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1000))
-    setLastUpdate(new Date())
-    setRefreshing(false)
-  }
+    await fetchDashboardData()
+  }, [fetchDashboardData])
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -258,173 +256,231 @@ export default function ModernDashboard() {
         </div>
       </div>
 
-      {/* Security Metrics Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        {securityMetrics.map((metric) => {
-          const Icon = metric.icon
-          return (
-            <Card key={metric.title} className="relative overflow-hidden">
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium text-neutral-600 dark:text-neutral-400">
-                  {metric.title}
-                </CardTitle>
-                <Icon className={`h-5 w-5 ${getMetricColor(metric.color)}`} />
-              </CardHeader>
-              <CardContent>
-                <div className="flex items-baseline space-x-2">
-                  <div className="text-3xl font-bold text-neutral-900 dark:text-white">
-                    {metric.value}
-                  </div>
-                  <div className="text-sm text-neutral-500 dark:text-neutral-400">
-                    {metric.unit}
-                  </div>
-                </div>
-                <div className="flex items-center mt-2">
-                  <div className={`flex items-center text-sm ${
-                    metric.trend === 'up' 
-                      ? metric.color === 'red' ? 'text-red-600' : 'text-green-600'
-                      : metric.trend === 'down'
-                      ? metric.color === 'red' ? 'text-green-600' : 'text-red-600'
-                      : 'text-gray-600'
-                  }`}>
-                    {getTrendIcon(metric.trend)}
-                    <span className="ml-1">{metric.change}</span>
-                  </div>
-                  <span className="text-xs text-neutral-500 dark:text-neutral-400 ml-2">
-                    vs last period
-                  </span>
-                </div>
-                <p className="text-xs text-neutral-500 dark:text-neutral-400 mt-2">
-                  {metric.description}
-                </p>
-              </CardContent>
-            </Card>
-          )
-        })}
-      </div>
-
-      {/* Main Dashboard Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        {/* System Status */}
-        <Card className="lg:col-span-2">
-          <CardHeader>
-            <CardTitle className="flex items-center">
-              <Activity className="h-5 w-5 mr-2" />
-              System Status
-            </CardTitle>
-            <CardDescription>
-              Real-time monitoring of security infrastructure components
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              {systemStatus.map((system) => (
-                <div key={system.name} className="flex items-center justify-between p-4 border border-neutral-200 dark:border-neutral-700 rounded-lg">
-                  <div className="flex items-center space-x-3">
-                    <div className={`w-3 h-3 rounded-full ${
-                      system.status === 'operational' ? 'bg-green-500' :
-                      system.status === 'warning' ? 'bg-yellow-500' : 'bg-red-500'
-                    }`} />
-                    <div>
-                      <p className="font-medium text-neutral-900 dark:text-white">{system.name}</p>
-                      <p className="text-sm text-neutral-500 dark:text-neutral-400">
-                        Latency: {system.latency} • Uptime: {system.uptime}
-                      </p>
-                    </div>
-                  </div>
-                  <Badge className={getStatusColor(system.status)}>
-                    {system.status}
-                  </Badge>
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Threat Sources */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center">
-              <Globe className="h-5 w-5 mr-2" />
-              Top Threat Sources
-            </CardTitle>
-            <CardDescription>
-              Geographic distribution of security threats
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              {threatSources.map((source) => (
-                <div key={source.country} className="flex items-center justify-between">
-                  <div className="flex items-center space-x-3">
-                    <div className="w-8 h-5 bg-neutral-200 dark:bg-neutral-700 rounded-sm flex items-center justify-center">
-                      <span className="text-xs font-medium">{source.country.slice(0, 2).toUpperCase()}</span>
-                    </div>
-                    <span className="text-sm font-medium text-neutral-900 dark:text-white">
-                      {source.country}
-                    </span>
-                  </div>
-                  <div className="flex items-center space-x-3">
-                    <div className="w-20">
-                      <Progress value={source.percentage} className="h-2" />
-                    </div>
-                    <span className="text-sm text-neutral-500 dark:text-neutral-400 w-8 text-right">
-                      {source.count}
-                    </span>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Recent Security Activities */}
-        <Card className="lg:col-span-3">
-          <CardHeader>
-            <CardTitle className="flex items-center">
-              <Clock className="h-5 w-5 mr-2" />
-              Recent Security Activities
-            </CardTitle>
-            <CardDescription>
-              Latest security events and system activities
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              {recentActivities.map((activity) => {
-                const Icon = activity.icon
-                return (
-                  <div key={activity.id} className="flex items-start space-x-4 p-4 border border-neutral-200 dark:border-neutral-700 rounded-lg hover:bg-neutral-50 dark:hover:bg-neutral-800 transition-colors">
-                    <div className={`p-2 rounded-lg ${getSeverityColor(activity.severity)}`}>
-                      <Icon className="h-4 w-4" />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="font-medium text-neutral-900 dark:text-white">
-                        {activity.title}
-                      </p>
-                      <p className="text-sm text-neutral-500 dark:text-neutral-400 mt-1">
-                        {activity.description}
-                      </p>
-                      <p className="text-xs text-neutral-400 dark:text-neutral-500 mt-2">
-                        {activity.time}
-                      </p>
-                    </div>
-                    <Badge className={getSeverityColor(activity.severity)}>
-                      {activity.severity}
-                    </Badge>
-                  </div>
-                )
-              })}
-            </div>
-            <div className="mt-6 text-center">
-              <Button variant="outline" className="w-full">
-                <Eye className="h-4 w-4 mr-2" />
-                View All Activities
+      {/* Error State */}
+      {error && (
+        <Card className="border-red-200 bg-red-50 dark:border-red-800 dark:bg-red-950">
+          <CardContent className="pt-6">
+            <div className="flex items-center space-x-2 text-red-600 dark:text-red-400">
+              <AlertTriangle className="h-5 w-5" />
+              <span>{error}</span>
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={handleRefresh}
+                className="ml-auto"
+              >
+                <RefreshCw className="h-4 w-4 mr-1" />
+                Retry
               </Button>
             </div>
           </CardContent>
         </Card>
-      </div>
+      )}
+
+      {/* Loading State */}
+      {loading && (
+        <div className="flex items-center justify-center py-12">
+          <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+          <span className="ml-2 text-muted-foreground">Loading dashboard data...</span>
+        </div>
+      )}
+
+      {/* Security Metrics Grid */}
+      {!loading && metrics && (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          {metricsConfig.map((config) => {
+            const metric = metrics[config.key]
+            const Icon = config.icon
+            return (
+              <Card key={config.title} className="relative overflow-hidden">
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium text-neutral-600 dark:text-neutral-400">
+                    {config.title}
+                  </CardTitle>
+                  <Icon className={`h-5 w-5 ${getMetricColor(config.color)}`} />
+                </CardHeader>
+                <CardContent>
+                  <div className="flex items-baseline space-x-2">
+                    <div className="text-3xl font-bold text-neutral-900 dark:text-white">
+                      {metric.value}
+                    </div>
+                    <div className="text-sm text-neutral-500 dark:text-neutral-400">
+                      {config.unit}
+                    </div>
+                  </div>
+                  <div className="flex items-center mt-2">
+                    <div className={`flex items-center text-sm ${
+                      metric.trend === 'up' 
+                        ? config.color === 'red' ? 'text-red-600' : 'text-green-600'
+                        : metric.trend === 'down'
+                        ? config.color === 'red' ? 'text-green-600' : 'text-red-600'
+                        : 'text-gray-600'
+                    }`}>
+                      {getTrendIcon(metric.trend)}
+                      <span className="ml-1">{metric.change}</span>
+                    </div>
+                    <span className="text-xs text-neutral-500 dark:text-neutral-400 ml-2">
+                      vs last period
+                    </span>
+                  </div>
+                  <p className="text-xs text-neutral-500 dark:text-neutral-400 mt-2">
+                    {config.description}
+                  </p>
+                </CardContent>
+              </Card>
+            )
+          })}
+        </div>
+      )}
+
+      {/* Main Dashboard Grid */}
+      {!loading && (
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          {/* System Status */}
+          <Card className="lg:col-span-2">
+            <CardHeader>
+              <CardTitle className="flex items-center">
+                <Activity className="h-5 w-5 mr-2" />
+                System Status
+              </CardTitle>
+              <CardDescription>
+                Real-time monitoring of security infrastructure components
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              {systemStatus.length === 0 ? (
+                <div className="text-center py-6 text-muted-foreground">
+                  No system status data available
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {systemStatus.map((system) => (
+                    <div key={system.name} className="flex items-center justify-between p-4 border border-neutral-200 dark:border-neutral-700 rounded-lg">
+                      <div className="flex items-center space-x-3">
+                        <div className={`w-3 h-3 rounded-full ${
+                          system.status === 'operational' ? 'bg-green-500' :
+                          system.status === 'warning' ? 'bg-yellow-500' : 'bg-red-500'
+                        }`} />
+                        <div>
+                          <p className="font-medium text-neutral-900 dark:text-white">{system.name}</p>
+                          <p className="text-sm text-neutral-500 dark:text-neutral-400">
+                            Latency: {system.latency} • Uptime: {system.uptime}
+                          </p>
+                        </div>
+                      </div>
+                      <Badge className={getStatusColor(system.status)}>
+                        {system.status}
+                      </Badge>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Threat Sources */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center">
+                <Globe className="h-5 w-5 mr-2" />
+                Top Threat Sources
+              </CardTitle>
+              <CardDescription>
+                Geographic distribution of security threats
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              {threatSources.length === 0 ? (
+                <div className="text-center py-6 text-muted-foreground">
+                  No threat data available for selected time range
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {threatSources.map((source) => (
+                    <div key={source.country} className="flex items-center justify-between">
+                      <div className="flex items-center space-x-3">
+                        <div className="w-8 h-5 bg-neutral-200 dark:bg-neutral-700 rounded-sm flex items-center justify-center">
+                          <span className="text-xs font-medium">{source.country.slice(0, 2).toUpperCase()}</span>
+                        </div>
+                        <span className="text-sm font-medium text-neutral-900 dark:text-white">
+                          {source.country}
+                        </span>
+                      </div>
+                      <div className="flex items-center space-x-3">
+                        <div className="w-20">
+                          <Progress value={source.percentage} className="h-2" />
+                        </div>
+                        <span className="text-sm text-neutral-500 dark:text-neutral-400 w-8 text-right">
+                          {source.count}
+                        </span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Recent Security Activities */}
+          <Card className="lg:col-span-3">
+            <CardHeader>
+              <CardTitle className="flex items-center">
+                <Clock className="h-5 w-5 mr-2" />
+                Recent Security Activities
+              </CardTitle>
+              <CardDescription>
+                Latest security events and system activities
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              {activities.length === 0 ? (
+                <div className="text-center py-8 text-muted-foreground">
+                  <Activity className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                  <p>No recent activities found</p>
+                  <p className="text-sm">Activities will appear here as they occur</p>
+                </div>
+              ) : (
+                <>
+                  <div className="space-y-4">
+                    {activities.map((activity) => {
+                      const IconComponent = iconMap[activity.icon as keyof typeof iconMap] || Activity
+                      return (
+                        <div key={activity.id} className="flex items-start space-x-4 p-4 border border-neutral-200 dark:border-neutral-700 rounded-lg hover:bg-neutral-50 dark:hover:bg-neutral-800 transition-colors">
+                          <div className={`p-2 rounded-lg ${getSeverityColor(activity.severity)}`}>
+                            <IconComponent className="h-4 w-4" />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="font-medium text-neutral-900 dark:text-white">
+                              {activity.title}
+                            </p>
+                            <p className="text-sm text-neutral-500 dark:text-neutral-400 mt-1">
+                              {activity.description}
+                            </p>
+                            <p className="text-xs text-neutral-400 dark:text-neutral-500 mt-2">
+                              {activity.time}
+                            </p>
+                          </div>
+                          <Badge className={getSeverityColor(activity.severity)}>
+                            {activity.severity}
+                          </Badge>
+                        </div>
+                      )
+                    })}
+                  </div>
+                  <div className="mt-6 text-center">
+                    <Button variant="outline" className="w-full" asChild>
+                      <a href="/threat-hunting">
+                        <Eye className="h-4 w-4 mr-2" />
+                        View All Activities
+                      </a>
+                    </Button>
+                  </div>
+                </>
+              )}
+            </CardContent>
+          </Card>
+        </div>
+      )}
 
       {/* Quick Actions */}
       <Card>
@@ -445,7 +501,8 @@ export default function ModernDashboard() {
               { name: 'RITA Analysis', icon: Eye, href: '/rita-discovery' },
               { name: 'Network Map', icon: Network, href: '/threat-map' },
               { name: 'Compute Status', icon: Server, href: '/compute' },
-              { name: 'Advanced Analytics', icon: BarChart3, href: '/advanced-analytics' }
+              { name: 'Advanced Analytics', icon: BarChart3, href: '/advanced-analytics' },
+              { name: 'Help', icon: HelpCircle, href: '/help' }
             ].map((action) => {
               const Icon = action.icon
               return (

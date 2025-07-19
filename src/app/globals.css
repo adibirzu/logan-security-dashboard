@@ -220,3 +220,39 @@ body {
 .status-pulse {
   animation: statusPulse 2s ease-in-out infinite;
 }
+
+/* Enhanced dropdown and select menu visibility */
+[data-radix-popper-content-wrapper] {
+  z-index: 50 !important;
+}
+
+[data-radix-select-content],
+[data-radix-dropdown-menu-content],
+[data-radix-popover-content] {
+  background: var(--popover) !important;
+  border: 1px solid var(--border) !important;
+  box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1) !important;
+  backdrop-filter: blur(8px) !important;
+  opacity: 1 !important;
+}
+
+.dark [data-radix-select-content],
+.dark [data-radix-dropdown-menu-content],
+.dark [data-radix-popover-content] {
+  box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.3), 0 4px 6px -4px rgb(0 0 0 / 0.3) !important;
+}
+
+/* Ensure dropdown items are visible */
+[data-radix-select-item],
+[data-radix-dropdown-menu-item] {
+  background: transparent !important;
+  color: var(--popover-foreground) !important;
+}
+
+[data-radix-select-item]:hover,
+[data-radix-dropdown-menu-item]:hover,
+[data-radix-select-item][data-highlighted],
+[data-radix-dropdown-menu-item][data-highlighted] {
+  background: var(--accent) !important;
+  color: var(--accent-foreground) !important;
+}

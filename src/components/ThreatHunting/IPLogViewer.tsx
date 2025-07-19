@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useCallback } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -74,7 +74,7 @@ export default function IPLogViewer({ ip: initialIP, onClose, timeRange = '24h' 
   const [selectedCategory, setSelectedCategory] = useState('all')
   const [searchFilter, setSearchFilter] = useState('')
 
-  const fetchIPLogs = async (targetIP: string, range: string = timeRange) => {
+  const fetchIPLogs = useCallback(async (targetIP: string, range: string = timeRange) => {
     if (!targetIP.trim()) {
       toast.error('Please enter an IP address')
       return
@@ -99,13 +99,13 @@ export default function IPLogViewer({ ip: initialIP, onClose, timeRange = '24h' 
     } finally {
       setLoading(false)
     }
-  }
+  }, [timeRange])
 
   useEffect(() => {
     if (initialIP) {
       fetchIPLogs(initialIP, timeRange)
     }
-  }, [initialIP, timeRange])
+  }, [initialIP, timeRange, fetchIPLogs])
 
   const getLogIcon = (category: string) => {
     switch (category) {
@@ -434,7 +434,7 @@ export default function IPLogViewer({ ip: initialIP, onClose, timeRange = '24h' 
         <Alert>
           <Info className="h-4 w-4" />
           <AlertDescription>
-            Enter an IP address and click "Search Logs" to find related log entries.
+            Enter an IP address and click &quot;Search Logs&quot; to find related log entries.
           </AlertDescription>
         </Alert>
       )}
