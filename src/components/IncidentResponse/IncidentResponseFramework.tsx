@@ -125,195 +125,6 @@ interface WorkflowAction {
   retries: number
 }
 
-// Sample incidents data
-const SAMPLE_INCIDENTS: Incident[] = [
-  {
-    id: 'INC-2024-001',
-    title: 'Suspicious PowerShell Activity Detected',
-    description: 'Multiple PowerShell execution attempts with encoded commands detected on server WEB-01',
-    severity: 'high',
-    status: 'investigating',
-    category: 'Malware',
-    source: 'EDR Alert',
-    assignee: 'John Doe',
-    reporter: 'Security System',
-    createdAt: new Date('2024-07-18T10:30:00Z'),
-    updatedAt: new Date('2024-07-18T11:15:00Z'),
-    ttd: 15,
-    ttr: 45,
-    tags: ['powershell', 'lateral-movement', 'apt'],
-    iocs: ['powershell.exe', '185.159.157.131'],
-    affectedSystems: ['WEB-01', 'DB-02'],
-    timeline: [
-      {
-        id: 'evt-1',
-        timestamp: new Date('2024-07-18T10:30:00Z'),
-        type: 'detection',
-        description: 'Suspicious PowerShell activity detected by EDR',
-        author: 'Security System',
-        automated: true
-      },
-      {
-        id: 'evt-2',
-        timestamp: new Date('2024-07-18T10:45:00Z'),
-        type: 'response',
-        description: 'Incident assigned to SOC analyst',
-        author: 'John Doe',
-        automated: false
-      }
-    ],
-    artifacts: [],
-    workflowExecutions: ['wf-exec-001', 'wf-exec-002']
-  },
-  {
-    id: 'INC-2024-002',
-    title: 'Potential Data Exfiltration Event',
-    description: 'Large volume of data transferred to external IP address from database server',
-    severity: 'critical',
-    status: 'contained',
-    category: 'Data Breach',
-    source: 'DLP Alert',
-    assignee: 'Jane Smith',
-    reporter: 'DLP System',
-    createdAt: new Date('2024-07-18T08:15:00Z'),
-    updatedAt: new Date('2024-07-18T09:30:00Z'),
-    ttd: 5,
-    ttr: 20,
-    tags: ['data-exfiltration', 'database', 'critical'],
-    iocs: ['77.83.38.138', 'sqlserver.exe'],
-    affectedSystems: ['DB-PROD-01'],
-    timeline: [
-      {
-        id: 'evt-3',
-        timestamp: new Date('2024-07-18T08:15:00Z'),
-        type: 'detection',
-        description: 'DLP alert triggered for large data transfer',
-        author: 'DLP System',
-        automated: true
-      },
-      {
-        id: 'evt-4',
-        timestamp: new Date('2024-07-18T08:35:00Z'),
-        type: 'containment',
-        description: 'Network access blocked for affected server',
-        author: 'n8n Workflow',
-        automated: true
-      }
-    ],
-    artifacts: [],
-    workflowExecutions: ['wf-exec-003', 'wf-exec-004']
-  }
-]
-
-// Sample n8n workflows
-const SAMPLE_WORKFLOWS: N8NWorkflow[] = [
-  {
-    id: 'wf-001',
-    name: 'Malware Detection Response',
-    description: 'Automated response workflow for malware detection alerts',
-    category: 'response',
-    triggers: ['malware_detected', 'suspicious_process'],
-    status: 'idle',
-    lastExecuted: new Date('2024-07-18T10:30:00Z'),
-    executionCount: 45,
-    successRate: 97.8,
-    avgExecutionTime: 120,
-    actions: [
-      {
-        id: 'action-1',
-        name: 'Create Incident Ticket',
-        type: 'jira',
-        config: { project: 'SEC', issueType: 'Incident' },
-        timeout: 30,
-        retries: 3
-      },
-      {
-        id: 'action-2',
-        name: 'Notify SOC Team',
-        type: 'slack',
-        config: { channel: '#soc-alerts', template: 'malware_alert' },
-        timeout: 10,
-        retries: 2
-      },
-      {
-        id: 'action-3',
-        name: 'Isolate Host',
-        type: 'http_request',
-        config: { endpoint: '/api/edr/isolate', method: 'POST' },
-        timeout: 60,
-        retries: 1
-      }
-    ]
-  },
-  {
-    id: 'wf-002',
-    name: 'Data Breach Response',
-    description: 'Critical incident response for data exfiltration events',
-    category: 'containment',
-    triggers: ['data_exfiltration', 'dlp_violation'],
-    status: 'idle',
-    lastExecuted: new Date('2024-07-18T08:15:00Z'),
-    executionCount: 12,
-    successRate: 100,
-    avgExecutionTime: 180,
-    actions: [
-      {
-        id: 'action-4',
-        name: 'Block Network Access',
-        type: 'http_request',
-        config: { endpoint: '/api/firewall/block', method: 'POST' },
-        timeout: 30,
-        retries: 2
-      },
-      {
-        id: 'action-5',
-        name: 'Page On-Call Manager',
-        type: 'pagerduty',
-        config: { severity: 'critical', escalation_policy: 'data-breach' },
-        timeout: 15,
-        retries: 3
-      },
-      {
-        id: 'action-6',
-        name: 'Collect Evidence',
-        type: 'script',
-        config: { script: 'collect_network_logs.py' },
-        timeout: 300,
-        retries: 1
-      }
-    ]
-  },
-  {
-    id: 'wf-003',
-    name: 'Threat Intelligence Enrichment',
-    description: 'Enrich incidents with threat intelligence data',
-    category: 'detection',
-    triggers: ['new_incident', 'ioc_detected'],
-    status: 'idle',
-    lastExecuted: new Date('2024-07-18T09:45:00Z'),
-    executionCount: 156,
-    successRate: 95.5,
-    avgExecutionTime: 45,
-    actions: [
-      {
-        id: 'action-7',
-        name: 'Query Threat Intel APIs',
-        type: 'http_request',
-        config: { endpoints: ['virustotal', 'alienvault', 'misp'] },
-        timeout: 60,
-        retries: 2
-      },
-      {
-        id: 'action-8',
-        name: 'Update Incident with IOCs',
-        type: 'http_request',
-        config: { endpoint: '/api/incidents/update', method: 'PATCH' },
-        timeout: 30,
-        retries: 1
-      }
-    ]
-  }
-]
 
 // Utility functions for styling
 const getSeverityColor = (severity: IncidentSeverity) => {
@@ -348,8 +159,8 @@ const getWorkflowStatusColor = (status: WorkflowStatus) => {
 }
 
 export default function IncidentResponseFramework() {
-  const [incidents, setIncidents] = useState<Incident[]>(SAMPLE_INCIDENTS)
-  const [workflows, setWorkflows] = useState<N8NWorkflow[]>(SAMPLE_WORKFLOWS)
+  const [incidents, setIncidents] = useState<Incident[]>([])
+  const [workflows, setWorkflows] = useState<N8NWorkflow[]>([])
   const [selectedIncident, setSelectedIncident] = useState<Incident | null>(null)
   const [selectedWorkflow, setSelectedWorkflow] = useState<N8NWorkflow | null>(null)
   const [activeTab, setActiveTab] = useState('incidents')
@@ -357,15 +168,50 @@ export default function IncidentResponseFramework() {
   const [filterStatus, setFilterStatus] = useState<string>('all')
   const [isCreatingIncident, setIsCreatingIncident] = useState(false)
 
+  useEffect(() => {
+    const fetchIncidents = async () => {
+      try {
+        const response = await fetch('/api/incidents')
+        const data = await response.json()
+        if (data.success) {
+          setIncidents(data.data)
+        } else {
+          toast.error('Failed to load incidents')
+        }
+      } catch (error) {
+        console.error('Error loading incidents:', error)
+        toast.error('Failed to load incidents')
+      }
+    }
+
+    const fetchWorkflows = async () => {
+      try {
+        const response = await fetch('/api/n8n/workflows')
+        const data = await response.json()
+        if (data.success) {
+          setWorkflows(data.data)
+        } else {
+          toast.error('Failed to load workflows')
+        }
+      } catch (error) {
+        console.error('Error loading workflows:', error)
+        toast.error('Failed to load workflows')
+      }
+    }
+
+    fetchIncidents()
+    fetchWorkflows()
+  }, [])
+
   // Metrics calculation
   const metrics = {
     totalIncidents: incidents.length,
     openIncidents: incidents.filter(i => ['open', 'investigating'].includes(i.status)).length,
     criticalIncidents: incidents.filter(i => i.severity === 'critical').length,
-    avgTTR: incidents.reduce((sum, i) => sum + i.ttr, 0) / incidents.length,
-    avgTTD: incidents.reduce((sum, i) => sum + i.ttd, 0) / incidents.length,
+    avgTTR: incidents.length > 0 ? incidents.reduce((sum, i) => sum + i.ttr, 0) / incidents.length : 0,
+    avgTTD: incidents.length > 0 ? incidents.reduce((sum, i) => sum + i.ttd, 0) / incidents.length : 0,
     activeWorkflows: workflows.filter(w => w.status === 'running').length,
-    workflowSuccess: workflows.reduce((sum, w) => sum + w.successRate, 0) / workflows.length
+    workflowSuccess: workflows.length > 0 ? workflows.reduce((sum, w) => sum + w.successRate, 0) / workflows.length : 0
   }
 
 
@@ -389,39 +235,27 @@ export default function IncidentResponseFramework() {
     }, 3000)
   }
 
-  const createIncident = (incident: Partial<Incident>) => {
-    const newIncident: Incident = {
-      id: `INC-${new Date().getFullYear()}-${String(incidents.length + 1).padStart(3, '0')}`,
-      title: incident.title || 'New Incident',
-      description: incident.description || '',
-      severity: incident.severity || 'medium',
-      status: 'open',
-      category: incident.category || 'General',
-      source: incident.source || 'Manual',
-      assignee: incident.assignee || 'Unassigned',
-      reporter: 'Security Analyst',
-      createdAt: new Date(),
-      updatedAt: new Date(),
-      ttd: 0,
-      ttr: 0,
-      tags: incident.tags || [],
-      iocs: incident.iocs || [],
-      affectedSystems: incident.affectedSystems || [],
-      timeline: [{
-        id: `evt-${Date.now()}`,
-        timestamp: new Date(),
-        type: 'detection',
-        description: 'Incident created manually',
-        author: 'Security Analyst',
-        automated: false
-      }],
-      artifacts: [],
-      workflowExecutions: []
+  const createIncident = async (incident: Partial<Incident>) => {
+    try {
+      const response = await fetch('/api/incidents', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(incident)
+      })
+      const data = await response.json()
+      if (data.success) {
+        setIncidents([data.data, ...incidents])
+        setSelectedIncident(data.data)
+        toast.success(`Incident created: ${data.data.id}`)
+      } else {
+        toast.error('Failed to create incident')
+      }
+    } catch (error) {
+      console.error('Error creating incident:', error)
+      toast.error('Failed to create incident')
     }
-    
-    setIncidents([newIncident, ...incidents])
-    setSelectedIncident(newIncident)
-    toast.success(`Incident created: ${newIncident.id}`)
   }
 
   const filteredIncidents = incidents.filter(incident => {
