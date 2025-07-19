@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { spawn } from 'child_process'
 import path from 'path'
-import fs from 'fs'
 
 interface IndicatorRequest {
   action: 'check' | 'batch' | 'stats' | 'submit'
@@ -63,14 +62,7 @@ function executeOCIThreatIntel(args: string[]): Promise<string> {
       if (code === 0) {
         resolve(stdout)
       } else {
-        // Filter out warnings and only show actual errors
-        const errorLines = stderr.split('\n').filter(line => 
-          line.trim() && 
-          !line.includes('VCN Analyzer:') && 
-          !line.includes('Python script warning:')
-        )
-        const actualErrors = errorLines.length > 0 ? errorLines.join('\n') : 'Unknown error'
-        reject(new Error(`Python script failed with code ${code}: ${actualErrors}`))
+        reject(new Error(`Python script failed with code ${code}: ${stderr}`))
       }
     })
     
@@ -118,6 +110,7 @@ export async function POST(request: NextRequest) {
         
         // Create temporary file with indicators
         const tempFile = path.join('/tmp', `indicators_${Date.now()}.json`)
+        const fs = require('fs')
         fs.writeFileSync(tempFile, JSON.stringify(indicators))
         
         args.push('--file', tempFile)
@@ -142,32 +135,11 @@ export async function POST(request: NextRequest) {
         break
 
       case 'submit':
-        if (!threat_data) {
-          return NextResponse.json({
-            success: false,
-            error: 'Threat data is required for submit action'
-          }, { status: 400 })
-        }
-        
-        // Create temporary file with threat data
-        const threatDataFile = path.join('/tmp', `threat_data_${Date.now()}.json`)
-        fs.writeFileSync(threatDataFile, JSON.stringify(threat_data))
-        
-        args.push('--file', threatDataFile)
-        if (compartment_id) args.push('--compartment', compartment_id)
-        
-        try {
-          const result = await executeOCIThreatIntel(args)
-          // Clean up temp file
-          fs.unlinkSync(threatDataFile)
-          return NextResponse.json(JSON.parse(result))
-        } catch (error) {
-          // Clean up temp file on error
-          if (fs.existsSync(threatDataFile)) {
-            fs.unlinkSync(threatDataFile)
-          }
-          throw error
-        }
+        // Note: Submission functionality may not be available in current OCI API
+        return NextResponse.json({
+          success: false,
+          error: 'Threat data submission not yet available in OCI Threat Intelligence service'
+        }, { status: 501 })
 
       default:
         return NextResponse.json({

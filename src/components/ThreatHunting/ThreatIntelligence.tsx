@@ -11,7 +11,6 @@ import { Alert, AlertDescription } from '@/components/ui/alert'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Separator } from '@/components/ui/separator'
 import { toast } from 'sonner'
-import ThreatDataSubmission from '@/components/ThreatIntelligence/ThreatDataSubmission'
 import {
   Globe,
   Shield,
@@ -475,7 +474,6 @@ export default function ThreatIntelligence() {
       <Tabs defaultValue="iocs" className="space-y-6">
         <TabsList>
           <TabsTrigger value="iocs">IOCs & Indicators</TabsTrigger>
-          <TabsTrigger value="submit">Submit Intel</TabsTrigger>
           <TabsTrigger value="actors">Threat Actors</TabsTrigger>
           <TabsTrigger value="campaigns">Campaigns</TabsTrigger>
           <TabsTrigger value="feeds">Intel Feeds</TabsTrigger>
@@ -770,19 +768,6 @@ export default function ThreatIntelligence() {
               </Card>
             </div>
           </div>
-        </TabsContent>
-
-        <TabsContent value="submit" className="space-y-6">
-          <ThreatDataSubmission 
-            onSubmissionComplete={(result) => {
-              if (result.success && result.successful_submissions > 0) {
-                toast.success(`Successfully submitted ${result.successful_submissions} threat indicators to OCI`)
-                // Optionally refresh the IOCs list if needed
-              } else if (result.error) {
-                toast.error(`Submission failed: ${result.error}`)
-              }
-            }}
-          />
         </TabsContent>
 
         <TabsContent value="actors" className="space-y-6">

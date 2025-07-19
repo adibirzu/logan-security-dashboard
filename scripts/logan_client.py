@@ -303,8 +303,7 @@ class LoganClient:
                 query = re.sub(count_field_pattern, "stats count", query)
         
         # Fix log source references to match available sources (only for known bad sources)
-        # Note: Windows Sysmon Events should be kept as-is if it's a valid log source
-        # query = query.replace("'Windows Sysmon Events'", "'OCI Audit Logs'")
+        query = query.replace("'Windows Sysmon Events'", "'OCI Audit Logs'")
         query = query.replace("'Event ID'", "'Event Type'")
         
         # Fix top command syntax
