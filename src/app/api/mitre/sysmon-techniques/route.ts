@@ -7,7 +7,7 @@ export async function POST(request: Request) {
     // Enhanced query specifically for Windows Sysmon events with Technique ID extraction
     const mitreQuery = `
       'Log Source' = 'Windows Sysmon Events' 
-      and not contains(User, 'SYSTEM') 
+      and User != 'NT AUTHORITY\\SYSTEM'
       and Technique_id != null 
       | timestats count as logrecords by Technique_id 
       | sort -logrecords

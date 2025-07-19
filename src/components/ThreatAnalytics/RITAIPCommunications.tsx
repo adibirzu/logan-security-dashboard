@@ -4,7 +4,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-// import { TimeRangeSelector } from '@/components/ui/TimeRangeSelector'; // Removed - using prop instead
+import { TimeRangeSelector } from '@/components/ui/TimeRangeSelector';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { 
   Network, 
@@ -47,11 +47,8 @@ interface IPCommunicationsData {
   error?: string;
 }
 
-interface RITAIPCommunicationsProps {
-  timeRange?: string;
-}
-
-export function RITAIPCommunications({ timeRange = '4h' }: RITAIPCommunicationsProps) {
+export function RITAIPCommunications() {
+  const [timeRange, setTimeRange] = useState('6h');
   const [data, setData] = useState<IPCommunicationsData | null>(null);
   const [loading, setLoading] = useState(false);
   const [selectedComm, setSelectedComm] = useState<IPCommunication | null>(null);
@@ -211,7 +208,15 @@ export function RITAIPCommunications({ timeRange = '4h' }: RITAIPCommunicationsP
           </div>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div>
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+            <div className="lg:col-span-1">
+              <TimeRangeSelector
+                selectedTimeRange={timeRange}
+                onTimeRangeChange={setTimeRange}
+                showCategories={false}
+              />
+            </div>
+            <div className="lg:col-span-2">
               {data?.success ? (
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
                   <div className="text-center">
@@ -245,6 +250,7 @@ export function RITAIPCommunications({ timeRange = '4h' }: RITAIPCommunicationsP
                   </AlertDescription>
                 </Alert>
               )}
+            </div>
           </div>
         </CardContent>
       </Card>
