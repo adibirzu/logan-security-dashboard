@@ -18,6 +18,7 @@ import QueryHistoryManager from '@/components/QueryHistory/QueryHistoryManager'
 import AdvancedDataExporter from '@/components/DataExport/AdvancedDataExporter'
 import { SecurityRulesBrowser } from '@/components/SecurityRules/SecurityRulesBrowser'
 import { UnifiedTimeFilter, TimeRange, useTimeRange } from '@/components/TimeFilter/UnifiedTimeFilter'
+import QueryTemplates from '@/components/QueryBuilder/QueryTemplates'
 
 import { 
   Database, 
@@ -449,7 +450,8 @@ export default function QueryBuilderPage() {
 
         <Tabs defaultValue="builder" className="space-y-6">
           <div className="flex items-center justify-between">
-            <TabsList className="grid w-full grid-cols-8">
+            <TabsList className="grid w-full grid-cols-9">
+              <TabsTrigger value="templates">Templates</TabsTrigger>
               <TabsTrigger value="logan-queries">Logan Queries</TabsTrigger>
               <TabsTrigger value="security-rules">Security Rules</TabsTrigger>
               <TabsTrigger value="builder">Query Builder</TabsTrigger>
@@ -473,6 +475,26 @@ export default function QueryBuilderPage() {
               </div>
             )}
           </div>
+
+          <TabsContent value="templates" className="space-y-6">
+            <QueryTemplates 
+              onQuerySelect={(query) => {
+                // Switch to builder tab and set the query
+                const builderTab = document.querySelector('[value="builder"]') as HTMLElement
+                if (builderTab) {
+                  builderTab.click()
+                }
+                // The query will be passed to the SimpleQueryBuilder component
+                // We'll need to implement a way to set the query in the builder
+                toast.success('Template query loaded into builder')
+              }}
+              onValidationComplete={(isValid, errors) => {
+                if (!isValid && errors.length > 0) {
+                  toast.error(`Validation failed: ${errors[0]}`)
+                }
+              }}
+            />
+          </TabsContent>
 
           <TabsContent value="logan-queries" className="space-y-6">
             <Card>

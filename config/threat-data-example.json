@@ -1,0 +1,27 @@
+{
+  "indicators": [
+    {
+      "type": "ip",
+      "value": "192.168.1.100",
+      "confidence": 85,
+      "threat_types": ["malware", "c2"]
+    },
+    {
+      "type": "domain",
+      "value": "malicious-test.example.com",
+      "confidence": 90,
+      "threat_types": ["phishing", "malware-delivery"]
+    },
+    {
+      "type": "md5",
+      "value": "d41d8cd98f00b204e9800998ecf8427e",
+      "confidence": 95,
+      "threat_types": ["malware", "trojan"]
+    }
+  ],
+  "metadata": {
+    "attribution": "Logan Security Dashboard Test",
+    "source": "Manual Testing",
+    "description": "Test threat intelligence indicators for OCI submission validation"
+  }
+}
