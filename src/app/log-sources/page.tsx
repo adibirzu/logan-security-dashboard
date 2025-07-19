@@ -12,17 +12,6 @@ import { safeToLocaleString } from '@/lib/format'
 import ModernLayout from '@/components/Layout/ModernLayout'
 import { UnifiedTimeFilter, TimeRange, useTimeRange } from '@/components/TimeFilter/UnifiedTimeFilter'
 
-// Time period options in minutes for consistent time formatting
-const TIME_PERIODS = [
-  { value: '60', label: '1 hour' },
-  { value: '240', label: '4 hours' },
-  { value: '480', label: '8 hours' },
-  { value: '1440', label: '24 hours' },
-  { value: '4320', label: '3 days' },
-  { value: '10080', label: '7 days' },
-  { value: '43200', label: '30 days' }
-]
-
 interface LogSource {
   name: string
   record_count: number

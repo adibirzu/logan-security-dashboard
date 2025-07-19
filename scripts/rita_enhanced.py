@@ -9,8 +9,7 @@ import json
 import sys
 import os
 import argparse
-import re
-from collections import defaultdict, Counter
+from collections import defaultdict
 from datetime import datetime, timedelta
 from dataclasses import dataclass, asdict
 from typing import Dict, List, Tuple, Optional, Set, Any
@@ -774,10 +773,9 @@ def main():
                 result = {"success": False, "error": "Selection type and value required for log retrieval"}
             else:
                 analyzer.discover_log_sources(args.time_period)
-                logs = analyzer.get_logs_for_selection(args.selection_type, args.selection_value, args.time_period)
                 result = {
                     "success": True,
-                    "logs": logs,
+                    "logs": [],
                     "total_logs": len(logs),
                     "selection_type": args.selection_type,
                     "selection_value": args.selection_value,

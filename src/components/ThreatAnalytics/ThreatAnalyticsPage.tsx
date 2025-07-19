@@ -19,8 +19,6 @@ import {
   RefreshCw,
   ArrowUpDown,
   Filter,
-  Wifi,
-  Timer
 } from 'lucide-react'
 import { Progress } from '@/components/ui/progress'
 import { safeToLocaleString, safeDateToLocaleString } from '@/lib/format'
@@ -92,7 +90,7 @@ export default function ThreatAnalyticsPage() {
     preset: '1440',
     minutes: 1440
   })
-  const { getTimeRangeInMinutes, getDateRange, getOCITimeFilter } = useTimeRange(timeRange)
+  const { getTimeRangeInMinutes } = useTimeRange(timeRange)
   
   const [selectedSeverity, setSelectedSeverity] = useState('all')
   const [selectedType, setSelectedType] = useState('all')
@@ -163,10 +161,6 @@ export default function ThreatAnalyticsPage() {
     if (score >= 70) return 'text-orange-600'
     if (score >= 50) return 'text-yellow-600'
     return 'text-blue-600'
-  }
-
-  const handleIpClick = (ip: string) => {
-    setSelectedIp(ip)
   }
 
   const filteredThreats = (threats || []).filter(threat => {
