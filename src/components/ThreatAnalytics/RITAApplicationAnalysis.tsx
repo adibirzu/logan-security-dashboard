@@ -4,7 +4,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { TimeRangeSelector } from '@/components/ui/TimeRangeSelector';
+// import { TimeRangeSelector } from '@/components/ui/TimeRangeSelector'; // Removed - using prop instead
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Input } from '@/components/ui/input';
 import { 
@@ -47,8 +47,11 @@ interface ApplicationAnalysisData {
   error?: string;
 }
 
-export function RITAApplicationAnalysis() {
-  const [timeRange, setTimeRange] = useState('6h');
+interface RITAApplicationAnalysisProps {
+  timeRange?: string;
+}
+
+export function RITAApplicationAnalysis({ timeRange = '4h' }: RITAApplicationAnalysisProps) {
   const [data, setData] = useState<ApplicationAnalysisData | null>(null);
   const [loading, setLoading] = useState(false);
   const [selectedApp, setSelectedApp] = useState<Application | null>(null);
@@ -222,15 +225,7 @@ export function RITAApplicationAnalysis() {
           </div>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-            <div className="lg:col-span-1">
-              <TimeRangeSelector
-                selectedTimeRange={timeRange}
-                onTimeRangeChange={setTimeRange}
-                showCategories={false}
-              />
-            </div>
-            <div className="lg:col-span-2">
+          <div>
               {data?.success ? (
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
                   <div className="text-center">
@@ -264,7 +259,6 @@ export function RITAApplicationAnalysis() {
                   </AlertDescription>
                 </Alert>
               )}
-            </div>
           </div>
         </CardContent>
       </Card>
