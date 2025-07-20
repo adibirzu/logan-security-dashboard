@@ -441,15 +441,7 @@ const coreModules: ModuleDefinition[] = [
     description: 'Application settings and configuration management',
     author: 'Logan Security Team',
     dependencies: [],
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
-    category: 'compliance',
-=======
     category: 'hidden',
->>>>>>> Stashed changes
-=======
-    category: 'hidden',
->>>>>>> Stashed changes
     tags: ['settings', 'configuration', 'management'],
     permissions: ['settings:read', 'settings:write'],
     icon: Settings,

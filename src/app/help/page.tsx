@@ -160,7 +160,7 @@ export default function HelpPage() {
                 <div className="space-y-4">
                   <h4 className="font-semibold">Calculation Method</h4>
                   <div className="bg-muted p-4 rounded-lg font-mono text-sm">
-                    <div>Query: Events containing 'security', 'threat', or 'alert'</div>
+                    <div>Query: Events containing &apos;security&apos;, &apos;threat&apos;, or &apos;alert&apos;</div>
                     <div className="text-muted-foreground mt-2">
                       security_score = 100 - (failed_events × 100 / total_events)
                     </div>
@@ -227,9 +227,9 @@ export default function HelpPage() {
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="bg-muted p-4 rounded-lg font-mono text-sm">
-                <div>Query: Events containing 'threat', 'malware', or 'attack'</div>
+                <div>Query: Events containing &apos;threat&apos;, &apos;malware&apos;, or &apos;attack&apos;</div>
                 <div className="text-muted-foreground mt-2">
-                  active_threats = count(distinct 'Principal Name')
+                  active_threats = count(distinct &apos;Principal Name&apos;)
                 </div>
               </div>
               
@@ -272,7 +272,7 @@ export default function HelpPage() {
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="bg-muted p-4 rounded-lg font-mono text-sm">
-                <div>Query: Events containing 'fail', 'error', or 'deny'</div>
+                <div>Query: Events containing &apos;fail&apos;, &apos;error&apos;, or &apos;deny&apos;</div>
                 <div className="text-muted-foreground mt-2">
                   risk_events = count(*)
                 </div>
@@ -313,7 +313,7 @@ export default function HelpPage() {
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="bg-muted p-4 rounded-lg font-mono text-sm">
-                <div>Query: Events with 'fail', 'deny', or 'attack' + valid IP addresses</div>
+                <div>Query: Events with &apos;fail&apos;, &apos;deny&apos;, or &apos;attack&apos; + valid IP addresses</div>
                 <div className="text-muted-foreground mt-2">
                   Group by IP Address → Estimate country → Calculate percentages
                 </div>
@@ -323,7 +323,7 @@ export default function HelpPage() {
                 <div className="space-y-3">
                   <h4 className="font-semibold">IP Geolocation Method</h4>
                   <ul className="space-y-2 text-sm text-muted-foreground">
-                    <li>• Internal networks (10.x, 172.x, 192.168.x) marked as "Internal"</li>
+                    <li>• Internal networks (10.x, 172.x, 192.168.x) marked as &quot;Internal&quot;</li>
                     <li>• Public IPs grouped by first octet ranges</li>
                     <li>• Geographic mapping based on IP allocation patterns</li>
                     <li>• Unknown/private ranges categorized separately</li>
@@ -423,7 +423,7 @@ export default function HelpPage() {
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="bg-muted p-4 rounded-lg font-mono text-sm">
-                <div>Query: Events containing 'audit' or 'compliance'</div>
+                <div>Query: Events containing &apos;audit&apos; or &apos;compliance&apos;</div>
                 <div className="text-muted-foreground mt-2">
                   compliance_rate = (passed_audits × 100) / (total_audits + 1)
                 </div>
@@ -448,7 +448,7 @@ export default function HelpPage() {
                   <div className="space-y-2 text-sm">
                     <div className="flex items-center gap-2">
                       <CheckCircle className="h-4 w-4 text-green-500" />
-                      <span>Events containing 'pass' keyword</span>
+                      <span>Events containing &apos;pass&apos; keyword</span>
                     </div>
                     <div className="flex items-center gap-2">
                       <CheckCircle className="h-4 w-4 text-green-500" />
@@ -563,8 +563,8 @@ export default function HelpPage() {
                 </h4>
                 <div className="bg-muted p-4 rounded-lg font-mono">
                   <div className="text-sm space-y-2">
-                    <div><strong>Input:</strong> security_events = count(*) where 'Event Name' contains ['security', 'threat', 'alert']</div>
-                    <div><strong>Input:</strong> failed_events = count(*) where 'Event Name' contains 'fail'</div>
+                    <div><strong>Input:</strong> security_events = count(*) where &apos;Event Name&apos; contains [&apos;security&apos;, &apos;threat&apos;, &apos;alert&apos;]</div>
+                    <div><strong>Input:</strong> failed_events = count(*) where &apos;Event Name&apos; contains &apos;fail&apos;</div>
                     <div className="border-t pt-2 mt-2">
                       <strong>Formula:</strong> security_score = round(100 - (failed_events × 100.0 / (security_events + 1)), 1)
                     </div>
@@ -582,9 +582,9 @@ export default function HelpPage() {
                 </h4>
                 <div className="bg-muted p-4 rounded-lg font-mono">
                   <div className="text-sm space-y-2">
-                    <div><strong>Input:</strong> threat_events = events where 'Event Name' contains ['threat', 'malware', 'attack']</div>
+                    <div><strong>Input:</strong> threat_events = events where &apos;Event Name&apos; contains [&apos;threat&apos;, &apos;malware&apos;, &apos;attack&apos;]</div>
                     <div className="border-t pt-2 mt-2">
-                      <strong>Formula:</strong> active_threats = count(distinct 'Principal Name')
+                      <strong>Formula:</strong> active_threats = count(distinct &apos;Principal Name&apos;)
                     </div>
                     <div className="text-xs text-muted-foreground">
                       Range: 0-∞ | Lower is better | Counts unique threat sources
@@ -600,7 +600,7 @@ export default function HelpPage() {
                 </h4>
                 <div className="bg-muted p-4 rounded-lg font-mono">
                   <div className="text-sm space-y-2">
-                    <div><strong>Input:</strong> risk_events = events where 'Event Name' contains ['fail', 'error', 'deny']</div>
+                    <div><strong>Input:</strong> risk_events = events where &apos;Event Name&apos; contains [&apos;fail&apos;, &apos;error&apos;, &apos;deny&apos;]</div>
                     <div className="border-t pt-2 mt-2">
                       <strong>Formula:</strong> risk_count = count(*)
                     </div>
@@ -618,8 +618,8 @@ export default function HelpPage() {
                 </h4>
                 <div className="bg-muted p-4 rounded-lg font-mono">
                   <div className="text-sm space-y-2">
-                    <div><strong>Input:</strong> total_audits = count(*) where 'Event Name' contains ['audit', 'compliance']</div>
-                    <div><strong>Input:</strong> passed_audits = count(*) where 'Event Name' contains 'pass'</div>
+                    <div><strong>Input:</strong> total_audits = count(*) where &apos;Event Name&apos; contains [&apos;audit&apos;, &apos;compliance&apos;]</div>
+                    <div><strong>Input:</strong> passed_audits = count(*) where &apos;Event Name&apos; contains &apos;pass&apos;</div>
                     <div className="border-t pt-2 mt-2">
                       <strong>Formula:</strong> compliance_rate = round((passed_audits × 100.0 / (total_audits + 1)), 1)
                     </div>
@@ -637,8 +637,8 @@ export default function HelpPage() {
                 </h4>
                 <div className="bg-muted p-4 rounded-lg font-mono">
                   <div className="text-sm space-y-2">
-                    <div><strong>Input:</strong> threat_ips = events with 'IP Address' != null and contains ['fail', 'deny', 'attack']</div>
-                    <div><strong>Processing:</strong> group by 'IP Address' → estimate_country(ip) → group by country</div>
+                    <div><strong>Input:</strong> threat_ips = events with &apos;IP Address&apos; != null and contains [&apos;fail&apos;, &apos;deny&apos;, &apos;attack&apos;]</div>
+                    <div><strong>Processing:</strong> group by &apos;IP Address&apos; → estimate_country(ip) → group by country</div>
                     <div className="border-t pt-2 mt-2">
                       <strong>Formula:</strong> percentage = round((country_threats / total_threats) × 100, 1)
                     </div>
@@ -675,7 +675,7 @@ export default function HelpPage() {
                 <h4 className="font-semibold">IP Geolocation Algorithm</h4>
                 <div className="bg-muted p-4 rounded-lg text-sm">
                   <div className="space-y-2">
-                    <div><strong>Private Networks:</strong> 10.x.x.x, 172.16-31.x.x, 192.168.x.x → "Internal"</div>
+                    <div><strong>Private Networks:</strong> 10.x.x.x, 172.16-31.x.x, 192.168.x.x → &quot;Internal&quot;</div>
                     <div><strong>Class A (1-126):</strong> North America region assignment</div>
                     <div><strong>Class B (128-191):</strong> Asia-Pacific region assignment</div>
                     <div><strong>Class C (192-223):</strong> Europe region assignment</div>
@@ -692,9 +692,9 @@ export default function HelpPage() {
                 <div className="bg-muted p-4 rounded-lg text-sm">
                   <div className="space-y-2">
                     <div><strong>Method:</strong> Compare current period with previous period of same duration</div>
-                    <div><strong>Trend Direction:</strong> "up" if current &gt; previous, "down" if current &lt; previous</div>
+                    <div><strong>Trend Direction:</strong> &quot;up&quot; if current &gt; previous, &quot;down&quot; if current &lt; previous</div>
                     <div><strong>Percentage Change:</strong> ((current - previous) / previous) × 100</div>
-                    <div><strong>Display Format:</strong> "+X.X%" for increases, "-X.X%" for decreases</div>
+                    <div><strong>Display Format:</strong> &quot;+X.X%&quot; for increases, &quot;-X.X%&quot; for decreases</div>
                   </div>
                 </div>
               </div>

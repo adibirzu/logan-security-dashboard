@@ -186,7 +186,7 @@ class SecurityAnalyzer:
                 stats["threat_level"] = "low"
                 stats["system_health"] = 95
             
-            stats["last_update"] = datetime.utcnow().isoformat() + "Z"
+            stats["last_update"] = datetime.now(datetime.UTC).isoformat().replace('+00:00', 'Z')
             
             return stats
             

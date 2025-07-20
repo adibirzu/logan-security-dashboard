@@ -3,6 +3,8 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { OptimizedStatsCard, LoadingSkeleton } from '@/components/ui/optimized-card'
+import { OptimizedThreatItem } from './OptimizedThreatItem'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -194,26 +196,7 @@ export default function ThreatAnalyticsPage() {
     return IconComponent
   }
 
-  const formatBytes = (bytes: number) => {
-    if (bytes === 0) return '0 B'
-    const k = 1024
-    const sizes = ['B', 'KB', 'MB', 'GB', 'TB']
-    const i = Math.floor(Math.log(bytes) / Math.log(k))
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i]
-  }
-
-  const formatDuration = (hours: number) => {
-    if (hours < 1) return `${Math.round(hours * 60)}m`
-    if (hours < 24) return `${Math.round(hours)}h`
-    return `${Math.round(hours / 24)}d`
-  }
-
-  const getScoreColor = (score: number) => {
-    if (score >= 90) return 'text-red-600'
-    if (score >= 70) return 'text-orange-600'
-    if (score >= 50) return 'text-yellow-600'
-    return 'text-blue-600'
-  }
+  // These functions are now moved to OptimizedThreatItem
 
   // Navigate to threat intelligence with IP pre-filled
   const navigateToThreatIntelligence = (ip: string) => {
@@ -273,70 +256,37 @@ export default function ThreatAnalyticsPage() {
       {/* Statistics Cards */}
       {stats && (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Total Threats</CardTitle>
-              <AlertTriangle className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{stats.total_threats}</div>
-              <p className="text-xs text-muted-foreground">
-                {stats.analysis_time_range}
-              </p>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Critical Threats</CardTitle>
-              <Shield className="h-4 w-4 text-red-500" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-red-600">{stats.critical_threats}</div>
-              <p className="text-xs text-muted-foreground">
-                Requires immediate attention
-              </p>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Beacons Detected</CardTitle>
-              <Target className="h-4 w-4 text-orange-500" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{stats.beacons_detected}</div>
-              <p className="text-xs text-muted-foreground">
-                Potential C2 communication
-              </p>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Long Connections</CardTitle>
-              <Clock className="h-4 w-4 text-yellow-500" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{stats.long_connections}</div>
-              <p className="text-xs text-muted-foreground">
-                Extended duration sessions
-              </p>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">DNS Tunneling</CardTitle>
-              <Network className="h-4 w-4 text-blue-500" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{stats.dns_tunneling}</div>
-              <p className="text-xs text-muted-foreground">
-                Covert channel attempts
-              </p>
-            </CardContent>
-          </Card>
+          <OptimizedStatsCard
+            title="Total Threats"
+            value={stats.total_threats}
+            subtitle={stats.analysis_time_range}
+            icon={<AlertTriangle className="h-4 w-4 text-muted-foreground" />}
+          />
+          <OptimizedStatsCard
+            title="Critical Threats"
+            value={stats.critical_threats}
+            subtitle="Requires immediate attention"
+            icon={<Shield className="h-4 w-4 text-red-500" />}
+            className="text-red-600"
+          />
+          <OptimizedStatsCard
+            title="Beacons Detected"
+            value={stats.beacons_detected}
+            subtitle="Potential C2 communication"
+            icon={<Target className="h-4 w-4 text-orange-500" />}
+          />
+          <OptimizedStatsCard
+            title="Long Connections"
+            value={stats.long_connections}
+            subtitle="Extended duration sessions"
+            icon={<Clock className="h-4 w-4 text-yellow-500" />}
+          />
+          <OptimizedStatsCard
+            title="DNS Tunneling"
+            value={stats.dns_tunneling}
+            subtitle="Covert channel attempts"
+            icon={<Network className="h-4 w-4 text-blue-500" />}
+          />
         </div>
       )}
 
@@ -415,102 +365,20 @@ export default function ThreatAnalyticsPage() {
                     if (!threat) return null
                     const Icon = getThreatIcon(threat.type)
                     return (
-                      <div
+                      <OptimizedThreatItem
                         key={threat.id}
-                        className="border rounded-lg p-4 hover:bg-gray-50 transition-colors"
-                      >
-                        <div className="flex items-start justify-between">
-                          <div className="flex items-start space-x-3">
-                            <div className="p-2 rounded-full bg-gray-100">
-                              <Icon className="h-5 w-5 text-gray-600" />
-                            </div>
-                            <div className="space-y-1">
-                              <div className="flex items-center gap-2">
-                                <h3 className="font-medium">
-                                  {THREAT_TYPE_LABELS[threat.type]}
-                                </h3>
-                                <Badge className={SEVERITY_COLORS[threat.severity]}>
-                                  {threat.severity.toUpperCase()}
-                                </Badge>
-                                <span className={`font-medium ${getScoreColor(threat.score)}`}>
-                                  Score: {threat.score}%
-                                </span>
-                              </div>
-                              <div className="text-sm text-muted-foreground space-y-1">
-                                <div className="flex items-center gap-4">
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
-                                  <span>Source: <ClickableIP ip={threat.source_ip} /></span>
-                                  <span>Destination: <ClickableIP ip={threat.destination_ip} /></span>
-=======
-=======
->>>>>>> Stashed changes
-                                  <span>Source: <span className={getMaliciousIPStyles(threat.source_ip).textColor || 'text-foreground'}>{threat.source_ip}</span>
-                                    {threatIntelResults.get(threat.source_ip)?.isMalicious && (
-                                      <Badge variant="destructive" className="ml-1 text-xs">
-                                        Malicious
-                                      </Badge>
-                                    )}
-                                  </span>
-                                  <span>Destination: <span className={getMaliciousIPStyles(threat.destination_ip).textColor || 'text-foreground'}>{threat.destination_ip}</span>
-                                    {threatIntelResults.get(threat.destination_ip)?.isMalicious && (
-                                      <Badge variant="destructive" className="ml-1 text-xs">
-                                        Malicious
-                                      </Badge>
-                                    )}
-                                  </span>
-<<<<<<< Updated upstream
->>>>>>> Stashed changes
-=======
->>>>>>> Stashed changes
-                                  {threat.destination_host && (
-                                    <span>Host: {threat.destination_host}</span>
-                                  )}
-                                </div>
-                                <div className="flex items-center gap-4">
-                                  <span>Connections: {safeToLocaleString(threat.connection_count)}</span>
-                                  <span>Data: {formatBytes(threat.bytes_transferred)}</span>
-                                  <span>Duration: {formatDuration(threat.duration_hours)}</span>
-                                  <span>Confidence: {threat.confidence}%</span>
-                                </div>
-                                <div className="flex items-center gap-4">
-                                  <span>First Seen: {safeDateToLocaleString(threat.first_seen)}</span>
-                                  <span>Last Seen: {safeDateToLocaleString(threat.last_seen)}</span>
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                          <div className="flex flex-col items-end space-y-2">
-                            <Progress value={threat.score} className="w-24" />
-                            <div className="flex gap-2">
-                              <Button 
-                                variant="outline" 
-                                size="sm"
-                                onClick={() => {
-                                  window.open(`/threat-hunting?tab=intelligence&ip=${encodeURIComponent(threat.source_ip)}`, '_blank')
-                                }}
-                                title="Check source IP in Threat Intelligence"
-                              >
-                                <Search className="h-4 w-4 mr-2" />
-                                Check Source IP
-                              </Button>
-                              {threat.destination_ip && (
-                                <Button 
-                                  variant="outline" 
-                                  size="sm"
-                                  onClick={() => {
-                                    window.open(`/threat-hunting?tab=intelligence&ip=${encodeURIComponent(threat.destination_ip)}`, '_blank')
-                                  }}
-                                  title="Check destination IP in Threat Intelligence"
-                                >
-                                  <Search className="h-4 w-4 mr-2" />
-                                  Check Dest IP
-                                </Button>
-                              )}
-                            </div>
-                          </div>
-                        </div>
-                      </div>
+                        threat={threat}
+                        threatIntelResults={threatIntelResults}
+                        Icon={Icon}
+                        threatTypeLabel={THREAT_TYPE_LABELS[threat.type]}
+                        severityColors={SEVERITY_COLORS}
+                        onCheckSourceIP={(ip) => {
+                          window.open(`/threat-hunting?tab=intelligence&ip=${encodeURIComponent(ip)}`, '_blank')
+                        }}
+                        onCheckDestIP={(ip) => {
+                          window.open(`/threat-hunting?tab=intelligence&ip=${encodeURIComponent(ip)}`, '_blank')
+                        }}
+                      />
                     )
                   })}
                   

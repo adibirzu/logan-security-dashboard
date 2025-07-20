@@ -3,7 +3,25 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
   // Performance optimizations
   experimental: {
-    optimizePackageImports: ['lucide-react', 'recharts', '@radix-ui/react-dropdown-menu'],
+    optimizePackageImports: [
+      'lucide-react', 
+      'recharts', 
+      '@radix-ui/react-dropdown-menu',
+      '@radix-ui/react-dialog',
+      '@radix-ui/react-select',
+      '@radix-ui/react-tabs',
+      '@radix-ui/react-tooltip',
+      'framer-motion',
+      'date-fns'
+    ],
+    turbo: {
+      rules: {
+        '*.svg': {
+          loaders: ['@svgr/webpack'],
+          as: '*.js',
+        },
+      },
+    },
   },
   
   
@@ -35,8 +53,22 @@ const nextConfig: NextConfig = {
           charts: {
             name: 'charts',
             chunks: 'all',
-            test: /[\\/]node_modules[\\/](recharts|d3)[\\/]/,
+            test: /[\\/]node_modules[\\/](recharts|d3|echarts)[\\/]/,
             priority: 25,
+          },
+          // Separate chunk for 3D libraries  
+          three: {
+            name: 'three',
+            chunks: 'all',
+            test: /[\\/]node_modules[\\/](three|@react-three)[\\/]/,
+            priority: 24,
+          },
+          // Maps and geo libraries
+          maps: {
+            name: 'maps',
+            chunks: 'all',
+            test: /[\\/]node_modules[\\/](leaflet|react-leaflet|topojson|@turf)[\\/]/,
+            priority: 23,
           },
           // Common vendor chunk
           lib: {

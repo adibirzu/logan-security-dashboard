@@ -1,347 +1,229 @@
 {
-  "mitre_enhanced_queries": {
-    "description": "Enhanced MITRE ATT&CK queries for Windows Sysmon events with technique extraction",
-    "last_updated": "2025-01-18",
-    "meta": {
-      "total_queries": 12,
-      "categories": ["mitre-attack", "windows-sysmon", "security"],
-      "query_type": "enhanced",
-      "data_source": "Windows Sysmon Events",
-      "technique_extraction": true
-    },
-    "queries": [
-      {
-        "id": "mitre_sysmon_technique_overview",
-        "name": "MITRE Sysmon Technique Overview",
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
-        "query": "'Log Source' = 'Windows Sysmon Events' and User != 'NT AUTHORITY\\\\SYSTEM' and Technique_id != null | timestats count as logrecords by Technique_id | sort -logrecords",
-=======
-        "query": "'Log Source' = 'Windows Sysmon Events' and 'User' != 'NT AUTHORITY\\\\SYSTEM' and 'Technique_id' is not null | timestats count as logrecords by 'Technique_id' | sort -logrecords",
->>>>>>> Stashed changes
-=======
-        "query": "'Log Source' = 'Windows Sysmon Events' and 'User' != 'NT AUTHORITY\\\\SYSTEM' and 'Technique_id' is not null | timestats count as logrecords by 'Technique_id' | sort -logrecords",
->>>>>>> Stashed changes
-        "category": "mitre-attack",
-        "status": "ENHANCED",
-        "test_date": "2025-01-18",
-        "saved_date": "2025-01-18T10:00:00Z",
-        "saved_by": "system",
-        "description": "Primary query to extract all MITRE ATT&CK technique IDs from Windows Sysmon events with event counts. Excludes system account events.",
-        "execution_stats": {},
-        "usage_stats": {},
-        "notes": "Core query for MITRE ATT&CK matrix mapping. Returns technique IDs with event counts for visualization.",
-        "mitre_mapping": {
-          "extracts_techniques": true,
-          "provides_counts": true,
-          "time_based": true
-        }
-      },
-      {
-        "id": "mitre_credential_access_techniques",
-        "name": "Credential Access Techniques",
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
-        "query": "'Log Source' = 'Windows Sysmon Events' and User != 'NT AUTHORITY\\\\SYSTEM' and (Technique_id like 'T1003*' or Technique_id like 'T1110*' or Technique_id like 'T1555*' or Technique_id like 'T1212*') | timestats count as events by Technique_id, User | sort -events",
-=======
-        "query": "'Log Source' = 'Windows Sysmon Events' and 'User' != 'NT AUTHORITY\\\\SYSTEM' and ('Technique_id' like 'T1003*' or 'Technique_id' like 'T1110*' or 'Technique_id' like 'T1555*' or 'Technique_id' like 'T1212*') | timestats count as events by 'Technique_id', 'User' | sort -events",
->>>>>>> Stashed changes
-=======
-        "query": "'Log Source' = 'Windows Sysmon Events' and 'User' != 'NT AUTHORITY\\\\SYSTEM' and ('Technique_id' like 'T1003*' or 'Technique_id' like 'T1110*' or 'Technique_id' like 'T1555*' or 'Technique_id' like 'T1212*') | timestats count as events by 'Technique_id', 'User' | sort -events",
->>>>>>> Stashed changes
-        "category": "mitre-attack",
-        "status": "ENHANCED",
-        "test_date": "2025-01-18",
-        "saved_date": "2025-01-18T10:00:00Z",
-        "saved_by": "system",
-        "description": "Focuses on credential access techniques (T1003, T1110, T1555, T1212) with user context.",
-        "execution_stats": {},
-        "usage_stats": {},
-        "notes": "Specific to credential access tactics. Includes user attribution.",
-        "mitre_mapping": {
-          "tactic": "credential-access",
-          "techniques": ["T1003", "T1110", "T1555", "T1212"],
-          "extracts_techniques": true,
-          "provides_user_context": true
-        }
-      },
-      {
-        "id": "mitre_execution_techniques",
-        "name": "Execution Techniques",
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
-        "query": "'Log Source' = 'Windows Sysmon Events' and User != 'NT AUTHORITY\\\\SYSTEM' and (Technique_id like 'T1059*' or Technique_id like 'T1203*' or Technique_id like 'T1204*' or Technique_id like 'T1047*') | timestats count as events by Technique_id, 'Process Name' | sort -events",
-=======
-        "query": "'Log Source' = 'Windows Sysmon Events' and 'User' != 'NT AUTHORITY\\\\SYSTEM' and ('Technique_id' like 'T1059*' or 'Technique_id' like 'T1203*' or 'Technique_id' like 'T1204*' or 'Technique_id' like 'T1047*') | timestats count as events by 'Technique_id', 'Process Name' | sort -events",
->>>>>>> Stashed changes
-=======
-        "query": "'Log Source' = 'Windows Sysmon Events' and 'User' != 'NT AUTHORITY\\\\SYSTEM' and ('Technique_id' like 'T1059*' or 'Technique_id' like 'T1203*' or 'Technique_id' like 'T1204*' or 'Technique_id' like 'T1047*') | timestats count as events by 'Technique_id', 'Process Name' | sort -events",
->>>>>>> Stashed changes
-        "category": "mitre-attack",
-        "status": "ENHANCED",
-        "test_date": "2025-01-18",
-        "saved_date": "2025-01-18T10:00:00Z",
-        "saved_by": "system",
-        "description": "Identifies execution techniques (T1059, T1203, T1204, T1047) with process context.",
-        "execution_stats": {},
-        "usage_stats": {},
-        "notes": "Execution tactic focus. Includes process name for additional context.",
-        "mitre_mapping": {
-          "tactic": "execution",
-          "techniques": ["T1059", "T1203", "T1204", "T1047"],
-          "extracts_techniques": true,
-          "provides_process_context": true
-        }
-      },
-      {
-        "id": "mitre_persistence_techniques",
-        "name": "Persistence Techniques",
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
-        "query": "'Log Source' = 'Windows Sysmon Events' and User != 'NT AUTHORITY\\\\SYSTEM' and (Technique_id like 'T1053*' or Technique_id like 'T1078*' or Technique_id like 'T1547*' or Technique_id like 'T1543*') | timestats count as events by Technique_id, 'Host Name' | sort -events",
-=======
-        "query": "'Log Source' = 'Windows Sysmon Events' and 'User' != 'NT AUTHORITY\\\\SYSTEM' and ('Technique_id' like 'T1053*' or 'Technique_id' like 'T1078*' or 'Technique_id' like 'T1547*' or 'Technique_id' like 'T1543*') | timestats count as events by 'Technique_id', 'Host Name' | sort -events",
->>>>>>> Stashed changes
-=======
-        "query": "'Log Source' = 'Windows Sysmon Events' and 'User' != 'NT AUTHORITY\\\\SYSTEM' and ('Technique_id' like 'T1053*' or 'Technique_id' like 'T1078*' or 'Technique_id' like 'T1547*' or 'Technique_id' like 'T1543*') | timestats count as events by 'Technique_id', 'Host Name' | sort -events",
->>>>>>> Stashed changes
-        "category": "mitre-attack",
-        "status": "ENHANCED",
-        "test_date": "2025-01-18",
-        "saved_date": "2025-01-18T10:00:00Z",
-        "saved_by": "system",
-        "description": "Tracks persistence techniques (T1053, T1078, T1547, T1543) with host context.",
-        "execution_stats": {},
-        "usage_stats": {},
-        "notes": "Persistence tactic focus. Includes host name for tracking affected systems.",
-        "mitre_mapping": {
-          "tactic": "persistence",
-          "techniques": ["T1053", "T1078", "T1547", "T1543"],
-          "extracts_techniques": true,
-          "provides_host_context": true
-        }
-      },
-      {
-        "id": "mitre_privilege_escalation_techniques",
-        "name": "Privilege Escalation Techniques",
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
-        "query": "'Log Source' = 'Windows Sysmon Events' and User != 'NT AUTHORITY\\\\SYSTEM' and (Technique_id like 'T1548*' or Technique_id like 'T1055*' or Technique_id like 'T1134*' or Technique_id like 'T1068*') | timestats count as events by Technique_id, User, 'Process Name' | sort -events",
-=======
-        "query": "'Log Source' = 'Windows Sysmon Events' and 'User' != 'NT AUTHORITY\\\\SYSTEM' and ('Technique_id' like 'T1548*' or 'Technique_id' like 'T1055*' or 'Technique_id' like 'T1134*' or 'Technique_id' like 'T1068*') | timestats count as events by 'Technique_id', 'User', 'Process Name' | sort -events",
->>>>>>> Stashed changes
-=======
-        "query": "'Log Source' = 'Windows Sysmon Events' and 'User' != 'NT AUTHORITY\\\\SYSTEM' and ('Technique_id' like 'T1548*' or 'Technique_id' like 'T1055*' or 'Technique_id' like 'T1134*' or 'Technique_id' like 'T1068*') | timestats count as events by 'Technique_id', 'User', 'Process Name' | sort -events",
->>>>>>> Stashed changes
-        "category": "mitre-attack",
-        "status": "ENHANCED",
-        "test_date": "2025-01-18",
-        "saved_date": "2025-01-18T10:00:00Z",
-        "saved_by": "system",
-        "description": "Monitors privilege escalation techniques (T1548, T1055, T1134, T1068) with user and process context.",
-        "execution_stats": {},
-        "usage_stats": {},
-        "notes": "Privilege escalation tactic focus. Critical for security monitoring.",
-        "mitre_mapping": {
-          "tactic": "privilege-escalation",
-          "techniques": ["T1548", "T1055", "T1134", "T1068"],
-          "extracts_techniques": true,
-          "provides_full_context": true
-        }
-      },
-      {
-        "id": "mitre_defense_evasion_techniques",
-        "name": "Defense Evasion Techniques",
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
-        "query": "'Log Source' = 'Windows Sysmon Events' and User != 'NT AUTHORITY\\\\SYSTEM' and (Technique_id like 'T1055*' or Technique_id like 'T1112*' or Technique_id like 'T1027*' or Technique_id like 'T1140*') | timestats count as events by Technique_id, 'Event ID' | sort -events",
-=======
-        "query": "'Log Source' = 'Windows Sysmon Events' and 'User' != 'NT AUTHORITY\\\\SYSTEM' and ('Technique_id' like 'T1055*' or 'Technique_id' like 'T1112*' or 'Technique_id' like 'T1027*' or 'Technique_id' like 'T1140*') | timestats count as events by 'Technique_id', 'Event ID' | sort -events",
->>>>>>> Stashed changes
-=======
-        "query": "'Log Source' = 'Windows Sysmon Events' and 'User' != 'NT AUTHORITY\\\\SYSTEM' and ('Technique_id' like 'T1055*' or 'Technique_id' like 'T1112*' or 'Technique_id' like 'T1027*' or 'Technique_id' like 'T1140*') | timestats count as events by 'Technique_id', 'Event ID' | sort -events",
->>>>>>> Stashed changes
-        "category": "mitre-attack",
-        "status": "ENHANCED",
-        "test_date": "2025-01-18",
-        "saved_date": "2025-01-18T10:00:00Z",
-        "saved_by": "system",
-        "description": "Detects defense evasion techniques (T1055, T1112, T1027, T1140) with event ID context.",
-        "execution_stats": {},
-        "usage_stats": {},
-        "notes": "Defense evasion tactic focus. Includes Sysmon event ID for forensic analysis.",
-        "mitre_mapping": {
-          "tactic": "defense-evasion",
-          "techniques": ["T1055", "T1112", "T1027", "T1140"],
-          "extracts_techniques": true,
-          "provides_event_context": true
-        }
-      },
-      {
-        "id": "mitre_discovery_techniques",
-        "name": "Discovery Techniques",
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
-        "query": "'Log Source' = 'Windows Sysmon Events' and User != 'NT AUTHORITY\\\\SYSTEM' and (Technique_id like 'T1082*' or Technique_id like 'T1083*' or Technique_id like 'T1087*' or Technique_id like 'T1046*') | timestats count as events by Technique_id, 'Command Line' | sort -events",
-=======
-        "query": "'Log Source' = 'Windows Sysmon Events' and 'User' != 'NT AUTHORITY\\\\SYSTEM' and ('Technique_id' like 'T1082*' or 'Technique_id' like 'T1083*' or 'Technique_id' like 'T1087*' or 'Technique_id' like 'T1046*') | timestats count as events by 'Technique_id', 'Command Line' | sort -events",
->>>>>>> Stashed changes
-=======
-        "query": "'Log Source' = 'Windows Sysmon Events' and 'User' != 'NT AUTHORITY\\\\SYSTEM' and ('Technique_id' like 'T1082*' or 'Technique_id' like 'T1083*' or 'Technique_id' like 'T1087*' or 'Technique_id' like 'T1046*') | timestats count as events by 'Technique_id', 'Command Line' | sort -events",
->>>>>>> Stashed changes
-        "category": "mitre-attack",
-        "status": "ENHANCED",
-        "test_date": "2025-01-18",
-        "saved_date": "2025-01-18T10:00:00Z",
-        "saved_by": "system",
-        "description": "Identifies discovery techniques (T1082, T1083, T1087, T1046) with command line context.",
-        "execution_stats": {},
-        "usage_stats": {},
-        "notes": "Discovery tactic focus. Command line provides insight into reconnaissance activities.",
-        "mitre_mapping": {
-          "tactic": "discovery",
-          "techniques": ["T1082", "T1083", "T1087", "T1046"],
-          "extracts_techniques": true,
-          "provides_command_context": true
-        }
-      },
-      {
-        "id": "mitre_lateral_movement_techniques",
-        "name": "Lateral Movement Techniques",
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
-        "query": "'Log Source' = 'Windows Sysmon Events' and User != 'NT AUTHORITY\\\\SYSTEM' and (Technique_id like 'T1021*' or Technique_id like 'T1570*' or Technique_id like 'T1550*') | timestats count as events by Technique_id, 'Source IP', 'Destination IP' | sort -events",
-=======
-        "query": "'Log Source' = 'Windows Sysmon Events' and 'User' != 'NT AUTHORITY\\\\SYSTEM' and ('Technique_id' like 'T1021*' or 'Technique_id' like 'T1570*' or 'Technique_id' like 'T1550*') | timestats count as events by 'Technique_id', 'Source IP', 'Destination IP' | sort -events",
->>>>>>> Stashed changes
-=======
-        "query": "'Log Source' = 'Windows Sysmon Events' and 'User' != 'NT AUTHORITY\\\\SYSTEM' and ('Technique_id' like 'T1021*' or 'Technique_id' like 'T1570*' or 'Technique_id' like 'T1550*') | timestats count as events by 'Technique_id', 'Source IP', 'Destination IP' | sort -events",
->>>>>>> Stashed changes
-        "category": "mitre-attack",
-        "status": "ENHANCED",
-        "test_date": "2025-01-18",
-        "saved_date": "2025-01-18T10:00:00Z",
-        "saved_by": "system",
-        "description": "Tracks lateral movement techniques (T1021, T1570, T1550) with network context.",
-        "execution_stats": {},
-        "usage_stats": {},
-        "notes": "Lateral movement tactic focus. Network IPs help track movement patterns.",
-        "mitre_mapping": {
-          "tactic": "lateral-movement",
-          "techniques": ["T1021", "T1570", "T1550"],
-          "extracts_techniques": true,
-          "provides_network_context": true
-        }
-      },
-      {
-        "id": "mitre_command_control_techniques",
-        "name": "Command and Control Techniques",
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
-        "query": "'Log Source' = 'Windows Sysmon Events' and User != 'NT AUTHORITY\\\\SYSTEM' and (Technique_id like 'T1071*' or Technique_id like 'T1090*' or Technique_id like 'T1095*' or Technique_id like 'T1573*') | timestats count as events by Technique_id, 'Destination IP', 'Destination Port' | sort -events",
-=======
-        "query": "'Log Source' = 'Windows Sysmon Events' and 'User' != 'NT AUTHORITY\\\\SYSTEM' and ('Technique_id' like 'T1071*' or 'Technique_id' like 'T1090*' or 'Technique_id' like 'T1095*' or 'Technique_id' like 'T1573*') | timestats count as events by 'Technique_id', 'Destination IP', 'Destination Port' | sort -events",
->>>>>>> Stashed changes
-=======
-        "query": "'Log Source' = 'Windows Sysmon Events' and 'User' != 'NT AUTHORITY\\\\SYSTEM' and ('Technique_id' like 'T1071*' or 'Technique_id' like 'T1090*' or 'Technique_id' like 'T1095*' or 'Technique_id' like 'T1573*') | timestats count as events by 'Technique_id', 'Destination IP', 'Destination Port' | sort -events",
->>>>>>> Stashed changes
-        "category": "mitre-attack",
-        "status": "ENHANCED",
-        "test_date": "2025-01-18",
-        "saved_date": "2025-01-18T10:00:00Z",
-        "saved_by": "system",
-        "description": "Monitors command and control techniques (T1071, T1090, T1095, T1573) with network details.",
-        "execution_stats": {},
-        "usage_stats": {},
-        "notes": "C2 tactic focus. Network details crucial for identifying malicious infrastructure.",
-        "mitre_mapping": {
-          "tactic": "command-and-control",
-          "techniques": ["T1071", "T1090", "T1095", "T1573"],
-          "extracts_techniques": true,
-          "provides_network_details": true
-        }
-      },
-      {
-        "id": "mitre_technique_timeline",
-        "name": "MITRE Technique Timeline",
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
-        "query": "'Log Source' = 'Windows Sysmon Events' and User != 'NT AUTHORITY\\\\SYSTEM' and Technique_id != null | link span=1hour Time | stats count as events by Time, Technique_id | sort Time",
-=======
-        "query": "'Log Source' = 'Windows Sysmon Events' and 'User' != 'NT AUTHORITY\\\\SYSTEM' and 'Technique_id' is not null | link span=1hour Time | stats count as events by Time, 'Technique_id' | sort Time",
->>>>>>> Stashed changes
-=======
-        "query": "'Log Source' = 'Windows Sysmon Events' and 'User' != 'NT AUTHORITY\\\\SYSTEM' and 'Technique_id' is not null | link span=1hour Time | stats count as events by Time, 'Technique_id' | sort Time",
->>>>>>> Stashed changes
-        "category": "mitre-attack",
-        "status": "ENHANCED",
-        "test_date": "2025-01-18",
-        "saved_date": "2025-01-18T10:00:00Z",
-        "saved_by": "system",
-        "description": "Creates a timeline of MITRE technique activity over time with 1-hour intervals.",
-        "execution_stats": {},
-        "usage_stats": {},
-        "notes": "Timeline analysis for tracking attack progression. Useful for incident response.",
-        "mitre_mapping": {
-          "extracts_techniques": true,
-          "provides_timeline": true,
-          "time_granularity": "1hour"
-        }
-      },
-      {
-        "id": "mitre_high_severity_techniques",
-        "name": "High Severity MITRE Techniques",
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
-        "query": "'Log Source' = 'Windows Sysmon Events' and User != 'NT AUTHORITY\\\\SYSTEM' and Technique_id != null | timestats count as events by Technique_id | where events >= 50 | sort -events",
-=======
-        "query": "'Log Source' = 'Windows Sysmon Events' and 'User' != 'NT AUTHORITY\\\\SYSTEM' and 'Technique_id' is not null | timestats count as events by 'Technique_id' | where events >= 50 | sort -events",
->>>>>>> Stashed changes
-=======
-        "query": "'Log Source' = 'Windows Sysmon Events' and 'User' != 'NT AUTHORITY\\\\SYSTEM' and 'Technique_id' is not null | timestats count as events by 'Technique_id' | where events >= 50 | sort -events",
->>>>>>> Stashed changes
-        "category": "mitre-attack",
-        "status": "ENHANCED",
-        "test_date": "2025-01-18",
-        "saved_date": "2025-01-18T10:00:00Z",
-        "saved_by": "system",
-        "description": "Identifies high-volume MITRE techniques (50+ events) indicating potential threat activity.",
-        "execution_stats": {},
-        "usage_stats": {},
-        "notes": "High-severity filter for prioritizing security responses. Threshold-based alerting.",
-        "mitre_mapping": {
-          "extracts_techniques": true,
-          "provides_severity_filtering": true,
-          "threshold": 50
-        }
-      },
-      {
-        "id": "mitre_user_technique_correlation",
-        "name": "User-Technique Correlation",
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
-        "query": "'Log Source' = 'Windows Sysmon Events' and User != 'NT AUTHORITY\\\\SYSTEM' and Technique_id != null | stats count as events, dc(Technique_id) as unique_techniques by User | where unique_techniques >= 5 | sort -unique_techniques",
-=======
-        "query": "'Log Source' = 'Windows Sysmon Events' and 'User' != 'NT AUTHORITY\\\\SYSTEM' and 'Technique_id' is not null | stats count as events, dc('Technique_id') as unique_techniques by 'User' | where unique_techniques >= 5 | sort -unique_techniques",
->>>>>>> Stashed changes
-=======
-        "query": "'Log Source' = 'Windows Sysmon Events' and 'User' != 'NT AUTHORITY\\\\SYSTEM' and 'Technique_id' is not null | stats count as events, dc('Technique_id') as unique_techniques by 'User' | where unique_techniques >= 5 | sort -unique_techniques",
->>>>>>> Stashed changes
-        "category": "mitre-attack",
-        "status": "ENHANCED",
-        "test_date": "2025-01-18",
-        "saved_date": "2025-01-18T10:00:00Z",
-        "saved_by": "system",
-        "description": "Correlates users with multiple MITRE techniques to identify potential compromised accounts.",
-        "execution_stats": {},
-        "usage_stats": {},
-        "notes": "User behavior analysis. Multiple techniques per user may indicate account compromise.",
-        "mitre_mapping": {
-          "extracts_techniques": true,
-          "provides_user_correlation": true,
-          "min_techniques_threshold": 5
-        }
+  "version": "2.0",
+  "description": "Enhanced MITRE ATT&CK queries for Logan Security Dashboard",
+  "last_updated": "2025-01-18",
+  "metadata": {
+    "query_version": "enhanced",
+    "query_type": "enhanced",
+    "data_source": "Windows Sysmon Events",
+    "technique_extraction": true
+  },
+  "queries": [
+    {
+      "id": "mitre_sysmon_technique_overview",
+      "name": "MITRE Sysmon Technique Overview",
+      "query": "'Log Source' = 'Windows Sysmon Events' and 'User' != 'NT AUTHORITY\\\\SYSTEM' and 'Technique_id' is not null | timestats count as logrecords by 'Technique_id' | sort -logrecords",
+      "category": "mitre-attack",
+      "status": "ENHANCED",
+      "test_date": "2025-01-18",
+      "saved_date": "2025-01-18T10:00:00Z",
+      "saved_by": "system",
+      "description": "Primary query to extract all MITRE ATT&CK technique IDs from Windows Sysmon events with event counts. Excludes system account events.",
+      "execution_stats": {},
+      "usage_stats": {},
+      "metadata": {
+        "extracts_techniques": true,
+        "provides_counts": true,
+        "time_based": true
       }
-    ]
-  }
+    },
+    {
+      "id": "mitre_credential_access_techniques",
+      "name": "Credential Access Techniques",
+      "query": "'Log Source' = 'Windows Sysmon Events' and 'User' != 'NT AUTHORITY\\\\SYSTEM' and ('Technique_id' like 'T1003*' or 'Technique_id' like 'T1110*' or 'Technique_id' like 'T1555*' or 'Technique_id' like 'T1212*') | timestats count as events by 'Technique_id', 'User' | sort -events",
+      "category": "mitre-attack",
+      "status": "ENHANCED",
+      "test_date": "2025-01-18",
+      "saved_date": "2025-01-18T10:00:00Z",
+      "saved_by": "system",
+      "description": "Focuses on credential access techniques (T1003, T1110, T1555, T1212) with user context.",
+      "execution_stats": {},
+      "usage_stats": {},
+      "metadata": {
+        "techniques": ["T1003", "T1110", "T1555", "T1212"],
+        "extracts_techniques": true,
+        "provides_user_context": true
+      }
+    },
+    {
+      "id": "mitre_execution_techniques",
+      "name": "Execution Techniques",
+      "query": "'Log Source' = 'Windows Sysmon Events' and 'User' != 'NT AUTHORITY\\\\SYSTEM' and ('Technique_id' like 'T1059*' or 'Technique_id' like 'T1203*' or 'Technique_id' like 'T1204*' or 'Technique_id' like 'T1047*') | timestats count as events by 'Technique_id', 'Process Name' | sort -events",
+      "category": "mitre-attack",
+      "status": "ENHANCED",
+      "test_date": "2025-01-18",
+      "saved_date": "2025-01-18T10:00:00Z",
+      "saved_by": "system",
+      "description": "Identifies execution techniques (T1059, T1203, T1204, T1047) with process context.",
+      "execution_stats": {},
+      "usage_stats": {},
+      "metadata": {
+        "techniques": ["T1059", "T1203", "T1204", "T1047"],
+        "extracts_techniques": true,
+        "provides_process_context": true
+      }
+    },
+    {
+      "id": "mitre_persistence_techniques",
+      "name": "Persistence Techniques",
+      "query": "'Log Source' = 'Windows Sysmon Events' and 'User' != 'NT AUTHORITY\\\\SYSTEM' and ('Technique_id' like 'T1053*' or 'Technique_id' like 'T1078*' or 'Technique_id' like 'T1547*' or 'Technique_id' like 'T1543*') | timestats count as events by 'Technique_id', 'Host Name' | sort -events",
+      "category": "mitre-attack",
+      "status": "ENHANCED",
+      "test_date": "2025-01-18",
+      "saved_date": "2025-01-18T10:00:00Z",
+      "saved_by": "system",
+      "description": "Tracks persistence techniques (T1053, T1078, T1547, T1543) with host context.",
+      "execution_stats": {},
+      "usage_stats": {},
+      "metadata": {
+        "techniques": ["T1053", "T1078", "T1547", "T1543"],
+        "extracts_techniques": true,
+        "provides_host_context": true
+      }
+    },
+    {
+      "id": "mitre_privilege_escalation_techniques",
+      "name": "Privilege Escalation Techniques",
+      "query": "'Log Source' = 'Windows Sysmon Events' and 'User' != 'NT AUTHORITY\\\\SYSTEM' and ('Technique_id' like 'T1548*' or 'Technique_id' like 'T1055*' or 'Technique_id' like 'T1134*' or 'Technique_id' like 'T1068*') | timestats count as events by 'Technique_id', 'User', 'Process Name' | sort -events",
+      "category": "mitre-attack",
+      "status": "ENHANCED",
+      "test_date": "2025-01-18",
+      "saved_date": "2025-01-18T10:00:00Z",
+      "saved_by": "system",
+      "description": "Monitors privilege escalation techniques (T1548, T1055, T1134, T1068) with user and process context.",
+      "execution_stats": {},
+      "usage_stats": {},
+      "metadata": {
+        "techniques": ["T1548", "T1055", "T1134", "T1068"],
+        "extracts_techniques": true,
+        "provides_full_context": true
+      }
+    },
+    {
+      "id": "mitre_defense_evasion_techniques",
+      "name": "Defense Evasion Techniques",
+      "query": "'Log Source' = 'Windows Sysmon Events' and 'User' != 'NT AUTHORITY\\\\SYSTEM' and ('Technique_id' like 'T1055*' or 'Technique_id' like 'T1112*' or 'Technique_id' like 'T1027*' or 'Technique_id' like 'T1140*') | timestats count as events by 'Technique_id', 'Event ID' | sort -events",
+      "category": "mitre-attack",
+      "status": "ENHANCED",
+      "test_date": "2025-01-18",
+      "saved_date": "2025-01-18T10:00:00Z",
+      "saved_by": "system",
+      "description": "Detects defense evasion techniques (T1055, T1112, T1027, T1140) with event ID context.",
+      "execution_stats": {},
+      "usage_stats": {},
+      "metadata": {
+        "techniques": ["T1055", "T1112", "T1027", "T1140"],
+        "extracts_techniques": true,
+        "provides_event_context": true
+      }
+    },
+    {
+      "id": "mitre_discovery_techniques",
+      "name": "Discovery Techniques",
+      "query": "'Log Source' = 'Windows Sysmon Events' and 'User' != 'NT AUTHORITY\\\\SYSTEM' and ('Technique_id' like 'T1082*' or 'Technique_id' like 'T1083*' or 'Technique_id' like 'T1087*' or 'Technique_id' like 'T1046*') | timestats count as events by 'Technique_id', 'Command Line' | sort -events",
+      "category": "mitre-attack",
+      "status": "ENHANCED",
+      "test_date": "2025-01-18",
+      "saved_date": "2025-01-18T10:00:00Z",
+      "saved_by": "system",
+      "description": "Identifies discovery techniques (T1082, T1083, T1087, T1046) with command line context.",
+      "execution_stats": {},
+      "usage_stats": {},
+      "metadata": {
+        "techniques": ["T1082", "T1083", "T1087", "T1046"],
+        "extracts_techniques": true,
+        "provides_command_context": true
+      }
+    },
+    {
+      "id": "mitre_lateral_movement_techniques",
+      "name": "Lateral Movement Techniques",
+      "query": "'Log Source' = 'Windows Sysmon Events' and 'User' != 'NT AUTHORITY\\\\SYSTEM' and ('Technique_id' like 'T1021*' or 'Technique_id' like 'T1570*' or 'Technique_id' like 'T1550*') | timestats count as events by 'Technique_id', 'Source IP', 'Destination IP' | sort -events",
+      "category": "mitre-attack",
+      "status": "ENHANCED",
+      "test_date": "2025-01-18",
+      "saved_date": "2025-01-18T10:00:00Z",
+      "saved_by": "system",
+      "description": "Tracks lateral movement techniques (T1021, T1570, T1550) with network context.",
+      "execution_stats": {},
+      "usage_stats": {},
+      "metadata": {
+        "techniques": ["T1021", "T1570", "T1550"],
+        "extracts_techniques": true,
+        "provides_network_context": true
+      }
+    },
+    {
+      "id": "mitre_command_control_techniques",
+      "name": "Command and Control Techniques",
+      "query": "'Log Source' = 'Windows Sysmon Events' and 'User' != 'NT AUTHORITY\\\\SYSTEM' and ('Technique_id' like 'T1071*' or 'Technique_id' like 'T1090*' or 'Technique_id' like 'T1095*' or 'Technique_id' like 'T1573*') | timestats count as events by 'Technique_id', 'Destination IP', 'Destination Port' | sort -events",
+      "category": "mitre-attack",
+      "status": "ENHANCED",
+      "test_date": "2025-01-18",
+      "saved_date": "2025-01-18T10:00:00Z",
+      "saved_by": "system",
+      "description": "Monitors command and control techniques (T1071, T1090, T1095, T1573) with network details.",
+      "execution_stats": {},
+      "usage_stats": {},
+      "metadata": {
+        "techniques": ["T1071", "T1090", "T1095", "T1573"],
+        "extracts_techniques": true,
+        "provides_network_details": true
+      }
+    },
+    {
+      "id": "mitre_technique_timeline",
+      "name": "MITRE Technique Timeline",
+      "query": "'Log Source' = 'Windows Sysmon Events' and 'User' != 'NT AUTHORITY\\\\SYSTEM' and 'Technique_id' is not null | link span=1hour Time | stats count as events by Time, 'Technique_id' | sort Time",
+      "category": "mitre-attack",
+      "status": "ENHANCED",
+      "test_date": "2025-01-18",
+      "saved_date": "2025-01-18T10:00:00Z",
+      "saved_by": "system",
+      "description": "Creates a timeline of MITRE technique activity over time with 1-hour intervals.",
+      "execution_stats": {},
+      "usage_stats": {},
+      "metadata": {
+        "extracts_techniques": true,
+        "provides_timeline": true,
+        "time_granularity": "1hour"
+      }
+    },
+    {
+      "id": "mitre_high_severity_techniques",
+      "name": "High Severity MITRE Techniques",
+      "query": "'Log Source' = 'Windows Sysmon Events' and 'User' != 'NT AUTHORITY\\\\SYSTEM' and 'Technique_id' is not null | timestats count as events by 'Technique_id' | where events >= 50 | sort -events",
+      "category": "mitre-attack",
+      "status": "ENHANCED",
+      "test_date": "2025-01-18",
+      "saved_date": "2025-01-18T10:00:00Z",
+      "saved_by": "system",
+      "description": "Identifies high-volume MITRE techniques (50+ events) indicating potential threat activity.",
+      "execution_stats": {},
+      "usage_stats": {},
+      "metadata": {
+        "extracts_techniques": true,
+        "provides_severity_filtering": true,
+        "threshold": 50
+      }
+    },
+    {
+      "id": "mitre_user_technique_correlation",
+      "name": "User-Technique Correlation",
+      "query": "'Log Source' = 'Windows Sysmon Events' and 'User' != 'NT AUTHORITY\\\\SYSTEM' and 'Technique_id' is not null | stats count as events, dc('Technique_id') as unique_techniques by 'User' | where unique_techniques >= 5 | sort -unique_techniques",
+      "category": "mitre-attack",
+      "status": "ENHANCED",
+      "test_date": "2025-01-18",
+      "saved_date": "2025-01-18T10:00:00Z",
+      "saved_by": "system",
+      "description": "Correlates users with multiple MITRE techniques to identify potential compromised accounts.",
+      "execution_stats": {},
+      "usage_stats": {},
+      "metadata": {
+        "extracts_techniques": true,
+        "provides_user_correlation": true,
+        "technique_threshold": 5
+      }
+    }
+  ]
 }

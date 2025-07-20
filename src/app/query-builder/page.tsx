@@ -163,7 +163,9 @@ export default function QueryBuilderPage() {
         const data = await response.json()
         
         if (data.success) {
-          setLoganQueries(data.data.categories || {})
+          // Handle both the categories structure and potential fallbacks
+          const categories = data.data?.categories || {}
+          setLoganQueries(categories)
         } else {
           toast.error('Failed to load Logan queries')
         }
