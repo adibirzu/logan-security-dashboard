@@ -302,6 +302,7 @@ export default function ThreatHuntingFramework() {
       }
     }
   }, [])
+<<<<<<< Updated upstream
 
   // Check for tab parameter in URL
   useEffect(() => {
@@ -313,6 +314,8 @@ export default function ThreatHuntingFramework() {
       }
     }
   }, [])
+=======
+>>>>>>> Stashed changes
 
   const startHuntingSession = (methodology: HuntingMethodology) => {
     const newSession: HuntingSession = {
@@ -440,7 +443,11 @@ export default function ThreatHuntingFramework() {
       </div>
 
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
+=======
+      <Tabs defaultValue={defaultTab} className="space-y-6">
+>>>>>>> Stashed changes
 =======
       <Tabs defaultValue={defaultTab} className="space-y-6">
 >>>>>>> Stashed changes
