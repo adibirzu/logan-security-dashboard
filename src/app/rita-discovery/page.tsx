@@ -1,14 +1,30 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, Suspense } from 'react';
+import dynamic from 'next/dynamic';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { UnifiedTimeFilter, TimeRange, useTimeRange } from '@/components/TimeFilter/UnifiedTimeFilter';
-import { RITAApplicationAnalysis } from '@/components/ThreatAnalytics/RITAApplicationAnalysis';
-import { RITAIPCommunications } from '@/components/ThreatAnalytics/RITAIPCommunications';
-import NetworkGraphVisualization from '@/components/ThreatAnalytics/NetworkGraphVisualization';
-import IPLogViewer from '@/components/ThreatAnalytics/IPLogViewer';
 import ModernLayout from '@/components/Layout/ModernLayout';
+
+// Lazy load heavy RITA components
+const RITAApplicationAnalysis = dynamic(() => 
+  import('@/components/ThreatAnalytics/RITAApplicationAnalysis').then(mod => ({ default: mod.RITAApplicationAnalysis })), {
+  loading: () => <div className="h-64 bg-muted animate-pulse rounded" />
+});
+
+const RITAIPCommunications = dynamic(() => 
+  import('@/components/ThreatAnalytics/RITAIPCommunications').then(mod => ({ default: mod.RITAIPCommunications })), {
+  loading: () => <div className="h-64 bg-muted animate-pulse rounded" />
+});
+
+const NetworkGraphVisualization = dynamic(() => import('@/components/ThreatAnalytics/NetworkGraphVisualization'), {
+  loading: () => <div className="h-96 bg-muted animate-pulse rounded" />
+});
+
+const IPLogViewer = dynamic(() => import('@/components/ThreatAnalytics/IPLogViewer'), {
+  loading: () => <div className="h-48 bg-muted animate-pulse rounded" />
+});
 import { 
   Network, 
   Activity, 
@@ -96,7 +112,7 @@ export default function RITADiscoveryPage() {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <RITAApplicationAnalysis />
+                <RITAApplicationAnalysis timeRange={getLegacyTimeRangeString()} />
               </CardContent>
             </Card>
             
@@ -108,7 +124,7 @@ export default function RITADiscoveryPage() {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <RITAIPCommunications />
+                <RITAIPCommunications timeRange={getLegacyTimeRangeString()} />
               </CardContent>
             </Card>
           </div>
@@ -130,11 +146,11 @@ export default function RITADiscoveryPage() {
         </TabsContent>
 
         <TabsContent value="applications">
-          <RITAApplicationAnalysis />
+          <RITAApplicationAnalysis timeRange={getLegacyTimeRangeString()} />
         </TabsContent>
 
         <TabsContent value="communications">
-          <RITAIPCommunications />
+          <RITAIPCommunications timeRange={getLegacyTimeRangeString()} />
         </TabsContent>
 
         <TabsContent value="network-graph">

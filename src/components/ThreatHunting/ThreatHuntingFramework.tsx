@@ -284,6 +284,24 @@ export default function ThreatHuntingFramework() {
     avgDuration: 4.2,
     successRate: 67
   })
+  const [defaultTab, setDefaultTab] = useState('methodologies')
+  const [lookupIp, setLookupIp] = useState<string | null>(null)
+
+  // Handle URL parameters on component mount
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const urlParams = new URLSearchParams(window.location.search)
+      const tab = urlParams.get('tab')
+      const ip = urlParams.get('ip')
+      
+      if (tab === 'intelligence') {
+        setDefaultTab('intelligence')
+        if (ip) {
+          setLookupIp(ip)
+        }
+      }
+    }
+  }, [])
 
   // Check for tab parameter in URL
   useEffect(() => {
@@ -421,7 +439,11 @@ export default function ThreatHuntingFramework() {
         </Card>
       </div>
 
+<<<<<<< Updated upstream
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
+=======
+      <Tabs defaultValue={defaultTab} className="space-y-6">
+>>>>>>> Stashed changes
         <TabsList>
           <TabsTrigger value="methodologies">Hunting Methodologies</TabsTrigger>
           <TabsTrigger value="active-sessions">Active Sessions</TabsTrigger>
@@ -623,7 +645,7 @@ export default function ThreatHuntingFramework() {
         </TabsContent>
 
         <TabsContent value="intelligence" className="space-y-6">
-          <ThreatIntelligence />
+          <ThreatIntelligence lookupIp={lookupIp} />
         </TabsContent>
       </Tabs>
     </div>

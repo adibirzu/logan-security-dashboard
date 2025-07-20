@@ -1,4 +1,5 @@
 /**
+<<<<<<< Updated upstream
  * Configuration management for Logan Security Dashboard
  * Centralizes all configuration settings with environment variable support
  */
@@ -234,3 +235,14 @@ export const validateConfig = (): { isValid: boolean; errors: string[] } => {
 }
 
 export default config
+=======
+ * Configuration management
+ */
+
+export const config = {
+  app: {
+    environment: process.env.NODE_ENV || 'development',
+    version: '1.0.0'
+  }
+}
+>>>>>>> Stashed changes

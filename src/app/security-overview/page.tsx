@@ -1,7 +1,9 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, Suspense } from 'react'
+import dynamic from 'next/dynamic'
 import ModernLayout from '@/components/Layout/ModernLayout'
+import { ComponentLoading } from '@/components/ui/component-loading'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -30,6 +32,19 @@ import {
   FileText,
   Settings
 } from 'lucide-react'
+
+// Lazy load heavy components for better performance
+const ComplianceTab = dynamic(() => import('@/components/SecurityOverview/ComplianceTab'), {
+  loading: () => <ComponentLoading height="h-64" message="Loading compliance data..." />
+})
+
+const InfrastructureTab = dynamic(() => import('@/components/SecurityOverview/InfrastructureTab'), {
+  loading: () => <ComponentLoading height="h-64" message="Loading infrastructure status..." />
+})
+
+const ThreatIntelTab = dynamic(() => import('@/components/SecurityOverview/ThreatIntelTab'), {
+  loading: () => <ComponentLoading height="h-64" message="Loading threat intelligence..." />
+})
 
 // Enhanced security metrics with more detail
 const securityMetrics = [
@@ -174,13 +189,28 @@ const threatIntelligence = [
   }
 ]
 
+interface DashboardStats {
+  totalEvents: number
+  criticalAlerts: number
+  failedLogins: number
+  systemHealth: number
+  lastUpdate: string
+}
+
 export default function SecurityOverviewPage() {
   const [activeTab, setActiveTab] = useState('overview')
   const [refreshing, setRefreshing] = useState(false)
   const [lastUpdate, setLastUpdate] = useState(new Date())
+<<<<<<< Updated upstream
   const [stats, setStats] = useState<any>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+=======
+  const [stats, setStats] = useState<DashboardStats | null>(null)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+  const [initialLoad, setInitialLoad] = useState(true)
+>>>>>>> Stashed changes
 
   const fetchStats = async () => {
     setLoading(true)
@@ -194,14 +224,30 @@ export default function SecurityOverviewPage() {
       setStats(data)
       setLastUpdate(new Date(data.lastUpdate))
     } catch (err) {
+<<<<<<< Updated upstream
       setError(err instanceof Error ? err.message : 'Unknown error occurred')
+=======
+      setError(err instanceof Error ? err.message : 'An unknown error occurred')
+>>>>>>> Stashed changes
     } finally {
       setLoading(false)
     }
   }
 
   useEffect(() => {
-    fetchStats()
+    // Load critical data first
+    fetchStats().then(() => {
+      setInitialLoad(false)
+      // Background load remaining data after a small delay
+      setTimeout(() => {
+        // Preload other components in background
+        if (typeof window !== 'undefined') {
+          import('@/components/SecurityOverview/ComplianceTab')
+          import('@/components/SecurityOverview/InfrastructureTab') 
+          import('@/components/SecurityOverview/ThreatIntelTab')
+        }
+      }, 500)
+    })
   }, [])
 
   const handleRefresh = async () => {
@@ -363,142 +409,21 @@ export default function SecurityOverviewPage() {
           </TabsContent>
 
           <TabsContent value="compliance" className="space-y-6">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              {/* Compliance Frameworks */}
-              <Card>
-                <CardHeader>
-                  <CardTitle>Compliance Frameworks</CardTitle>
-                  <CardDescription>Current compliance status across all frameworks</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    {(complianceFrameworks || []).map((framework) => (
-                      <div key={framework.name} className="flex items-center justify-between p-4 border rounded-lg">
-                        <div>
-                          <p className="font-medium">{framework.name}</p>
-                          <p className="text-sm text-gray-500">Last audit: {framework.lastAudit}</p>
-                        </div>
-                        <div className="flex items-center space-x-3">
-                          <div className="text-right">
-                            <p className={`font-semibold ${getComplianceColor(framework.score)}`}>
-                              {framework.score}%
-                            </p>
-                            <Progress value={framework.score} className="w-20 h-2" />
-                          </div>
-                          <Badge className={framework.status === 'compliant' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}>
-                            {framework.status}
-                          </Badge>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
-
-              {/* Compliance Summary */}
-              <Card>
-                <CardHeader>
-                  <CardTitle>Compliance Summary</CardTitle>
-                  <CardDescription>Overall compliance metrics and trends</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-6">
-                    <div className="text-center">
-                      <div className="text-4xl font-bold text-green-600">96.4%</div>
-                      <p className="text-gray-500">Overall Compliance Score</p>
-                    </div>
-                    <div className="grid grid-cols-2 gap-4 text-center">
-                      <div>
-                        <div className="text-2xl font-bold">6</div>
-                        <p className="text-sm text-gray-500">Frameworks</p>
-                      </div>
-                      <div>
-                        <div className="text-2xl font-bold">247</div>
-                        <p className="text-sm text-gray-500">Controls</p>
-                      </div>
-                      <div>
-                        <div className="text-2xl font-bold">9</div>
-                        <p className="text-sm text-gray-500">Exceptions</p>
-                      </div>
-                      <div>
-                        <div className="text-2xl font-bold">0</div>
-                        <p className="text-sm text-gray-500">Violations</p>
-                      </div>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
+            <Suspense fallback={<ComponentLoading height="h-64" message="Loading compliance data..." />}>
+              <ComplianceTab frameworks={complianceFrameworks} />
+            </Suspense>
           </TabsContent>
 
           <TabsContent value="infrastructure" className="space-y-6">
-            {(infrastructureHealth || []).map((category) => (
-              <Card key={category.category}>
-                <CardHeader>
-                  <CardTitle>{category.category}</CardTitle>
-                  <CardDescription>Health and performance monitoring</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {(category.components || []).map((component) => (
-                      <div key={component.name} className="flex items-center justify-between p-4 border rounded-lg">
-                        <div>
-                          <p className="font-medium">{component.name}</p>
-                          <p className="text-sm text-gray-500">Last check: {component.lastCheck}</p>
-                        </div>
-                        <div className="flex items-center space-x-3">
-                          <div className="text-right">
-                            <p className="text-sm font-medium">{component.uptime}% uptime</p>
-                          </div>
-                          <Badge className={getStatusColor(component.status)}>
-                            {component.status}
-                          </Badge>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
+            <Suspense fallback={<ComponentLoading height="h-64" message="Loading infrastructure status..." />}>
+              <InfrastructureTab healthData={infrastructureHealth} getStatusColor={getStatusColor} />
+            </Suspense>
           </TabsContent>
 
           <TabsContent value="intelligence" className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>Latest Threat Intelligence</CardTitle>
-                <CardDescription>Recent threat indicators and campaign updates</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  {(threatIntelligence || []).map((threat) => (
-                    <div key={threat.id} className="p-4 border rounded-lg hover:bg-gray-50 transition-colors">
-                      <div className="flex items-start justify-between">
-                        <div className="flex-1">
-                          <div className="flex items-center space-x-2 mb-2">
-                            <Badge variant="outline">{threat.type}</Badge>
-                            <Badge className={getSeverityColor(threat.severity)}>
-                              {threat.severity}
-                            </Badge>
-                            <span className="text-xs text-gray-500">{threat.lastSeen}</span>
-                          </div>
-                          <h3 className="font-semibold text-gray-900">{threat.title}</h3>
-                          <p className="text-sm text-gray-600 mt-1">{threat.description}</p>
-                          <div className="flex items-center space-x-4 mt-2 text-xs text-gray-500">
-                            <span>Confidence: {threat.confidence}</span>
-                            <span>IOCs: {threat.iocs}</span>
-                            <span>Regions: {threat.affected_regions.join(', ')}</span>
-                          </div>
-                        </div>
-                        <Button variant="outline" size="sm">
-                          <Eye className="h-4 w-4 mr-2" />
-                          Details
-                        </Button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
+            <Suspense fallback={<ComponentLoading height="h-64" message="Loading threat intelligence..." />}>
+              <ThreatIntelTab threatData={threatIntelligence} getSeverityColor={getSeverityColor} />
+            </Suspense>
           </TabsContent>
         </Tabs>
       </div>

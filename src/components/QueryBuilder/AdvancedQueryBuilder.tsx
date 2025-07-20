@@ -232,7 +232,6 @@ export default function AdvancedQueryBuilder({ onExecute, onSave, savedQueries =
   const applyTemplate = (template: typeof QUERY_TEMPLATES[0]) => {
     setRawQuery(template.query)
     setActiveTab('raw')
-    setSelectedTemplate(template.name)
   }
 
   const handleExecute = () => {

@@ -64,8 +64,8 @@ export function ModularNavigation() {
   const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set(['security', 'analytics']))
 
   useEffect(() => {
-    // Get enabled modules and group by category
-    const enabledModules = moduleRegistry.getEnabledModules()
+    // Get enabled modules and group by category, excluding hidden modules
+    const enabledModules = moduleRegistry.getEnabledModules().filter(module => module.category !== 'hidden')
     const modulesByCategory = enabledModules.reduce((acc, module) => {
       if (!acc[module.category]) {
         acc[module.category] = []
@@ -198,21 +198,6 @@ export function ModularNavigation() {
       {/* Bottom section with Settings and Status */}
       <div className="mt-auto border-t border-border bg-muted/20">
         <div className="p-4 space-y-3">
-          {/* Settings */}
-          <Link href="/settings">
-            <Button
-              variant={isCurrentPath('/settings') ? 'default' : 'ghost'}
-              className={cn(
-                "w-full justify-start h-9 text-sm",
-                isCurrentPath('/settings')
-                  ? "bg-primary text-primary-foreground hover:bg-primary/90"
-                  : "text-foreground hover:bg-accent hover:text-accent-foreground"
-              )}
-            >
-              <Settings className="mr-2 h-4 w-4" />
-              Settings
-            </Button>
-          </Link>
 
           {/* Module Statistics */}
           <div className="p-3 bg-muted/50 rounded-lg">

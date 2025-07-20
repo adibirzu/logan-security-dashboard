@@ -185,7 +185,11 @@ const SAMPLE_CAMPAIGNS: Campaign[] = [
   }
 ]
 
-export default function ThreatIntelligence() {
+interface ThreatIntelligenceProps {
+  lookupIp?: string | null
+}
+
+export default function ThreatIntelligence({ lookupIp }: ThreatIntelligenceProps = {}) {
   const [threatIntel, setThreatIntel] = useState<ThreatIntel[]>(SAMPLE_THREAT_INTEL)
   const [threatActors] = useState<ThreatActor[]>(SAMPLE_THREAT_ACTORS)
   const [campaigns] = useState<Campaign[]>(SAMPLE_CAMPAIGNS)
@@ -333,6 +337,7 @@ export default function ThreatIntelligence() {
       setLoading(false)
     }
   }, [threatIntel])
+<<<<<<< Updated upstream
 
   // Check for pre-filled search from threat analytics navigation
   useEffect(() => {
@@ -362,6 +367,8 @@ export default function ThreatIntelligence() {
       }
     }
   }, [checkIndicatorWithOCI])
+=======
+>>>>>>> Stashed changes
 
   // Batch check multiple indicators
   const batchCheckWithOCI = async () => {
@@ -468,6 +475,17 @@ export default function ThreatIntelligence() {
     
     setNewIndicator('')
   }
+
+  // Handle lookup IP from URL parameter
+  useEffect(() => {
+    if (lookupIp) {
+      setNewIndicator(lookupIp)
+      setNewIndicatorType('ip')
+      // Automatically search for the IP and check with OCI
+      checkIndicatorWithOCI(lookupIp, 'ip')
+      toast.info(`Looking up IP: ${lookupIp}`)
+    }
+  }, [lookupIp, checkIndicatorWithOCI])
 
   return (
     <div className="space-y-6">

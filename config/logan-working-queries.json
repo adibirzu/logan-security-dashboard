@@ -165,7 +165,7 @@
           "id": "sysmon_network_events",
           "name": "Sysmon Network Events",
           "description": "Sysmon network events excluding specific techniques",
-          "query": "'Log Source' = 'Windows Sysmon Events' and Technique_id != T1574.002 | fields Technique_id, 'Destination IP', 'Source IP' | timestats count as logrecords by 'Log Source'",
+          "query": "'Log Source' = 'Windows Sysmon Events' and 'Technique_id' != 'T1574.002' | fields 'Technique_id', 'Destination IP', 'Source IP' | timestats count as logrecords by 'Log Source'",
           "category": "windows_sysmon",
           "tags": ["sysmon", "network", "technique"],
           "timeRange": "24h",
@@ -181,7 +181,11 @@
           "id": "mitre_technique_frequency",
           "name": "MITRE Technique ID Frequency",
           "description": "Analysis of MITRE technique usage by non-system users",
+<<<<<<< Updated upstream
           "query": "'Log Source' = 'Windows Sysmon Events' and User != 'NT AUTHORITY\\\\SYSTEM' | timestats count as logrecords by Technique_id",
+=======
+          "query": "'Log Source' = 'Windows Sysmon Events' and 'User' != 'NT AUTHORITY\\\\SYSTEM' | timestats count as logrecords by 'Technique_id'",
+>>>>>>> Stashed changes
           "category": "mitre_attack",
           "tags": ["mitre", "techniques", "frequency"],
           "timeRange": "24h",
