@@ -1,23 +1,48 @@
 'use client'
 
-import React, { useState, useEffect, useCallback } from 'react'
+import React, { useState, useEffect, useCallback, Suspense } from 'react'
+import dynamic from 'next/dynamic'
 import ModernLayout from '@/components/Layout/ModernLayout'
-import SimpleQueryBuilder from '@/components/QueryBuilder/SimpleQueryBuilder'
+import { ComponentLoading } from '@/components/ui/component-loading'
+import { VirtualList } from '@/components/ui/virtual-list'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Badge } from '@/components/ui/badge'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
 import { toast } from 'sonner'
-
-// Import advanced analytics components
-import AdvancedQueryBuilder from '@/components/QueryBuilder/AdvancedQueryBuilder'
-import { AdvancedVisualizationSuite } from '@/components/Visualization/AdvancedCharts'
-import InteractiveDashboard from '@/components/Dashboard/InteractiveDashboard'
-import QueryHistoryManager from '@/components/QueryHistory/QueryHistoryManager'
-import AdvancedDataExporter from '@/components/DataExport/AdvancedDataExporter'
-import { SecurityRulesBrowser } from '@/components/SecurityRules/SecurityRulesBrowser'
 import { UnifiedTimeFilter, TimeRange, useTimeRange } from '@/components/TimeFilter/UnifiedTimeFilter'
+
+// Lazy load heavy components to reduce initial bundle size
+const SimpleQueryBuilder = dynamic(() => import('@/components/QueryBuilder/SimpleQueryBuilder'), {
+  loading: () => <ComponentLoading height="h-32" message="Loading query builder..." />
+})
+
+const AdvancedQueryBuilder = dynamic(() => import('@/components/QueryBuilder/AdvancedQueryBuilder'), {
+  loading: () => <ComponentLoading height="h-48" message="Loading advanced editor..." />
+})
+
+const AdvancedVisualizationSuite = dynamic(() => 
+  import('@/components/Visualization/AdvancedCharts').then(mod => ({ default: mod.AdvancedVisualizationSuite })), {
+  loading: () => <ComponentLoading height="h-64" message="Loading visualizations..." />
+})
+
+const InteractiveDashboard = dynamic(() => import('@/components/Dashboard/InteractiveDashboard'), {
+  loading: () => <ComponentLoading height="h-96" message="Loading dashboard..." />
+})
+
+const QueryHistoryManager = dynamic(() => import('@/components/QueryHistory/QueryHistoryManager'), {
+  loading: () => <ComponentLoading height="h-64" message="Loading query history..." />
+})
+
+const AdvancedDataExporter = dynamic(() => import('@/components/DataExport/AdvancedDataExporter'), {
+  loading: () => <ComponentLoading height="h-48" message="Loading export tools..." />
+})
+
+const SecurityRulesBrowser = dynamic(() => 
+  import('@/components/SecurityRules/SecurityRulesBrowser').then(mod => ({ default: mod.SecurityRulesBrowser })), {
+  loading: () => <ComponentLoading height="h-64" message="Loading security rules..." />
+})
 
 import { 
   Database, 
@@ -183,8 +208,13 @@ export default function QueryBuilderPage() {
     loadLoganQueries()
     loadQueryHistory()
     loadSavedQueries()
-    // Initialize mock data for advanced analytics
-    setCurrentData(generateMockData(500))
+    // Initialize smaller mock data set for faster initial load
+    setCurrentData(generateMockData(100))
+    
+    // Background load larger dataset after initial render
+    setTimeout(() => {
+      setCurrentData(generateMockData(500))
+    }, 1000)
   }, [])
 
   const loadLoganQuery = (loganQuery: LoganQuery) => {
@@ -655,50 +685,100 @@ export default function QueryBuilderPage() {
                   </Alert>
                 )}
 
-                {/* Results List */}
-                <div className="space-y-2">
-                  {results.map((result) => (
-                    <Card key={result.id} className="hover:shadow-md transition-shadow">
-                      <CardContent className="p-4">
-                        <div className="flex items-start justify-between">
-                          <div className="flex-1 space-y-2">
-                            <div className="flex items-center space-x-2">
-                              <Badge className={getSeverityColor(result.severity)}>
-                                {result.severity}
-                              </Badge>
-                              <span className="text-sm text-muted-foreground">
-                                {result.timestamp}
-                              </span>
-                              {result.sourceIp && (
-                                <Badge variant="outline">
-                                  {result.sourceIp}
+                {/* Results List with Virtual Scrolling */}
+                {results.length > 50 ? (
+                  <VirtualList
+                    items={results}
+                    itemHeight={120}
+                    containerHeight={600}
+                    className="border rounded-lg"
+                    renderItem={(result, index) => (
+                      <Card className="hover:shadow-md transition-shadow m-1">
+                        <CardContent className="p-4">
+                          <div className="flex items-start justify-between">
+                            <div className="flex-1 space-y-2">
+                              <div className="flex items-center space-x-2">
+                                <Badge className={getSeverityColor(result.severity)}>
+                                  {result.severity}
                                 </Badge>
-                              )}
-                              {result.user && (
-                                <Badge variant="outline">
-                                  {result.user}
-                                </Badge>
+                                <span className="text-sm text-muted-foreground">
+                                  {result.timestamp}
+                                </span>
+                                {result.sourceIp && (
+                                  <Badge variant="outline">
+                                    {result.sourceIp}
+                                  </Badge>
+                                )}
+                                {result.user && (
+                                  <Badge variant="outline">
+                                    {result.user}
+                                  </Badge>
+                                )}
+                              </div>
+                              
+                              <div>
+                                <h4 className="font-medium">{result.message}</h4>
+                                <p className="text-sm text-muted-foreground">{result.source}</p>
+                              </div>
+                              
+                              {result.details && (
+                                <p className="text-sm text-muted-foreground">{result.details}</p>
                               )}
                             </div>
                             
-                            <div>
-                              <h4 className="font-medium">{result.message}</h4>
-                              <p className="text-sm text-muted-foreground">{result.source}</p>
-                            </div>
-                            
-                            {result.details && (
-                              <p className="text-sm text-muted-foreground">{result.details}</p>
-                            )}
+                            <Button variant="ghost" size="sm">
+                              <BarChart3 className="h-4 w-4" />
+                            </Button>
                           </div>
-                          
-                          <Button variant="ghost" size="sm">
-                            <BarChart3 className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  ))}
-                </div>
+                        </CardContent>
+                      </Card>
+                    )}
+                  />
+                ) : (
+                  <div className="space-y-2">
+                    {results.map((result) => (
+                      <Card key={result.id} className="hover:shadow-md transition-shadow">
+                        <CardContent className="p-4">
+                          <div className="flex items-start justify-between">
+                            <div className="flex-1 space-y-2">
+                              <div className="flex items-center space-x-2">
+                                <Badge className={getSeverityColor(result.severity)}>
+                                  {result.severity}
+                                </Badge>
+                                <span className="text-sm text-muted-foreground">
+                                  {result.timestamp}
+                                </span>
+                                {result.sourceIp && (
+                                  <Badge variant="outline">
+                                    {result.sourceIp}
+                                  </Badge>
+                                )}
+                                {result.user && (
+                                  <Badge variant="outline">
+                                    {result.user}
+                                  </Badge>
+                                )}
+                              </div>
+                              
+                              <div>
+                                <h4 className="font-medium">{result.message}</h4>
+                                <p className="text-sm text-muted-foreground">{result.source}</p>
+                              </div>
+                              
+                              {result.details && (
+                                <p className="text-sm text-muted-foreground">{result.details}</p>
+                              )}
+                            </div>
+                            
+                            <Button variant="ghost" size="sm">
+                              <BarChart3 className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
+                )}
               </div>
             )}
           </TabsContent>

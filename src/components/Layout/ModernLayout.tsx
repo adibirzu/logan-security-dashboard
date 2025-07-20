@@ -183,14 +183,6 @@ export default function ModernLayout({ children, title, subtitle }: ModernLayout
               )}>
                 <Target className="h-5 w-5" />
               </Link>
-              <Link href="/settings" className={cn(
-                "flex items-center justify-center p-2 rounded-lg transition-colors",
-                pathname === '/settings' 
-                  ? "bg-primary text-primary-foreground" 
-                  : "text-foreground hover:bg-accent hover:text-accent-foreground"
-              )}>
-                <Settings className="h-5 w-5" />
-              </Link>
             </div>
           )}
         </div>
@@ -212,15 +204,11 @@ export default function ModernLayout({ children, title, subtitle }: ModernLayout
                   <ChevronDown className="h-4 w-4 text-muted-foreground" />
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-56">
+              <DropdownMenuContent align="end" className="w-56 bg-card border border-border shadow-lg backdrop-blur-sm">
                 <DropdownMenuLabel>Account</DropdownMenuLabel>
                 <DropdownMenuItem>
                   <User className="h-4 w-4 mr-2" />
                   Profile
-                </DropdownMenuItem>
-                <DropdownMenuItem>
-                  <Settings className="h-4 w-4 mr-2" />
-                  Settings
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem>
@@ -246,7 +234,7 @@ export default function ModernLayout({ children, title, subtitle }: ModernLayout
         sidebarCollapsed ? "lg:ml-16" : "lg:ml-64"
       )}>
         {/* Top bar */}
-        <header className="bg-white dark:bg-neutral-950 border-b border-neutral-200 dark:border-neutral-800 px-4 py-3">
+        <header className="bg-background border-b border-border px-4 py-3">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
               <Button
@@ -260,9 +248,9 @@ export default function ModernLayout({ children, title, subtitle }: ModernLayout
               
               {title && (
                 <div>
-                  <h1 className="text-xl font-semibold text-neutral-900 dark:text-white">{title}</h1>
+                  <h1 className="text-xl font-semibold text-foreground">{title}</h1>
                   {subtitle && (
-                    <p className="text-sm text-neutral-500 dark:text-neutral-400">{subtitle}</p>
+                    <p className="text-sm text-muted-foreground">{subtitle}</p>
                   )}
                 </div>
               )}
@@ -271,7 +259,7 @@ export default function ModernLayout({ children, title, subtitle }: ModernLayout
             <div className="flex items-center space-x-4">
               {/* Global search */}
               <div className="relative hidden md:block">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-neutral-400" />
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
                   type="search"
                   placeholder="Search logs, threats, IPs..."
@@ -291,6 +279,53 @@ export default function ModernLayout({ children, title, subtitle }: ModernLayout
               <Button variant="ghost" size="sm">
                 <Zap className="h-5 w-5" />
               </Button>
+
+              {/* Settings Menu */}
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    className="hover:bg-accent hover:text-accent-foreground"
+                    title="Settings & Configuration"
+                  >
+                    <Settings className="h-5 w-5" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-56 bg-card border border-border shadow-lg backdrop-blur-sm">
+                  <DropdownMenuLabel className="flex items-center gap-2">
+                    <Settings className="h-4 w-4" />
+                    Settings & Configuration
+                  </DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem asChild>
+                    <Link href="/settings" className="flex items-center gap-2 cursor-pointer">
+                      <Server className="h-4 w-4" />
+                      Environment Settings
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link href="/settings?tab=multitenancy" className="flex items-center gap-2 cursor-pointer">
+                      <Globe className="h-4 w-4" />
+                      Multitenancy Config
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link href="/settings?tab=authentication" className="flex items-center gap-2 cursor-pointer">
+                      <Shield className="h-4 w-4" />
+                      Authentication
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem className="flex items-center gap-2 text-muted-foreground">
+                    <Eye className="h-4 w-4" />
+                    Dashboard Theme
+                    <Badge variant="outline" className="ml-auto text-xs">
+                      Auto
+                    </Badge>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             </div>
           </div>
         </header>

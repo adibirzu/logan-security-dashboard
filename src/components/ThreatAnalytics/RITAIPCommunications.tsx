@@ -4,7 +4,6 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { TimeRangeSelector } from '@/components/ui/TimeRangeSelector';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { 
   Network, 
@@ -16,8 +15,10 @@ import {
   Wifi,
   ExternalLink,
   MapPin,
-  Activity
+  Activity,
+  XCircle
 } from 'lucide-react';
+import { batchCheckIPThreatIntelligence, getMaliciousIPStyles } from '@/lib/threat-intelligence';
 
 interface IPCommunication {
   source_ip: string;
@@ -47,13 +48,22 @@ interface IPCommunicationsData {
   error?: string;
 }
 
-export function RITAIPCommunications() {
-  const [timeRange, setTimeRange] = useState('6h');
+interface RITAIPCommunicationsProps {
+  timeRange?: string;
+}
+
+export function RITAIPCommunications({ timeRange = '6h' }: RITAIPCommunicationsProps) {
   const [data, setData] = useState<IPCommunicationsData | null>(null);
   const [loading, setLoading] = useState(false);
   const [selectedComm, setSelectedComm] = useState<IPCommunication | null>(null);
   const [showDetails, setShowDetails] = useState(false);
+  const [selectedCommIndex, setSelectedCommIndex] = useState<number | null>(null);
   const [filterType, setFilterType] = useState<'all' | 'internal' | 'external' | 'risky'>('all');
+  const [threatIntelResults, setThreatIntelResults] = useState<Map<string, {
+    isMalicious: boolean
+    confidence: number
+    threatTypes: string[]
+  }>>(new Map());
 
   const loadCommunicationsData = useCallback(async () => {
     setLoading(true);
@@ -61,6 +71,20 @@ export function RITAIPCommunications() {
       const response = await fetch(`/api/rita/communications?timeRange=${timeRange}`);
       const result = await response.json();
       setData(result);
+      
+      // Batch check all IPs for threat intelligence
+      if (result.success && result.ip_communications) {
+        const allIPs = new Set<string>()
+        result.ip_communications.forEach((comm: IPCommunication) => {
+          if (comm.source_ip) allIPs.add(comm.source_ip)
+          if (comm.dest_ip) allIPs.add(comm.dest_ip)
+        })
+        
+        if (allIPs.size > 0) {
+          const threatIntelResults = await batchCheckIPThreatIntelligence(Array.from(allIPs))
+          setThreatIntelResults(threatIntelResults)
+        }
+      }
     } catch (error) {
       console.error('Error loading communications data:', error);
       setData({
@@ -209,14 +233,7 @@ export function RITAIPCommunications() {
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-            <div className="lg:col-span-1">
-              <TimeRangeSelector
-                selectedTimeRange={timeRange}
-                onTimeRangeChange={setTimeRange}
-                showCategories={false}
-              />
-            </div>
-            <div className="lg:col-span-2">
+            <div className="lg:col-span-3">
               {data?.success ? (
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
                   <div className="text-center">
@@ -285,57 +302,209 @@ export function RITAIPCommunications() {
                 const communicationType = getCommunicationType(comm);
                 
                 return (
-                  <div
-                    key={index}
-                    className="flex items-center justify-between p-3 border rounded-lg hover:bg-muted/50 cursor-pointer"
-                    onClick={() => {
-                      setSelectedComm(comm);
-                      setShowDetails(true);
-                    }}
-                  >
-                    <div className="flex items-center gap-3 flex-1">
-                      <CommIcon className="w-5 h-5 text-muted-foreground" />
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2 mb-1">
-                          <span className="font-medium truncate">{comm.source_ip}</span>
-                          <span className="text-muted-foreground">→</span>
-                          <span className="font-medium truncate">{comm.dest_ip}</span>
-                          <Badge 
-                            variant="outline" 
-                            className={`text-xs ${
-                              communicationType === 'internal' ? 'border-blue-500 text-blue-500' :
-                              communicationType === 'outbound' ? 'border-orange-500 text-orange-500' :
-                              communicationType === 'inbound' ? 'border-purple-500 text-purple-500' :
-                              ''
-                            }`}
-                          >
-                            {communicationType}
-                          </Badge>
+                  <React.Fragment key={index}>
+                    <div
+                      className="flex items-center justify-between p-3 border rounded-lg hover:bg-muted/50 cursor-pointer"
+                      onClick={() => {
+                        if (selectedCommIndex === index && showDetails) {
+                          // Close if clicking the same item
+                          setSelectedComm(null);
+                          setShowDetails(false);
+                          setSelectedCommIndex(null);
+                        } else {
+                          // Open new details
+                          setSelectedComm(comm);
+                          setShowDetails(true);
+                          setSelectedCommIndex(index);
+                        }
+                      }}
+                    >
+                      <div className="flex items-center gap-3 flex-1">
+                        <CommIcon className="w-5 h-5 text-muted-foreground" />
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 mb-1">
+                            <span className={`font-medium truncate ${getMaliciousIPStyles(comm.source_ip).textColor || ''}`}>
+                              {comm.source_ip}
+                            </span>
+                            {threatIntelResults.get(comm.source_ip)?.isMalicious && (
+                              <Badge variant="destructive" className="text-xs">
+                                Malicious
+                              </Badge>
+                            )}
+                            <span className="text-muted-foreground">→</span>
+                            <span className={`font-medium truncate ${getMaliciousIPStyles(comm.dest_ip).textColor || ''}`}>
+                              {comm.dest_ip}
+                            </span>
+                            {threatIntelResults.get(comm.dest_ip)?.isMalicious && (
+                              <Badge variant="destructive" className="text-xs">
+                                Malicious
+                              </Badge>
+                            )}
+                            <Badge 
+                              variant="outline" 
+                              className={`text-xs ${
+                                communicationType === 'internal' ? 'border-blue-500 text-blue-500' :
+                                communicationType === 'outbound' ? 'border-orange-500 text-orange-500' :
+                                communicationType === 'inbound' ? 'border-purple-500 text-purple-500' :
+                                ''
+                              }`}
+                            >
+                              {communicationType}
+                            </Badge>
+                          </div>
+                          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                            <span>Ports: {comm.ports_used.slice(0, 3).join(', ')}{comm.ports_used.length > 3 ? '...' : ''}</span>
+                            {comm.risk_indicators.length > 0 && (
+                              <div className="flex gap-1">
+                                {comm.risk_indicators.map((indicator, i) => (
+                                  <Badge key={i} variant="destructive" className="text-xs">
+                                    {indicator.replace('_', ' ')}
+                                  </Badge>
+                                ))}
+                              </div>
+                            )}
+                          </div>
                         </div>
-                        <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                          <span>Ports: {comm.ports_used.slice(0, 3).join(', ')}{comm.ports_used.length > 3 ? '...' : ''}</span>
-                          {comm.risk_indicators.length > 0 && (
-                            <div className="flex gap-1">
-                              {comm.risk_indicators.map((indicator, i) => (
-                                <Badge key={i} variant="destructive" className="text-xs">
-                                  {indicator.replace('_', ' ')}
-                                </Badge>
-                              ))}
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <div className="text-right text-sm">
+                          <div className="font-medium">{comm.connection_count.toLocaleString()} connections</div>
+                          <div className="text-muted-foreground">{formatBytes(comm.total_bytes)}</div>
+                        </div>
+                        <Button variant="ghost" size="sm">
+                          <Eye className="w-4 h-4" />
+                        </Button>
+                      </div>
+                    </div>
+                    
+                    {/* Communication Details - Show directly under clicked item */}
+                    {showDetails && selectedComm && selectedCommIndex === index && (
+                      <div className="mt-3 mb-3">
+                        <Card className="bg-muted/30">
+                          <CardHeader className="pb-3">
+                            <div className="flex items-center justify-between">
+                              <CardTitle className="flex items-center gap-2 text-base">
+                                <Globe className="w-4 h-4" />
+                                Communication Details: {selectedComm.source_ip} → {selectedComm.dest_ip}
+                              </CardTitle>
+                              <Button 
+                                variant="ghost" 
+                                size="sm" 
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setShowDetails(false);
+                                  setSelectedComm(null);
+                                  setSelectedCommIndex(null);
+                                }}
+                              >
+                                <XCircle className="w-4 h-4" />
+                              </Button>
                             </div>
-                          )}
-                        </div>
+                          </CardHeader>
+                          <CardContent className="space-y-4">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                              <div>
+                                <h4 className="font-medium mb-2">Communication Details</h4>
+                                <div className="space-y-2 text-sm">
+                                  <div className="flex justify-between">
+                                    <span className="text-muted-foreground">Source:</span>
+                                    <span>{selectedComm.source_ip}</span>
+                                  </div>
+                                  <div className="flex justify-between">
+                                    <span className="text-muted-foreground">Destination:</span>
+                                    <span>{selectedComm.dest_ip}</span>
+                                  </div>
+                                  <div className="flex justify-between">
+                                    <span className="text-muted-foreground">Type:</span>
+                                    <Badge variant="outline">{getCommunicationType(selectedComm)}</Badge>
+                                  </div>
+                                  <div className="flex justify-between">
+                                    <span className="text-muted-foreground">Protocols:</span>
+                                    <span>{selectedComm.protocols.join(', ')}</span>
+                                  </div>
+                                </div>
+                              </div>
+                              <div>
+                                <h4 className="font-medium mb-2">Statistics</h4>
+                                <div className="space-y-2 text-sm">
+                                  <div className="flex justify-between">
+                                    <span className="text-muted-foreground">Connections:</span>
+                                    <span>{selectedComm.connection_count.toLocaleString()}</span>
+                                  </div>
+                                  <div className="flex justify-between">
+                                    <span className="text-muted-foreground">Total Bytes:</span>
+                                    <span>{formatBytes(selectedComm.total_bytes)}</span>
+                                  </div>
+                                  <div className="flex justify-between">
+                                    <span className="text-muted-foreground">First Seen:</span>
+                                    <span>{new Date(selectedComm.first_seen).toLocaleString()}</span>
+                                  </div>
+                                  <div className="flex justify-between">
+                                    <span className="text-muted-foreground">Last Seen:</span>
+                                    <span>{new Date(selectedComm.last_seen).toLocaleString()}</span>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                              <div>
+                                <h4 className="font-medium mb-2">Ports Used ({selectedComm.ports_used.length})</h4>
+                                <div className="flex flex-wrap gap-1">
+                                  {selectedComm.ports_used.map((port, i) => (
+                                    <Badge key={i} variant="outline" className="text-xs">
+                                      {port}
+                                    </Badge>
+                                  ))}
+                                </div>
+                              </div>
+                              <div>
+                                <h4 className="font-medium mb-2">Actions</h4>
+                                <div className="flex flex-wrap gap-1">
+                                  {selectedComm.actions.map((action, i) => (
+                                    <Badge 
+                                      key={i} 
+                                      variant={action === 'ACCEPT' ? 'outline' : 'destructive'}
+                                      className="text-xs"
+                                    >
+                                      {action}
+                                    </Badge>
+                                  ))}
+                                </div>
+                              </div>
+                            </div>
+
+                            {selectedComm.risk_indicators.length > 0 && (
+                              <div>
+                                <h4 className="font-medium mb-2 flex items-center gap-2">
+                                  <Shield className="w-4 h-4 text-red-500" />
+                                  Risk Indicators
+                                </h4>
+                                <div className="flex flex-wrap gap-1">
+                                  {selectedComm.risk_indicators.map((indicator, i) => (
+                                    <Badge key={i} variant="destructive" className="text-xs">
+                                      {indicator.replace('_', ' ')}
+                                    </Badge>
+                                  ))}
+                                </div>
+                              </div>
+                            )}
+                            
+                            {selectedComm.sample_logs && selectedComm.sample_logs.length > 0 && (
+                              <div>
+                                <h4 className="font-medium mb-2">Sample Logs ({selectedComm.sample_logs.length})</h4>
+                                <div className="bg-muted rounded-lg p-3 max-h-48 overflow-y-auto">
+                                  <pre className="text-xs font-mono text-muted-foreground">
+                                    {JSON.stringify(selectedComm.sample_logs, null, 2)}
+                                  </pre>
+                                </div>
+                              </div>
+                            )}
+                          </CardContent>
+                        </Card>
                       </div>
-                    </div>
-                    <div className="flex items-center gap-3">
-                      <div className="text-right text-sm">
-                        <div className="font-medium">{comm.connection_count.toLocaleString()} connections</div>
-                        <div className="text-muted-foreground">{formatBytes(comm.total_bytes)}</div>
-                      </div>
-                      <Button variant="ghost" size="sm">
-                        <Eye className="w-4 h-4" />
-                      </Button>
-                    </div>
-                  </div>
+                    )}
+                  </React.Fragment>
                 );
               })}
               
@@ -349,122 +518,6 @@ export function RITAIPCommunications() {
         </Card>
       )}
 
-      {/* Communication Details Modal */}
-      {showDetails && selectedComm && (
-        <Card className="mt-4">
-          <CardHeader>
-            <div className="flex items-center justify-between">
-              <CardTitle className="flex items-center gap-2">
-                <Globe className="w-5 h-5" />
-                Communication Details: {selectedComm.source_ip} → {selectedComm.dest_ip}
-              </CardTitle>
-              <Button variant="outline" size="sm" onClick={() => setShowDetails(false)}>
-                Close
-              </Button>
-            </div>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <h4 className="font-medium mb-2">Communication Details</h4>
-                <div className="space-y-2 text-sm">
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">Source:</span>
-                    <span>{selectedComm.source_ip}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">Destination:</span>
-                    <span>{selectedComm.dest_ip}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">Type:</span>
-                    <Badge variant="outline">{getCommunicationType(selectedComm)}</Badge>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">Protocols:</span>
-                    <span>{selectedComm.protocols.join(', ')}</span>
-                  </div>
-                </div>
-              </div>
-              <div>
-                <h4 className="font-medium mb-2">Statistics</h4>
-                <div className="space-y-2 text-sm">
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">Connections:</span>
-                    <span>{selectedComm.connection_count.toLocaleString()}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">Total Bytes:</span>
-                    <span>{formatBytes(selectedComm.total_bytes)}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">First Seen:</span>
-                    <span>{new Date(selectedComm.first_seen).toLocaleString()}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">Last Seen:</span>
-                    <span>{new Date(selectedComm.last_seen).toLocaleString()}</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <h4 className="font-medium mb-2">Ports Used ({selectedComm.ports_used.length})</h4>
-                <div className="flex flex-wrap gap-1">
-                  {selectedComm.ports_used.map((port, i) => (
-                    <Badge key={i} variant="outline" className="text-xs">
-                      {port}
-                    </Badge>
-                  ))}
-                </div>
-              </div>
-              <div>
-                <h4 className="font-medium mb-2">Actions</h4>
-                <div className="flex flex-wrap gap-1">
-                  {selectedComm.actions.map((action, i) => (
-                    <Badge 
-                      key={i} 
-                      variant={action === 'ACCEPT' ? 'outline' : 'destructive'}
-                      className="text-xs"
-                    >
-                      {action}
-                    </Badge>
-                  ))}
-                </div>
-              </div>
-            </div>
-
-            {selectedComm.risk_indicators.length > 0 && (
-              <div>
-                <h4 className="font-medium mb-2 flex items-center gap-2">
-                  <Shield className="w-4 h-4 text-red-500" />
-                  Risk Indicators
-                </h4>
-                <div className="flex flex-wrap gap-1">
-                  {selectedComm.risk_indicators.map((indicator, i) => (
-                    <Badge key={i} variant="destructive" className="text-xs">
-                      {indicator.replace('_', ' ')}
-                    </Badge>
-                  ))}
-                </div>
-              </div>
-            )}
-            
-            {selectedComm.sample_logs && selectedComm.sample_logs.length > 0 && (
-              <div>
-                <h4 className="font-medium mb-2">Sample Logs ({selectedComm.sample_logs.length})</h4>
-                <div className="bg-muted rounded-lg p-3 max-h-48 overflow-y-auto">
-                  <pre className="text-xs font-mono text-muted-foreground">
-                    {JSON.stringify(selectedComm.sample_logs, null, 2)}
-                  </pre>
-                </div>
-              </div>
-            )}
-          </CardContent>
-        </Card>
-      )}
     </div>
   );
 }

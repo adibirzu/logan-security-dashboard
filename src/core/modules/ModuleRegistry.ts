@@ -43,7 +43,7 @@ export interface ModuleDefinition {
   api?: ModuleAPI
   config?: ModuleConfig
   icon?: LucideIcon
-  category: 'security' | 'analytics' | 'monitoring' | 'threat-intel' | 'incident-response' | 'compliance'
+  category: 'security' | 'analytics' | 'monitoring' | 'threat-intel' | 'incident-response' | 'compliance' | 'hidden'
   tags: string[]
   permissions: string[]
 }

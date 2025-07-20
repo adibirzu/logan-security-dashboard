@@ -56,9 +56,10 @@ interface LogSource {
 
 interface EnhancedGraphAnalysisProps {
   timeRange: string
+  onIpClick?: (ip: string) => void
 }
 
-const EnhancedGraphAnalysis: React.FC<EnhancedGraphAnalysisProps> = ({ timeRange }) => {
+const EnhancedGraphAnalysis: React.FC<EnhancedGraphAnalysisProps> = ({ timeRange, onIpClick }) => {
   const [applications, setApplications] = useState<ApplicationCommunication[]>([])
   const [ipCommunications, setIPCommunications] = useState<IPCommunication[]>([])
   const [logSources, setLogSources] = useState<Record<string, LogSource>>({})
@@ -70,6 +71,10 @@ const EnhancedGraphAnalysis: React.FC<EnhancedGraphAnalysisProps> = ({ timeRange
 
   const handleIPClick = (ip: string) => {
     setSelectedIP(ip)
+    // Call parent callback to show IP logs in the main component
+    if (onIpClick) {
+      onIpClick(ip)
+    }
   }
 
   // Load enhanced RITA data

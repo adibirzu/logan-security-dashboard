@@ -1,6 +1,8 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, Suspense } from 'react'
+import dynamic from 'next/dynamic'
+import ModernLayout from '@/components/Layout/ModernLayout'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -25,8 +27,25 @@ import {
   Eye,
   Zap,
   Network,
-  Monitor
+  Monitor,
+  Plus,
+  Edit,
+  Trash2,
+  Copy,
+  Check
 } from 'lucide-react'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Switch } from '@/components/ui/switch'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
+import { MultitenancyService } from '@/lib/multitenancy/multitenancy-service'
+import { OCIEnvironment } from '@/types/multitenancy'
+
+// Lazy load the heavy environment form component
+const EnvironmentForm = dynamic(() => import('@/components/Settings/EnvironmentForm'), {
+  loading: () => <div className="h-64 bg-muted animate-pulse rounded" />
+})
 
 interface ServiceStatus {
   name: string
@@ -52,6 +71,12 @@ export default function SettingsPage() {
     lastUpdated: new Date()
   })
   const [loading, setLoading] = useState(false)
+  
+  // Multitenancy state
+  const [environments, setEnvironments] = useState<OCIEnvironment[]>([])
+  const [queryMode, setQueryMode] = useState<'single' | 'parallel' | 'sequential'>('parallel')
+  const [editingEnv, setEditingEnv] = useState<OCIEnvironment | null>(null)
+  const [showEnvDialog, setShowEnvDialog] = useState(false)
 
   const getStatusIcon = (status: string) => {
     switch (status) {
@@ -241,6 +266,13 @@ export default function SettingsPage() {
     }
   }
 
+  // Load environments on mount
+  useEffect(() => {
+    const multitenancyService = MultitenancyService.getInstance()
+    setEnvironments(multitenancyService.getEnvironments())
+    setQueryMode(multitenancyService.getQueryMode())
+  }, [])
+
   // Auto-refresh every 30 seconds
   useEffect(() => {
     checkSystemHealth()
@@ -248,13 +280,53 @@ export default function SettingsPage() {
     return () => clearInterval(interval)
   }, [])
 
+  // Environment management functions
+  const saveEnvironment = (env: OCIEnvironment) => {
+    const multitenancyService = MultitenancyService.getInstance()
+    
+    try {
+      if (editingEnv) {
+        multitenancyService.updateEnvironment(env.id, env)
+        toast.success('Environment updated successfully')
+      } else {
+        multitenancyService.addEnvironment(env)
+        toast.success('Environment added successfully')
+      }
+      
+      setEnvironments(multitenancyService.getEnvironments())
+      setShowEnvDialog(false)
+      setEditingEnv(null)
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Failed to save environment')
+    }
+  }
+
+  const deleteEnvironment = (id: string) => {
+    const multitenancyService = MultitenancyService.getInstance()
+    
+    try {
+      multitenancyService.removeEnvironment(id)
+      setEnvironments(multitenancyService.getEnvironments())
+      toast.success('Environment removed successfully')
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Failed to remove environment')
+    }
+  }
+
+  const updateQueryMode = (mode: 'single' | 'parallel' | 'sequential') => {
+    const multitenancyService = MultitenancyService.getInstance()
+    multitenancyService.setQueryMode(mode)
+    setQueryMode(mode)
+    toast.success(`Query mode updated to ${mode}`)
+  }
+
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-2xl font-bold">Settings</h2>
-          <p className="text-muted-foreground">System configuration and service status</p>
-        </div>
+    <ModernLayout
+      title="Settings"
+      subtitle="System configuration and service status"
+    >
+      <div className="space-y-6">
+      <div className="flex items-center justify-end">
         <Button 
           variant="outline" 
           size="sm"
@@ -267,8 +339,9 @@ export default function SettingsPage() {
       </div>
 
       <Tabs defaultValue="status" className="space-y-6">
-        <TabsList>
+        <TabsList className="grid w-full grid-cols-4">
           <TabsTrigger value="status">Service Status</TabsTrigger>
+          <TabsTrigger value="environments">Environments</TabsTrigger>
           <TabsTrigger value="configuration">Configuration</TabsTrigger>
           <TabsTrigger value="maintenance">Maintenance</TabsTrigger>
         </TabsList>
@@ -418,6 +491,130 @@ export default function SettingsPage() {
           </Card>
         </TabsContent>
 
+        <TabsContent value="environments" className="space-y-6">
+          {/* Query Mode Configuration */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Query Execution Mode</CardTitle>
+              <CardDescription>Configure how queries are executed across environments</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="space-y-4">
+                <Label>Query Mode</Label>
+                <Select value={queryMode} onValueChange={(value: any) => updateQueryMode(value)}>
+                  <SelectTrigger className="w-full">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="single">Single Environment</SelectItem>
+                    <SelectItem value="parallel">Parallel Execution</SelectItem>
+                    <SelectItem value="sequential">Sequential Execution</SelectItem>
+                  </SelectContent>
+                </Select>
+                <p className="text-sm text-muted-foreground">
+                  {queryMode === 'single' && 'Queries will run on the default environment only'}
+                  {queryMode === 'parallel' && 'Queries will run simultaneously across all active environments'}
+                  {queryMode === 'sequential' && 'Queries will run one after another across environments'}
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Environment List */}
+          <Card>
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <div>
+                  <CardTitle>OCI Environments</CardTitle>
+                  <CardDescription>Manage multiple OCI Logging Analytics instances</CardDescription>
+                </div>
+                <Dialog open={showEnvDialog} onOpenChange={setShowEnvDialog}>
+                  <DialogTrigger asChild>
+                    <Button onClick={() => setEditingEnv(null)}>
+                      <Plus className="h-4 w-4 mr-2" />
+                      Add Environment
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent className="max-w-2xl">
+                    <DialogHeader>
+                      <DialogTitle>{editingEnv ? 'Edit Environment' : 'Add New Environment'}</DialogTitle>
+                      <DialogDescription>
+                        Configure an OCI environment for Logging Analytics queries
+                      </DialogDescription>
+                    </DialogHeader>
+                    <EnvironmentForm 
+                      environment={editingEnv}
+                      onSave={saveEnvironment}
+                      onCancel={() => {
+                        setShowEnvDialog(false)
+                        setEditingEnv(null)
+                      }}
+                    />
+                  </DialogContent>
+                </Dialog>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                {environments.length === 0 ? (
+                  <Alert>
+                    <AlertTriangle className="h-4 w-4" />
+                    <AlertDescription>
+                      No environments configured. Add an environment to start querying multiple OCI instances.
+                    </AlertDescription>
+                  </Alert>
+                ) : (
+                  environments.map((env) => (
+                    <div key={env.id} className="flex items-center justify-between p-4 border rounded-lg">
+                      <div className="flex items-center space-x-4">
+                        <div className={`w-3 h-3 rounded-full ${env.isActive ? 'bg-green-500' : 'bg-gray-400'}`} />
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <h4 className="font-medium">{env.name}</h4>
+                            {env.isDefault && <Badge variant="secondary">Default</Badge>}
+                            <Badge variant="outline">{env.authType}</Badge>
+                          </div>
+                          <p className="text-sm text-muted-foreground">
+                            {env.region} • {env.compartmentId}
+                          </p>
+                        </div>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <Switch
+                          checked={env.isActive}
+                          onCheckedChange={(checked) => {
+                            const multitenancyService = MultitenancyService.getInstance()
+                            multitenancyService.updateEnvironment(env.id, { isActive: checked })
+                            setEnvironments(multitenancyService.getEnvironments())
+                          }}
+                        />
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => {
+                            setEditingEnv(env)
+                            setShowEnvDialog(true)
+                          }}
+                        >
+                          <Edit className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => deleteEnvironment(env.id)}
+                          disabled={environments.length === 1}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </div>
+                  ))
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
         <TabsContent value="maintenance" className="space-y-6">
           <Card>
             <CardHeader>
@@ -436,6 +633,7 @@ export default function SettingsPage() {
           </Card>
         </TabsContent>
       </Tabs>
-    </div>
+      </div>
+    </ModernLayout>
   )
 }

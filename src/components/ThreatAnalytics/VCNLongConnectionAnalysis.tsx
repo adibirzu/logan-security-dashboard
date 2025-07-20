@@ -39,6 +39,7 @@ interface LongConnectionData {
 
 interface VCNLongConnectionAnalysisProps {
   timeRange: string
+  onIpClick?: (ip: string) => void
 }
 
 const SEVERITY_COLORS = {
@@ -57,7 +58,7 @@ const PORT_CATEGORIES: Record<string, number[]> = {
   'Other': []
 }
 
-export default function VCNLongConnectionAnalysis({ timeRange }: VCNLongConnectionAnalysisProps) {
+export default function VCNLongConnectionAnalysis({ timeRange, onIpClick }: VCNLongConnectionAnalysisProps) {
   const [connections, setConnections] = useState<LongConnectionData[]>([])
   const [loading, setLoading] = useState(false)
   const [selectedConnection, setSelectedConnection] = useState<LongConnectionData | null>(null)
@@ -364,9 +365,30 @@ export default function VCNLongConnectionAnalysis({ timeRange }: VCNLongConnecti
                 <div className="flex items-center justify-between">
                   <div className="space-y-2">
                     <div className="flex items-center gap-2">
-                      <span className="font-medium">{connection.source_ip}</span>
+                      <span 
+                        className="font-medium hover:underline cursor-pointer text-blue-600"
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          if (onIpClick) {
+                            onIpClick(connection.source_ip)
+                          }
+                        }}
+                      >
+                        {connection.source_ip}
+                      </span>
                       <span className="text-muted-foreground">→</span>
-                      <span className="font-medium">{connection.dest_ip}:{connection.dest_port}</span>
+                      <span 
+                        className="font-medium hover:underline cursor-pointer text-blue-600"
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          if (onIpClick) {
+                            onIpClick(connection.dest_ip)
+                          }
+                        }}
+                      >
+                        {connection.dest_ip}
+                      </span>
+                      <span className="font-medium">:{connection.dest_port}</span>
                       <Badge className={
                         connection.severity === 'critical' ? 'bg-red-100 text-red-800' :
                         connection.severity === 'high' ? 'bg-orange-100 text-orange-800' :

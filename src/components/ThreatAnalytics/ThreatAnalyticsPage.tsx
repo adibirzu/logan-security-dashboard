@@ -20,9 +20,11 @@ import {
   RefreshCw,
   ArrowUpDown,
   Filter,
+  Loader2,
 } from 'lucide-react'
 import { Progress } from '@/components/ui/progress'
 import { safeToLocaleString, safeDateToLocaleString } from '@/lib/format'
+import { batchCheckIPThreatIntelligence, getMaliciousIPStyles } from '@/lib/threat-intelligence'
 import VCNBeaconAnalysis from './VCNBeaconAnalysis'
 import VCNLongConnectionAnalysis from './VCNLongConnectionAnalysis'
 import NetworkGraphVisualization from './NetworkGraphVisualization'
@@ -99,6 +101,14 @@ export default function ThreatAnalyticsPage() {
   const [sortBy, setSortBy] = useState('score')
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc')
   const [selectedIp, setSelectedIp] = useState<string | null>(null)
+  const [loadedCount, setLoadedCount] = useState(50)
+  const [hasMore, setHasMore] = useState(true)
+  const [loadingMore, setLoadingMore] = useState(false)
+  const [threatIntelResults, setThreatIntelResults] = useState<Map<string, {
+    isMalicious: boolean
+    confidence: number
+    threatTypes: string[]
+  }>>(new Map())
   
   // Convert new TimeRange format to legacy string format for existing components
   const getLegacyTimeRangeString = (): string => {
@@ -110,18 +120,33 @@ export default function ThreatAnalyticsPage() {
     return '30d'
   }
 
-  const loadThreatAnalysis = useCallback(async () => {
+  const loadThreatAnalysis = useCallback(async (limit = 20) => {
     setLoading(true)
     try {
       const timeRangeMinutes = getTimeRangeInMinutes()
       const [threatsResponse, statsResponse] = await Promise.all([
-        fetch(`/api/threat-analytics/threats?timeRange=${timeRangeMinutes}m&severity=${selectedSeverity}&type=${selectedType}&sortBy=${sortBy}&sortOrder=${sortOrder}`),
+        fetch(`/api/threat-analytics/threats?timeRange=${timeRangeMinutes}m&severity=${selectedSeverity}&type=${selectedType}&sortBy=${sortBy}&sortOrder=${sortOrder}&limit=${limit}`),
         fetch(`/api/threat-analytics/stats?timeRange=${timeRangeMinutes}m`)
       ])
 
       if (threatsResponse.ok) {
         const threatsData = await threatsResponse.json()
-        setThreats(threatsData.threats || [])
+        const newThreats = threatsData.threats || []
+        setThreats(newThreats)
+        setHasMore(newThreats.length === limit)
+        setLoadedCount(newThreats.length)
+        
+        // Batch check all IPs for threat intelligence
+        const allIPs = new Set<string>()
+        newThreats.forEach((threat: ThreatAnalysis) => {
+          if (threat.source_ip) allIPs.add(threat.source_ip)
+          if (threat.destination_ip) allIPs.add(threat.destination_ip)
+        })
+        
+        if (allIPs.size > 0) {
+          const threatIntelResults = await batchCheckIPThreatIntelligence(Array.from(allIPs))
+          setThreatIntelResults(threatIntelResults)
+        }
       }
 
       if (statsResponse.ok) {
@@ -135,7 +160,32 @@ export default function ThreatAnalyticsPage() {
     }
   }, [getTimeRangeInMinutes, selectedSeverity, selectedType, sortBy, sortOrder])
 
+  const loadMoreThreats = useCallback(async () => {
+    if (!hasMore || loadingMore) return
+    
+    setLoadingMore(true)
+    try {
+      const timeRangeMinutes = getTimeRangeInMinutes()
+      const response = await fetch(`/api/threat-analytics/threats?timeRange=${timeRangeMinutes}m&severity=${selectedSeverity}&type=${selectedType}&sortBy=${sortBy}&sortOrder=${sortOrder}&limit=30&offset=${loadedCount}`)
+      
+      if (response.ok) {
+        const data = await response.json()
+        const newThreats = data.threats || []
+        setThreats(prev => [...prev, ...newThreats])
+        setHasMore(newThreats.length === 30)
+        setLoadedCount(prev => prev + newThreats.length)
+      }
+    } catch (error) {
+      console.error('Failed to load more threats:', error)
+    } finally {
+      setLoadingMore(false)
+    }
+  }, [hasMore, loadingMore, getTimeRangeInMinutes, selectedSeverity, selectedType, sortBy, sortOrder, loadedCount])
+
   useEffect(() => {
+    // Reset pagination when filters change
+    setLoadedCount(20)
+    setHasMore(true)
     loadThreatAnalysis()
   }, [timeRange, selectedSeverity, selectedType, sortBy, sortOrder, loadThreatAnalysis])
 
@@ -211,7 +261,7 @@ export default function ThreatAnalyticsPage() {
           <Button
             variant="oracle-outline"
             size="sm"
-            onClick={loadThreatAnalysis}
+            onClick={() => loadThreatAnalysis()}
             disabled={loading}
           >
             <RefreshCw className={`h-4 w-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
@@ -388,8 +438,25 @@ export default function ThreatAnalyticsPage() {
                               </div>
                               <div className="text-sm text-muted-foreground space-y-1">
                                 <div className="flex items-center gap-4">
+<<<<<<< Updated upstream
                                   <span>Source: <ClickableIP ip={threat.source_ip} /></span>
                                   <span>Destination: <ClickableIP ip={threat.destination_ip} /></span>
+=======
+                                  <span>Source: <span className={getMaliciousIPStyles(threat.source_ip).textColor || 'text-foreground'}>{threat.source_ip}</span>
+                                    {threatIntelResults.get(threat.source_ip)?.isMalicious && (
+                                      <Badge variant="destructive" className="ml-1 text-xs">
+                                        Malicious
+                                      </Badge>
+                                    )}
+                                  </span>
+                                  <span>Destination: <span className={getMaliciousIPStyles(threat.destination_ip).textColor || 'text-foreground'}>{threat.destination_ip}</span>
+                                    {threatIntelResults.get(threat.destination_ip)?.isMalicious && (
+                                      <Badge variant="destructive" className="ml-1 text-xs">
+                                        Malicious
+                                      </Badge>
+                                    )}
+                                  </span>
+>>>>>>> Stashed changes
                                   {threat.destination_host && (
                                     <span>Host: {threat.destination_host}</span>
                                   )}
@@ -409,15 +476,63 @@ export default function ThreatAnalyticsPage() {
                           </div>
                           <div className="flex flex-col items-end space-y-2">
                             <Progress value={threat.score} className="w-24" />
-                            <Button variant="outline" size="sm">
-                              <Search className="h-4 w-4 mr-2" />
-                              Investigate
-                            </Button>
+                            <div className="flex gap-2">
+                              <Button 
+                                variant="outline" 
+                                size="sm"
+                                onClick={() => {
+                                  window.open(`/threat-hunting?tab=intelligence&ip=${encodeURIComponent(threat.source_ip)}`, '_blank')
+                                }}
+                                title="Check source IP in Threat Intelligence"
+                              >
+                                <Search className="h-4 w-4 mr-2" />
+                                Check Source IP
+                              </Button>
+                              {threat.destination_ip && (
+                                <Button 
+                                  variant="outline" 
+                                  size="sm"
+                                  onClick={() => {
+                                    window.open(`/threat-hunting?tab=intelligence&ip=${encodeURIComponent(threat.destination_ip)}`, '_blank')
+                                  }}
+                                  title="Check destination IP in Threat Intelligence"
+                                >
+                                  <Search className="h-4 w-4 mr-2" />
+                                  Check Dest IP
+                                </Button>
+                              )}
+                            </div>
                           </div>
                         </div>
                       </div>
                     )
                   })}
+                  
+                  {/* Load More Button */}
+                  {hasMore && !loading && filteredThreats.length > 0 && (
+                    <div className="flex justify-center pt-4">
+                      <Button 
+                        variant="outline" 
+                        onClick={loadMoreThreats}
+                        disabled={loadingMore}
+                        className="min-w-32"
+                      >
+                        {loadingMore ? (
+                          <>
+                            <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                            Loading...
+                          </>
+                        ) : (
+                          <>
+                            Load More Threats
+                            <span className="ml-2 text-xs text-muted-foreground">
+                              ({loadedCount} loaded)
+                            </span>
+                          </>
+                        )}
+                      </Button>
+                    </div>
+                  )}
                 </div>
               )}
             </CardContent>
@@ -425,15 +540,24 @@ export default function ThreatAnalyticsPage() {
         </TabsContent>
 
         <TabsContent value="enhanced">
-          <EnhancedGraphAnalysis timeRange={getLegacyTimeRangeString()} />
+          <EnhancedGraphAnalysis 
+            timeRange={`${getTimeRangeInMinutes()}m`} 
+            onIpClick={setSelectedIp}
+          />
         </TabsContent>
 
         <TabsContent value="beacons">
-          <VCNBeaconAnalysis timeRange={getLegacyTimeRangeString()} />
+          <VCNBeaconAnalysis 
+            timeRange={`${getTimeRangeInMinutes()}m`} 
+            onIpClick={setSelectedIp}
+          />
         </TabsContent>
 
         <TabsContent value="connections">
-          <VCNLongConnectionAnalysis timeRange={getLegacyTimeRangeString()} />
+          <VCNLongConnectionAnalysis 
+            timeRange={`${getTimeRangeInMinutes()}m`} 
+            onIpClick={setSelectedIp}
+          />
         </TabsContent>
 
         <TabsContent value="dns">
@@ -529,7 +653,7 @@ export default function ThreatAnalyticsPage() {
       {selectedIp && (
         <IPLogViewer
           ip={selectedIp}
-          timeRange={getLegacyTimeRangeString()}
+          timeRange={`${getTimeRangeInMinutes()}m`}
           onClose={() => setSelectedIp(null)}
         />
       )}

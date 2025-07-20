@@ -40,6 +40,7 @@ interface BeaconData {
 
 interface VCNBeaconAnalysisProps {
   timeRange: string
+  onIpClick?: (ip: string) => void
 }
 
 const SEVERITY_COLORS = {
@@ -49,7 +50,7 @@ const SEVERITY_COLORS = {
   low: '#2563eb'
 }
 
-export default function VCNBeaconAnalysis({ timeRange }: VCNBeaconAnalysisProps) {
+export default function VCNBeaconAnalysis({ timeRange, onIpClick }: VCNBeaconAnalysisProps) {
   const [beacons, setBeacons] = useState<BeaconData[]>([])
   const [loading, setLoading] = useState(false)
   const [selectedBeacon, setSelectedBeacon] = useState<BeaconData | null>(null)
@@ -301,9 +302,30 @@ export default function VCNBeaconAnalysis({ timeRange }: VCNBeaconAnalysisProps)
                   <div className="flex items-center justify-between">
                     <div className="space-y-1">
                       <div className="flex items-center gap-2">
-                        <span className="font-medium">{beacon.source_ip}</span>
+                        <span 
+                          className="font-medium hover:underline cursor-pointer text-blue-600"
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            if (onIpClick) {
+                              onIpClick(beacon.source_ip)
+                            }
+                          }}
+                        >
+                          {beacon.source_ip}
+                        </span>
                         <span className="text-muted-foreground">→</span>
-                        <span className="font-medium">{beacon.dest_ip}:{beacon.dest_port}</span>
+                        <span 
+                          className="font-medium hover:underline cursor-pointer text-blue-600"
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            if (onIpClick) {
+                              onIpClick(beacon.dest_ip)
+                            }
+                          }}
+                        >
+                          {beacon.dest_ip}
+                        </span>
+                        <span className="font-medium">:{beacon.dest_port}</span>
                         <Badge className={
                           beacon.severity === 'critical' ? 'bg-red-100 text-red-800' :
                           beacon.severity === 'high' ? 'bg-orange-100 text-orange-800' :
