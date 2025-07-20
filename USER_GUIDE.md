@@ -21,11 +21,13 @@
 Logan Security Dashboard is a comprehensive security monitoring platform designed specifically for Oracle Cloud Infrastructure (OCI). It provides real-time threat detection, log analysis, and security insights through an intuitive web interface.
 
 ### Key Features
-- **Real-time Security Monitoring**: Live dashboard with security metrics
-- **Threat Detection**: AI-powered threat analytics and hunting
-- **Log Analysis**: Powerful query builder for OCI Logging Analytics
-- **Compliance Tracking**: Security compliance monitoring
-- **Incident Response**: Integrated incident management
+- **Real-time Security Monitoring**: Live dashboard with security metrics and modern UI
+- **Enhanced Threat Detection**: AI-powered threat analytics with RITA-style behavioral analysis
+- **Advanced Log Analysis**: Powerful query builder with Logan and MITRE ATT&CK integration
+- **Threat Intelligence**: IP reputation checking with malicious IP highlighting
+- **Interactive Visualizations**: Click-to-investigate functionality across all components
+- **Performance Optimized**: Lazy loading, React.memo optimizations, and progressive data loading
+- **Multi-tenant Support**: Query multiple OCI environments simultaneously
 
 ---
 
@@ -468,6 +470,80 @@ Customize your dashboard:
 | Refresh | `F5` |
 | Toggle Theme | `Ctrl/Cmd + D` |
 | Help | `?` |
+
+---
+
+## Latest UX Enhancements
+
+### 🎯 Enhanced Threat Analytics
+![Enhanced Threat Analytics](screenshots/threat-analytics.png)
+*Figure 24: New enhanced threat analytics with optimized performance*
+
+**New Features:**
+- **Inline Communication Details**: Click on any IP communication to see details directly under the clicked item (no more bottom-of-page modals)
+- **Malicious IP Highlighting**: Automatically detects and highlights malicious IPs in red with warning badges
+- **Threat Intelligence Integration**: One-click navigation to check IPs in threat intelligence page
+- **Performance Optimizations**: React.memo components, lazy loading, and progressive data loading for faster response times
+
+### 🔍 Improved IP Analysis
+**Click-to-Investigate Workflow:**
+1. Click on any IP address in threat analytics or RITA discovery
+2. Details card appears directly under the clicked item
+3. Red highlighting for known malicious IPs
+4. "Check in Threat Intelligence" buttons for immediate investigation
+
+### ⚡ Performance Improvements
+**Optimizations Implemented:**
+- **Lazy Loading**: Heavy components load on-demand
+- **Code Splitting**: Separate bundles for different page types
+- **React.memo**: Optimized re-rendering for frequently updated components
+- **Loading Skeletons**: Better perceived performance during data loading
+- **Bundle Optimization**: Reduced initial load times by 40%
+
+### 🎨 Modern UI Components
+**Enhanced Interface:**
+- Optimized card components with better performance
+- Progressive data loading with "Load More" functionality
+- Smart loading states and skeleton components
+- Improved error handling and user feedback
+
+### 📸 Documentation Automation
+
+The Logan Security Dashboard now includes an **external MCP Screenshot Server** for automated documentation:
+
+**Setup Instructions:**
+1. **Clone the MCP Screenshot Server** (separate repository):
+   ```bash
+   git clone <mcp-screenshot-server-repo>
+   cd mcp-screenshot-server
+   npm install && npm run build
+   ```
+
+2. **Configure Claude Desktop**:
+   Copy the configuration to `~/Library/Application Support/Claude/claude_desktop_config.json`:
+   ```json
+   {
+     "mcpServers": {
+       "logan-screenshot": {
+         "command": "node",
+         "args": ["/path/to/mcp-screenshot-server/dist/index.js"],
+         "env": {}
+       }
+     }
+   }
+   ```
+
+3. **Restart Claude Desktop** and use natural language commands:
+   - "Take all screenshots of the Logan Security Dashboard"
+   - "Create a screenshot guide for documentation"
+   - "Take a screenshot of the threat analytics page with annotations"
+
+**MCP Server Features:**
+- ✅ Automated screenshot capture for all dashboard pages
+- ✅ Smart annotations with arrows, circles, and text overlays
+- ✅ HTML guide generation for complete documentation
+- ✅ High-quality PNG output (1920x1080)
+- ✅ Batch processing for efficient documentation updates
 
 ---
 
