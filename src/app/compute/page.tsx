@@ -25,6 +25,9 @@ import {
 } from 'lucide-react';
 import ModernLayout from '@/components/Layout/ModernLayout';
 
+// Cache duration in milliseconds (5 minutes)
+const CACHE_DURATION = 5 * 60 * 1000;
+
 interface ComputeInstance {
   id: string;
   display_name: string;

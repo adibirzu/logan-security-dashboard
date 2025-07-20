@@ -152,6 +152,7 @@ export default function AdvancedQueryBuilder({ onExecute, onSave, savedQueries =
   ])
   const [rawQuery, setRawQuery] = useState('')
   const [activeTab, setActiveTab] = useState('visual')
+  const [selectedTemplate, setSelectedTemplate] = useState<string | null>(null)
   const [queryOptions, setQueryOptions] = useState<QueryOptions>({
     timePeriod: 1440,
     maxResults: 100,
