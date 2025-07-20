@@ -338,6 +338,7 @@ export default function ThreatIntelligence({ lookupIp }: ThreatIntelligenceProps
     }
   }, [threatIntel])
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
 
   // Check for pre-filled search from threat analytics navigation
   useEffect(() => {
@@ -367,6 +368,8 @@ export default function ThreatIntelligence({ lookupIp }: ThreatIntelligenceProps
       }
     }
   }, [checkIndicatorWithOCI])
+=======
+>>>>>>> Stashed changes
 =======
 >>>>>>> Stashed changes
 

@@ -442,7 +442,11 @@ const coreModules: ModuleDefinition[] = [
     author: 'Logan Security Team',
     dependencies: [],
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
     category: 'compliance',
+=======
+    category: 'hidden',
+>>>>>>> Stashed changes
 =======
     category: 'hidden',
 >>>>>>> Stashed changes

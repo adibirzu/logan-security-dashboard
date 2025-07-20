@@ -202,9 +202,16 @@ export default function SecurityOverviewPage() {
   const [refreshing, setRefreshing] = useState(false)
   const [lastUpdate, setLastUpdate] = useState(new Date())
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
   const [stats, setStats] = useState<any>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+=======
+  const [stats, setStats] = useState<DashboardStats | null>(null)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+  const [initialLoad, setInitialLoad] = useState(true)
+>>>>>>> Stashed changes
 =======
   const [stats, setStats] = useState<DashboardStats | null>(null)
   const [loading, setLoading] = useState(true)
@@ -225,7 +232,11 @@ export default function SecurityOverviewPage() {
       setLastUpdate(new Date(data.lastUpdate))
     } catch (err) {
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
       setError(err instanceof Error ? err.message : 'Unknown error occurred')
+=======
+      setError(err instanceof Error ? err.message : 'An unknown error occurred')
+>>>>>>> Stashed changes
 =======
       setError(err instanceof Error ? err.message : 'An unknown error occurred')
 >>>>>>> Stashed changes

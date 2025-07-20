@@ -8,9 +8,15 @@ export async function POST(request: Request) {
     const mitreQuery = `
       'Log Source' = 'Windows Sysmon Events' 
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
       and User != 'NT AUTHORITY\\\\SYSTEM'
       and Technique_id != null 
       | timestats count as logrecords by Technique_id 
+=======
+      and 'User' != 'NT AUTHORITY\\\\SYSTEM'
+      and 'Technique_id' is not null 
+      | timestats count as logrecords by 'Technique_id' 
+>>>>>>> Stashed changes
 =======
       and 'User' != 'NT AUTHORITY\\\\SYSTEM'
       and 'Technique_id' is not null 

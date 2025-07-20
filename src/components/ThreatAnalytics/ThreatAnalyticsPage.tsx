@@ -439,9 +439,12 @@ export default function ThreatAnalyticsPage() {
                               <div className="text-sm text-muted-foreground space-y-1">
                                 <div className="flex items-center gap-4">
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
                                   <span>Source: <ClickableIP ip={threat.source_ip} /></span>
                                   <span>Destination: <ClickableIP ip={threat.destination_ip} /></span>
 =======
+=======
+>>>>>>> Stashed changes
                                   <span>Source: <span className={getMaliciousIPStyles(threat.source_ip).textColor || 'text-foreground'}>{threat.source_ip}</span>
                                     {threatIntelResults.get(threat.source_ip)?.isMalicious && (
                                       <Badge variant="destructive" className="ml-1 text-xs">
@@ -456,6 +459,9 @@ export default function ThreatAnalyticsPage() {
                                       </Badge>
                                     )}
                                   </span>
+<<<<<<< Updated upstream
+>>>>>>> Stashed changes
+=======
 >>>>>>> Stashed changes
                                   {threat.destination_host && (
                                     <span>Host: {threat.destination_host}</span>
