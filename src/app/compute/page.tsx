@@ -117,8 +117,6 @@ const CACHE_KEYS = {
   LAST_FETCH: 'logan-compute-last-fetch'
 } as const;
 
-const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
-
 export default function ComputePage() {
   // Selection state
   const [selectedRegion, setSelectedRegion] = useState<string>('');

@@ -57,12 +57,23 @@ function loadMitreQueries(): any {
 
 // Convert MITRE queries to Logan format
 function convertMitreToLoganFormat(mitreData: any): LoganQueryCategory {
-  const queries: LoganQuery[] = mitreData.mitre_enhanced_queries.queries.map((query: any) => ({
+  // Handle different possible structures
+  let queriesArray = []
+  if (mitreData.queries) {
+    queriesArray = mitreData.queries
+  } else if (mitreData.mitre_enhanced_queries?.queries) {
+    queriesArray = mitreData.mitre_enhanced_queries.queries
+  } else {
+    console.warn('MITRE queries data structure not recognized:', Object.keys(mitreData))
+    queriesArray = []
+  }
+
+  const queries: LoganQuery[] = queriesArray.map((query: any) => ({
     id: query.id,
     name: query.name,
-    description: query.description,
+    description: query.description || query.query || 'Enhanced MITRE query',
     query: query.query,
-    category: query.category,
+    category: query.category || 'mitre-attack',
     tags: query.mitre_mapping ? [
       'mitre-attack',
       'windows-sysmon',
@@ -100,8 +111,14 @@ export async function GET(request: NextRequest) {
     // Merge MITRE queries with Logan queries
     let categories = { ...loganQueries.categories }
     if (mitreQueries) {
-      const mitreCategory = convertMitreToLoganFormat(mitreQueries)
-      categories['mitre_enhanced'] = mitreCategory
+      try {
+        const mitreCategory = convertMitreToLoganFormat(mitreQueries)
+        if (mitreCategory.queries.length > 0) {
+          categories['mitre_enhanced'] = mitreCategory
+        }
+      } catch (error) {
+        console.error('Error converting MITRE queries:', error)
+      }
     }
 
     // Filter by category if specified
