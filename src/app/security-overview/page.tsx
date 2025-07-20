@@ -174,13 +174,21 @@ const threatIntelligence = [
   }
 ]
 
+interface DashboardStats {
+  totalEvents: number;
+  criticalAlerts: number;
+  failedLogins: number;
+  systemHealth: number;
+  lastUpdate: string;
+}
+
 export default function SecurityOverviewPage() {
   const [activeTab, setActiveTab] = useState('overview')
   const [refreshing, setRefreshing] = useState(false)
   const [lastUpdate, setLastUpdate] = useState(new Date())
-  const [stats, setStats] = useState(null)
+  const [stats, setStats] = useState<DashboardStats | null>(null)
   const [loading, setLoading] = useState(true)
-  const [error, setError] = useState(null)
+  const [error, setError] = useState<string | null>(null)
 
   const fetchStats = async () => {
     setLoading(true)
@@ -194,7 +202,7 @@ export default function SecurityOverviewPage() {
       setStats(data)
       setLastUpdate(new Date(data.lastUpdate))
     } catch (err) {
-      setError(err.message)
+      setError(err instanceof Error ? err.message : 'Unknown error occurred')
     } finally {
       setLoading(false)
     }
@@ -295,7 +303,7 @@ export default function SecurityOverviewPage() {
                     <Activity className="h-5 w-5 text-blue-600" />
                   </CardHeader>
                   <CardContent>
-                    <div className="text-3xl font-bold">{stats.totalEvents}</div>
+                    <div className="text-3xl font-bold">{stats?.totalEvents || 0}</div>
                   </CardContent>
                 </Card>
                 <Card>
@@ -304,7 +312,7 @@ export default function SecurityOverviewPage() {
                     <AlertTriangle className="h-5 w-5 text-red-600" />
                   </CardHeader>
                   <CardContent>
-                    <div className="text-3xl font-bold">{stats.criticalAlerts}</div>
+                    <div className="text-3xl font-bold">{stats?.criticalAlerts || 0}</div>
                   </CardContent>
                 </Card>
                 <Card>
@@ -313,7 +321,7 @@ export default function SecurityOverviewPage() {
                     <Users className="h-5 w-5 text-yellow-600" />
                   </CardHeader>
                   <CardContent>
-                    <div className="text-3xl font-bold">{stats.failedLogins}</div>
+                    <div className="text-3xl font-bold">{stats?.failedLogins || 0}</div>
                   </CardContent>
                 </Card>
                 <Card>
@@ -322,8 +330,8 @@ export default function SecurityOverviewPage() {
                     <Shield className="h-5 w-5 text-green-600" />
                   </CardHeader>
                   <CardContent>
-                    <div className="text-3xl font-bold">{stats.systemHealth}%</div>
-                    <Progress value={stats.systemHealth} className="w-full h-2 mt-2" />
+                    <div className="text-3xl font-bold">{stats?.systemHealth || 0}%</div>
+                    <Progress value={stats?.systemHealth || 0} className="w-full h-2 mt-2" />
                   </CardContent>
                 </Card>
               </div>
