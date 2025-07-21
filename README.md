@@ -1,5 +1,13 @@
 # Logan Security Dashboard
 
+## ⚠️ Disclaimer
+
+This software was created to showcase Oracle Cloud Infrastructure (OCI) Logging Analytics capabilities and demonstrate how to expand them using third-party services and modern web technologies. The architecture and code were written by me with the assistance of Oracle Code Assist and multiple LLMs including Claude, OpenAI GPT-4o, Meta Llama 3.2, and Grok 3. This is an educational project designed to learn more about OCI's service capabilities and how to optimize security monitoring tasks.
+
+**This is NOT an official Oracle product** - it is a personal project demonstrating integration possibilities with OCI Logging Analytics.
+
+---
+
 A comprehensive security monitoring and analysis dashboard built for Oracle Cloud Infrastructure (OCI) Logging Analytics. This Next.js application provides real-time security insights, threat analysis, and log source management with an intuitive web interface.
 
 ![Logan Security Dashboard](https://img.shields.io/badge/Next.js-15.3.5-black) ![TypeScript](https://img.shields.io/badge/TypeScript-5.0-blue) ![Python](https://img.shields.io/badge/Python-3.8+-green) ![OCI](https://img.shields.io/badge/OCI-Logging%20Analytics-red)
@@ -474,19 +482,9 @@ python3 logan_client.py test
          name: 'logan-dashboard',
          script: 'npm',
          args: 'start',
-         cwd: '/path/to/logan-security-dashboard',
          env: {
            NODE_ENV: 'production',
            PORT: 3000
-         }
-       },
-       {
-         name: 'logan-mcp-server',
-         script: 'python3',
-         args: 'logan_mcp.py',
-         cwd: '/path/to/logan-fastmcp',
-         env: {
-           PYTHONPATH: '/path/to/logan-fastmcp'
          }
        }
      ]
@@ -500,90 +498,23 @@ python3 logan_client.py test
    pm2 startup
    ```
 
-## 🔧 Installation Scripts
-
-### Quick Setup Script (Linux/macOS)
-
-Create `install.sh`:
+## 🔧 Quick Installation
 
 ```bash
-#!/bin/bash
-set -e
+# Clone repository
+git clone https://github.com/adibirzu/logan-security-dashboard.git
+cd logan-security-dashboard
 
-echo "🚀 Installing Logan Security Dashboard..."
-
-# Check prerequisites
-command -v node >/dev/null 2>&1 || { echo "❌ Node.js is required but not installed."; exit 1; }
-command -v python3 >/dev/null 2>&1 || { echo "❌ Python 3 is required but not installed."; exit 1; }
-command -v oci >/dev/null 2>&1 || { echo "❌ OCI CLI is required but not installed."; exit 1; }
-
-echo "✅ Prerequisites check passed"
-
-# Install Node.js dependencies
-echo "📦 Installing Node.js dependencies..."
+# Install dependencies
 npm install
-
-# Install Python dependencies
-echo "🐍 Installing Python dependencies..."
 pip3 install -r scripts/requirements.txt
 
-# Copy environment file
-if [ ! -f .env.local ]; then
-    echo "📝 Creating environment configuration..."
-    cp .env.local.example .env.local
-    echo "⚠️  Please edit .env.local with your OCI configuration"
-fi
+# Configure environment
+cp .env.local.example .env.local
+# Edit .env.local with your OCI configuration
 
-echo "✅ Installation complete!"
-echo "📖 Please see README.md for configuration and startup instructions"
-```
-
-Make it executable and run:
-
-```bash
-chmod +x install.sh
-./install.sh
-```
-
-### Windows Setup Script
-
-Create `install.bat`:
-
-```batch
-@echo off
-echo Installing Logan Security Dashboard...
-
-:: Check Node.js
-node --version >nul 2>&1
-if errorlevel 1 (
-    echo Node.js is required but not installed.
-    exit /b 1
-)
-
-:: Check Python
-python --version >nul 2>&1
-if errorlevel 1 (
-    echo Python is required but not installed.
-    exit /b 1
-)
-
-:: Install dependencies
-echo Installing Node.js dependencies...
-npm install
-
-echo Installing Python dependencies...
-pip install -r scripts/requirements.txt
-
-:: Copy environment file
-if not exist .env.local (
-    echo Creating environment configuration...
-    copy .env.local.example .env.local
-    echo Please edit .env.local with your OCI configuration
-)
-
-echo Installation complete!
-echo Please see README.md for configuration and startup instructions
-pause
+# Start the application
+npm run dev
 ```
 
 ## 📊 Usage Guide
@@ -858,6 +789,3 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 - Query visualization and management
 - Predefined security checks
 
----
-
-**Made with ❤️ for cybersecurity professionals**
