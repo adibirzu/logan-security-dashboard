@@ -20,6 +20,8 @@ import {
 } from 'lucide-react'
 import { copyToClipboard } from '@/lib/clipboard'
 import { safeDateToLocaleString, formatBytes } from '@/lib/format'
+import { getTimePeriodMinutes, parseCustomTimeRange } from '@/lib/timeUtils'
+import { batchCheckIPThreatIntelligence, getMaliciousIPStyles } from '@/lib/threat-intelligence'
 
 interface LogEntry {
   time: string
@@ -44,16 +46,28 @@ export default function IPLogViewer({ ip, timeRange, onClose }: IPLogViewerProps
     totalLogs: 0,
     logSources: [] as string[]
   })
+  const [threatIntelResults, setThreatIntelResults] = useState<Map<string, {
+    isMalicious: boolean
+    confidence: number
+    threatTypes: string[]
+  }>>(new Map())
 
-  const getTimePeriodMinutes = (range: string): number => {
-    switch (range) {
-      case '1h': return 60
-      case '6h': return 360
-      case '24h': return 1440
-      case '7d': return 10080
-      case '30d': return 43200
-      default: return 1440
+  // Use the utility function that handles both string and numeric formats
+  const getTimePeriodMinutesWithCustom = (range: string): number => {
+    // Handle numeric format (e.g., "1440m", "60m")
+    const numericMatch = range.match(/^(\d+)m?$/);
+    if (numericMatch) {
+      return parseInt(numericMatch[1], 10);
     }
+    
+    // Handle custom format (e.g., "custom:2024-01-01:2024-01-02")
+    if (range.startsWith('custom:')) {
+      const customResult = parseCustomTimeRange(range);
+      return customResult !== null ? customResult : 1440;
+    }
+    
+    // Handle standard format using utility function
+    return getTimePeriodMinutes(range);
   }
 
   const fetchIPLogs = useCallback(async () => {
@@ -68,7 +82,7 @@ export default function IPLogViewer({ ip, timeRange, onClose }: IPLogViewerProps
         },
         body: JSON.stringify({
           ip,
-          timeRange: getTimePeriodMinutes(timeRange)
+          timeRange: getTimePeriodMinutesWithCustom(timeRange)
         })
       })
 
@@ -82,6 +96,14 @@ export default function IPLogViewer({ ip, timeRange, onClose }: IPLogViewerProps
           totalLogs: data.totalLogs || 0,
           logSources: data.logSources || []
         })
+        
+        // Check threat intelligence for IP
+        try {
+          const threatIntelResults = await batchCheckIPThreatIntelligence([ip])
+          setThreatIntelResults(threatIntelResults)
+        } catch (error) {
+          console.error('Failed to check threat intelligence:', error)
+        }
       } else {
         console.error('Failed to fetch IP logs:', data.error, data.details)
         setLogs([])
@@ -270,7 +292,18 @@ export default function IPLogViewer({ ip, timeRange, onClose }: IPLogViewerProps
           <div>
             <CardTitle className="flex items-center gap-2">
               <Globe className="h-5 w-5" />
-              Logs for IP: {ip}
+              Logs for IP: 
+              <span 
+                className={threatIntelResults.get(ip)?.isMalicious ? 'text-red-600 font-bold' : ''}
+                style={threatIntelResults.get(ip)?.isMalicious ? getMaliciousIPStyles(ip) : {}}
+              >
+                {ip}
+              </span>
+              {threatIntelResults.get(ip)?.isMalicious && (
+                <Badge variant="destructive" className="text-xs">
+                  MALICIOUS
+                </Badge>
+              )}
             </CardTitle>
             <CardDescription>
               Showing {filteredLogs.length} of {stats.totalLogs} logs from the last {timeRange}
@@ -322,6 +355,14 @@ export default function IPLogViewer({ ip, timeRange, onClose }: IPLogViewerProps
           >
             <Download className="h-4 w-4 mr-2" />
             Export
+          </Button>
+          <Button
+            variant="oracle-outline"
+            size="sm"
+            onClick={() => window.open(`/threat-hunting?tab=intelligence&ip=${encodeURIComponent(ip)}`, '_blank')}
+          >
+            <Shield className="h-4 w-4 mr-2" />
+            Check in TI
           </Button>
           <Button
             variant="oracle-outline"

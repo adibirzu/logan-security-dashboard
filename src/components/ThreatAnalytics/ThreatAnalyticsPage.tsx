@@ -122,7 +122,7 @@ export default function ThreatAnalyticsPage() {
     return '30d'
   }
 
-  const loadThreatAnalysis = useCallback(async (limit = 20) => {
+  const loadThreatAnalysis = useCallback(async (limit = 50) => {
     setLoading(true)
     try {
       const timeRangeMinutes = getTimeRangeInMinutes()
@@ -138,7 +138,7 @@ export default function ThreatAnalyticsPage() {
         setHasMore(newThreats.length === limit)
         setLoadedCount(newThreats.length)
         
-        // Batch check all IPs for threat intelligence
+        // Batch check all IPs for threat intelligence (limit to 50 IPs max)
         const allIPs = new Set<string>()
         newThreats.forEach((threat: ThreatAnalysis) => {
           if (threat.source_ip) allIPs.add(threat.source_ip)
@@ -146,7 +146,9 @@ export default function ThreatAnalyticsPage() {
         })
         
         if (allIPs.size > 0) {
-          const threatIntelResults = await batchCheckIPThreatIntelligence(Array.from(allIPs))
+          // Limit to first 50 IPs for performance
+          const ipsToCheck = Array.from(allIPs).slice(0, 50)
+          const threatIntelResults = await batchCheckIPThreatIntelligence(ipsToCheck)
           setThreatIntelResults(threatIntelResults)
         }
       }
@@ -186,7 +188,7 @@ export default function ThreatAnalyticsPage() {
 
   useEffect(() => {
     // Reset pagination when filters change
-    setLoadedCount(20)
+    setLoadedCount(50)
     setHasMore(true)
     loadThreatAnalysis()
   }, [timeRange, selectedSeverity, selectedType, sortBy, sortOrder, loadThreatAnalysis])

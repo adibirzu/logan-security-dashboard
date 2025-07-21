@@ -28,6 +28,7 @@ import {
   Settings
 } from 'lucide-react'
 import { formatBytes } from '@/lib/format'
+import { getTimePeriodMinutes, parseCustomTimeRange } from '@/lib/timeUtils'
 
 // Dynamically import Cytoscape to avoid SSR issues
 import dynamic from 'next/dynamic'
@@ -152,20 +153,22 @@ export default function NetworkGraphVisualization({ timeRange, onIpClick }: Netw
     protocolFilters: ['TCP', 'UDP', 'ICMP', 'HTTP', 'HTTPS']
   })
 
-  const getTimePeriodMinutes = (range: string): number => {
-    switch (range) {
-      case '15m': return 15
-      case '30m': return 30
-      case '1h': return 60
-      case '3h': return 180
-      case '6h': return 360
-      case '12h': return 720
-      case '24h': return 1440
-      case '2d': return 2880
-      case '7d': return 10080
-      case '30d': return 43200
-      default: return 1440
+  // Use the utility function that handles both string and numeric formats
+  const getTimePeriodMinutesWithCustom = (range: string): number => {
+    // Handle numeric format (e.g., "1440m", "60m")
+    const numericMatch = range.match(/^(\d+)m?$/);
+    if (numericMatch) {
+      return parseInt(numericMatch[1], 10);
     }
+    
+    // Handle custom format (e.g., "custom:2024-01-01:2024-01-02")
+    if (range.startsWith('custom:')) {
+      const customResult = parseCustomTimeRange(range);
+      return customResult !== null ? customResult : 1440;
+    }
+    
+    // Handle standard format using utility function
+    return getTimePeriodMinutes(range);
   }
 
   const loadGraphData = useCallback(async () => {
@@ -177,7 +180,7 @@ export default function NetworkGraphVisualization({ timeRange, onIpClick }: Netw
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          timeRange: getTimePeriodMinutes(filters.timeRange || timeRange),
+          timeRange: getTimePeriodMinutesWithCustom(filters.timeRange || timeRange),
           maxNodes: filters.maxNodes,
           maxEdges: filters.maxEdges
         })

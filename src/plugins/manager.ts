@@ -387,7 +387,10 @@ class LoganPluginManager extends EventEmitter implements PluginManager {
         console.log(`[${level.toUpperCase()}] [Plugin:${pluginId}] ${message}`, meta || '')
       }
       
-      // TODO: Implement file logging if needed
+      // Implement file logging if enabled
+      if (config.logging.enableFile && config.logging.filePath) {
+        this.writeToLogFile(pluginId, level, message, meta)
+      }
     }
 
     return {
@@ -395,6 +398,30 @@ class LoganPluginManager extends EventEmitter implements PluginManager {
       info: createLogMethod('info'),
       warn: createLogMethod('warn'),
       error: createLogMethod('error'),
+    }
+  }
+
+  private writeToLogFile(pluginId: string, level: string, message: string, meta?: any): void {
+    try {
+      const timestamp = new Date().toISOString()
+      const logEntry = {
+        timestamp,
+        level: level.toUpperCase(),
+        plugin: pluginId,
+        message,
+        meta: meta || null
+      }
+      
+      const logLine = JSON.stringify(logEntry) + '\n'
+      
+      // Use dynamic import for fs to avoid bundling issues
+      import('fs').then(fs => {
+        fs.appendFileSync(config.logging.filePath!, logLine, 'utf8')
+      }).catch(error => {
+        console.error('Failed to write to log file:', error)
+      })
+    } catch (error) {
+      console.error('Error in file logging:', error)
     }
   }
 

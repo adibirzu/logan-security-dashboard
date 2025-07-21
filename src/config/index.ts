@@ -4,9 +4,32 @@
  */
 
 export interface DatabaseConfig {
+  enabled: boolean
   connectionString?: string
   maxConnections: number
   timeout: number
+  
+  // Oracle MCP Configuration (aligned with Oracle MCP Server specs)
+  mcp: {
+    enabled: boolean
+    server: string
+    port: number
+    connectionString: string     // Oracle connection string: user/password@host:port/service_name
+    targetSchema?: string        // Schema to target (optional)
+    cacheDir?: string           // Cache directory for MCP operations
+    thickMode?: boolean         // Use Oracle thick mode (requires Oracle Client libraries)
+    secure: boolean
+    token?: string
+  }
+  
+  // Legacy Oracle Configuration
+  oracle: {
+    host: string
+    port: number
+    serviceName: string
+    username: string
+    password: string
+  }
 }
 
 export interface OCIConfig {
@@ -121,9 +144,31 @@ export const config: AppConfig = {
   },
 
   database: {
+    enabled: getEnvBoolean('ORACLE_DB_ENABLED', true),
     connectionString: getEnvVar('DATABASE_URL'),
     maxConnections: getEnvNumber('DB_MAX_CONNECTIONS', 10),
     timeout: getEnvNumber('DB_TIMEOUT', 30000),
+    
+    mcp: {
+      enabled: getEnvBoolean('ORACLE_MCP_ENABLED', true),
+      server: getEnvVar('ORACLE_MCP_SERVER', 'localhost') || 'localhost',
+      port: getEnvNumber('ORACLE_MCP_PORT', 8080),
+      connectionString: getEnvVar('ORACLE_CONNECTION_STRING') || 
+                       `${getEnvVar('ORACLE_DB_USER', 'logan_user')}/${getEnvVar('ORACLE_DB_PASSWORD', 'password')}@${getEnvVar('ORACLE_DB_HOST', 'localhost')}:${getEnvNumber('ORACLE_DB_PORT', 1521)}/${getEnvVar('ORACLE_DB_SERVICE', 'ORCL')}`,
+      targetSchema: getEnvVar('TARGET_SCHEMA') || getEnvVar('ORACLE_MCP_SCHEMA', 'LOGAN_USER') || 'LOGAN_USER',
+      cacheDir: getEnvVar('CACHE_DIR', '.cache') || '.cache',
+      thickMode: getEnvBoolean('THICK_MODE', false) || getEnvBoolean('ORACLE_THICK_MODE', false),
+      secure: getEnvBoolean('ORACLE_MCP_SECURE', false),
+      token: getEnvVar('ORACLE_MCP_TOKEN')
+    },
+    
+    oracle: {
+      host: getEnvVar('ORACLE_DB_HOST', 'localhost') || 'localhost',
+      port: getEnvNumber('ORACLE_DB_PORT', 1521),
+      serviceName: getEnvVar('ORACLE_DB_SERVICE', 'ORCL') || 'ORCL',
+      username: getEnvVar('ORACLE_DB_USER', 'logan_user') || 'logan_user',
+      password: getEnvVar('ORACLE_DB_PASSWORD', '') || ''
+    }
   },
 
   oci: {
