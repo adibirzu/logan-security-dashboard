@@ -1,7 +1,42 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { getOracleMCPClient } from '@/lib/database/oracle-client'
+import { v4 as uuidv4 } from 'uuid'
 
-// TODO: Replace this with a database
-const incidents = [
+// Interface for incidents stored in database
+interface Incident {
+  id: string
+  title: string
+  description: string
+  severity: 'low' | 'medium' | 'high' | 'critical'
+  status: 'open' | 'investigating' | 'contained' | 'resolved' | 'closed'
+  category: string
+  source: string
+  assignee?: string
+  reporter: string
+  createdAt: Date
+  updatedAt: Date
+  resolvedAt?: Date
+  ttd: number // Time to Detection (minutes)
+  ttr: number // Time to Response (minutes)
+  tags: string[]
+  iocs: string[] // Indicators of Compromise
+  affectedSystems: string[]
+  timeline: TimelineEvent[]
+  artifacts: string[]
+  workflowExecutions: string[]
+}
+
+interface TimelineEvent {
+  id: string
+  timestamp: Date
+  type: 'detection' | 'response' | 'containment' | 'resolution'
+  description: string
+  author: string
+  automated: boolean
+}
+
+// Fallback incidents for when database is not available
+const fallbackIncidents = [
   {
     id: 'INC-2024-001',
     title: 'Suspicious PowerShell Activity Detected',
@@ -83,21 +118,164 @@ const incidents = [
 ]
 
 export async function GET(request: NextRequest) {
-  return NextResponse.json({
-    success: true,
-    data: incidents
-  })
+  try {
+    const client = getOracleMCPClient()
+    
+    // Try to get incidents from database
+    try {
+      const initialized = await client.initialize()
+      if (initialized) {
+        const result = await client.executeMCPRequest('select', {
+          table: 'incidents',
+          orderBy: [{ field: 'created_at', direction: 'DESC' }]
+        })
+        
+        if (result.success && result.data) {
+          const incidents = result.data.map(mapToIncident)
+          return NextResponse.json({
+            success: true,
+            data: incidents,
+            source: 'database'
+          })
+        }
+      }
+    } catch (dbError) {
+      console.warn('Database not available, using fallback data:', dbError)
+    }
+    
+    // Fallback to in-memory data
+    return NextResponse.json({
+      success: true,
+      data: fallbackIncidents,
+      source: 'fallback'
+    })
+  } catch (error) {
+    console.error('Failed to retrieve incidents:', error)
+    return NextResponse.json({
+      success: false,
+      error: 'Failed to retrieve incidents'
+    }, { status: 500 })
+  }
 }
 
 export async function POST(request: NextRequest) {
-  const newIncident = await request.json()
-  newIncident.id = `INC-2024-${String(incidents.length + 1).padStart(3, '0')}`
-  newIncident.createdAt = new Date()
-  newIncident.updatedAt = new Date()
-  incidents.unshift(newIncident)
+  try {
+    const newIncidentData = await request.json()
+    
+    // Validate required fields
+    if (!newIncidentData.title || !newIncidentData.description || !newIncidentData.severity) {
+      return NextResponse.json({
+        success: false,
+        error: 'Missing required fields: title, description, and severity are required'
+      }, { status: 400 })
+    }
 
-  return NextResponse.json({
-    success: true,
-    data: newIncident
-  }, { status: 201 })
+    const client = getOracleMCPClient()
+    const incidentId = uuidv4()
+    
+    const newIncident: Incident = {
+      id: incidentId,
+      title: newIncidentData.title,
+      description: newIncidentData.description,
+      severity: newIncidentData.severity,
+      status: newIncidentData.status || 'open',
+      category: newIncidentData.category || 'Security',
+      source: newIncidentData.source || 'Manual',
+      assignee: newIncidentData.assignee,
+      reporter: newIncidentData.reporter || 'System',
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      resolvedAt: newIncidentData.resolvedAt ? new Date(newIncidentData.resolvedAt) : undefined,
+      ttd: newIncidentData.ttd || 0,
+      ttr: newIncidentData.ttr || 0,
+      tags: newIncidentData.tags || [],
+      iocs: newIncidentData.iocs || [],
+      affectedSystems: newIncidentData.affectedSystems || [],
+      timeline: newIncidentData.timeline || [{
+        id: uuidv4(),
+        timestamp: new Date(),
+        type: 'detection',
+        description: 'Incident created',
+        author: newIncidentData.reporter || 'System',
+        automated: true
+      }],
+      artifacts: newIncidentData.artifacts || [],
+      workflowExecutions: newIncidentData.workflowExecutions || []
+    }
+
+    // Try to save to database
+    try {
+      const initialized = await client.initialize()
+      if (initialized) {
+        const result = await client.executeMCPRequest('insert', {
+          table: 'incidents',
+          data: {
+            ...newIncident,
+            timeline: JSON.stringify(newIncident.timeline),
+            tags: JSON.stringify(newIncident.tags),
+            iocs: JSON.stringify(newIncident.iocs),
+            affected_systems: JSON.stringify(newIncident.affectedSystems),
+            artifacts: JSON.stringify(newIncident.artifacts),
+            workflow_executions: JSON.stringify(newIncident.workflowExecutions)
+          }
+        })
+        
+        if (result.success) {
+          return NextResponse.json({
+            success: true,
+            data: newIncident,
+            source: 'database'
+          }, { status: 201 })
+        }
+      }
+    } catch (dbError) {
+      console.warn('Database not available, using fallback storage:', dbError)
+    }
+
+    // Fallback: add to in-memory array (ensure all fields are defined for fallback array)
+    const fallbackIncident = {
+      ...newIncident,
+      assignee: newIncident.assignee || 'Unassigned'
+    }
+    fallbackIncidents.unshift(fallbackIncident as any)
+    
+    return NextResponse.json({
+      success: true,
+      data: newIncident,
+      source: 'fallback'
+    }, { status: 201 })
+  } catch (error) {
+    console.error('Failed to create incident:', error)
+    return NextResponse.json({
+      success: false,
+      error: 'Failed to create incident',
+      details: error instanceof Error ? error.message : 'Unknown error'
+    }, { status: 500 })
+  }
+}
+
+// Helper function to map database row to Incident object
+function mapToIncident(row: any): Incident {
+  return {
+    id: row.id,
+    title: row.title,
+    description: row.description,
+    severity: row.severity,
+    status: row.status,
+    category: row.category,
+    source: row.source,
+    assignee: row.assignee,
+    reporter: row.reporter,
+    createdAt: new Date(row.created_at),
+    updatedAt: new Date(row.updated_at),
+    resolvedAt: row.resolved_at ? new Date(row.resolved_at) : undefined,
+    ttd: row.ttd || 0,
+    ttr: row.ttr || 0,
+    tags: row.tags ? JSON.parse(row.tags) : [],
+    iocs: row.iocs ? JSON.parse(row.iocs) : [],
+    affectedSystems: row.affected_systems ? JSON.parse(row.affected_systems) : [],
+    timeline: row.timeline ? JSON.parse(row.timeline) : [],
+    artifacts: row.artifacts ? JSON.parse(row.artifacts) : [],
+    workflowExecutions: row.workflow_executions ? JSON.parse(row.workflow_executions) : []
+  }
 }

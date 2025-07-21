@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import * as fs from 'fs'
 import * as path from 'path'
+import { getOracleMCPClient, SavedQuery } from '@/lib/database/oracle-client'
+import { v4 as uuidv4 } from 'uuid'
 
 const WORKING_QUERIES_FILE = path.join(process.cwd(), 'config', 'working-queries.json')
 
@@ -144,13 +146,61 @@ function saveWorkingQueries(data: WorkingQueriesFile): void {
   }
 }
 
-// GET - Retrieve all working queries
+// GET - Retrieve all working queries with database integration
 export async function GET() {
   try {
+    const client = getOracleMCPClient()
+    
+    // Try to get queries from database first
+    try {
+      const initialized = await client.initialize()
+      if (initialized) {
+        const savedQueries = await client.getSavedQueries()
+        
+        // Convert SavedQuery to WorkingQuery format
+        const workingQueriesFromDB = savedQueries.map(sq => ({
+          id: sq.id,
+          name: sq.name,
+          query: sq.query,
+          category: sq.category,
+          description: sq.description,
+          saved_date: sq.createdAt.toISOString(),
+          saved_by: sq.createdBy,
+          execution_stats: {
+            avg_execution_time_ms: sq.avgExecutionTime,
+            success_rate: 1.0
+          },
+          usage_stats: {
+            usage_count: sq.executionCount,
+            last_used: sq.updatedAt.toISOString()
+          },
+          tags: sq.tags,
+          user_notes: sq.description
+        }))
+
+        return NextResponse.json({
+          success: true,
+          data: {
+            meta: {
+              last_updated: new Date().toISOString(),
+              total_queries: workingQueriesFromDB.length,
+              categories: [...new Set(workingQueriesFromDB.map(q => q.category))]
+            },
+            queries: workingQueriesFromDB
+          },
+          source: 'database'
+        })
+      }
+    } catch (dbError) {
+      console.warn('Database not available, falling back to file storage:', dbError)
+    }
+
+    // Fallback to file-based queries
     const workingQueries = loadWorkingQueries()
     return NextResponse.json({
       success: true,
-      data: workingQueries.verified_working_queries
+      data: workingQueries.verified_working_queries,
+      source: 'file'
     })
   } catch (error) {
     console.error('Error retrieving working queries:', error)
@@ -168,6 +218,80 @@ export async function POST(request: NextRequest) {
     const { action, query: queryData } = body
 
     if (action === 'save' && queryData) {
+      const client = getOracleMCPClient()
+      
+      // Auto-categorize if no category provided
+      const category = queryData.category || categorizeQuery(queryData.query)
+
+      // Try to save to database first
+      try {
+        const initialized = await client.initialize()
+        if (initialized) {
+          // Check for duplicates in database
+          const existingQueries = await client.getSavedQueries()
+          const existingQuery = existingQueries.find(
+            q => q.query === queryData.query || q.name === queryData.name
+          )
+          
+          if (existingQuery) {
+            return NextResponse.json({
+              success: false,
+              error: 'Query with this name or content already exists',
+              existing: existingQuery
+            }, { status: 409 })
+          }
+
+          // Create SavedQuery object for database
+          const savedQuery: SavedQuery = {
+            id: uuidv4(),
+            name: queryData.name,
+            description: queryData.description || '',
+            query: queryData.query,
+            category,
+            parameters: [],
+            createdBy: 'user',
+            createdAt: new Date(),
+            updatedAt: new Date(),
+            isPublic: false,
+            tags: queryData.tags || [category],
+            executionCount: 1,
+            avgExecutionTime: queryData.execution_time_ms || 0
+          }
+
+          const result = await client.saveQuery(savedQuery)
+          
+          if (result.success) {
+            return NextResponse.json({
+              success: true,
+              message: 'Query saved to database successfully',
+              query: {
+                id: savedQuery.id,
+                name: savedQuery.name,
+                query: savedQuery.query,
+                category: savedQuery.category,
+                description: savedQuery.description,
+                saved_date: savedQuery.createdAt.toISOString(),
+                saved_by: savedQuery.createdBy,
+                execution_stats: {
+                  avg_execution_time_ms: savedQuery.avgExecutionTime,
+                  success_rate: 1.0
+                },
+                usage_stats: {
+                  usage_count: savedQuery.executionCount,
+                  last_used: savedQuery.updatedAt.toISOString()
+                },
+                tags: savedQuery.tags,
+                user_notes: savedQuery.description
+              },
+              source: 'database'
+            })
+          }
+        }
+      } catch (dbError) {
+        console.warn('Database not available, falling back to file storage:', dbError)
+      }
+
+      // Fallback to file-based storage
       const workingQueries = loadWorkingQueries()
       
       // Check for duplicates
@@ -182,9 +306,6 @@ export async function POST(request: NextRequest) {
           existing: existingQuery
         }, { status: 409 })
       }
-
-      // Auto-categorize if no category provided
-      const category = queryData.category || categorizeQuery(queryData.query)
 
       // Create new working query
       const newQuery: WorkingQuery = {
@@ -218,7 +339,8 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({
         success: true,
         message: 'Query saved to working queries successfully',
-        query: newQuery
+        query: newQuery,
+        source: 'file'
       })
     }
 
