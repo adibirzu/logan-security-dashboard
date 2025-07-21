@@ -1,5 +1,13 @@
 # Logan Security Dashboard - User Guide
 
+## ⚠️ Disclaimer
+
+This software was created to showcase Oracle Cloud Infrastructure (OCI) Logging Analytics capabilities and demonstrate how to expand them using third-party services. The architecture and code were written by me with the assistance of Oracle Code Assist and multiple LLMs including Claude, OpenAI GPT-4o, Meta Llama 3.2, and Grok 3. This is an educational project designed to learn more about OCI's service capabilities and security monitoring optimization.
+
+**This is NOT an official Oracle product** - it is a personal project demonstrating integration possibilities with OCI Logging Analytics.
+
+---
+
 ## Table of Contents
 1. [Overview](#overview)
 2. [Getting Started](#getting-started)
@@ -574,13 +582,9 @@ The Logan Security Dashboard now includes an **external MCP Screenshot Server** 
 ## Getting Help
 
 ### Support Resources
-- **Documentation**: [docs.logan-security.com]
-- **Community**: [community.logan-security.com]
-- **Support**: support@logan-security.com
-- **Emergency**: +1-800-LOGAN-911
-
-### Feedback
-We value your feedback! Use the feedback button in the dashboard or email feedback@logan-security.com
+- **Documentation**: This guide and the project README
+- **Issues**: Create a GitHub issue for bugs or feature requests
+- **OCI Support**: Consult Oracle Cloud Infrastructure documentation
 
 ---
 
