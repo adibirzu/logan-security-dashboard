@@ -46,7 +46,11 @@ class Neo4jGraphStore:
     def __init__(self, uri: str = "bolt://localhost:7687", user: str = "neo4j", password: str = None):
         # Get password from environment variable if not provided
         if password is None:
-            password = os.getenv("NEO4J_PASSWORD", "password")
+            password = os.getenv("NEO4J_PASSWORD", "")
+        
+        # Validate password is provided
+        if not password:
+            raise ValueError("NEO4J_PASSWORD environment variable is required or password must be provided")
         self.driver = GraphDatabase.driver(uri, auth=(user, password))
         self._initialize_constraints()
     
@@ -713,7 +717,7 @@ def main():
     parser.add_argument('--use-neo4j', action='store_true', help='Use Neo4j for storage')
     parser.add_argument('--neo4j-uri', type=str, default='bolt://localhost:7687', help='Neo4j URI')
     parser.add_argument('--neo4j-user', type=str, default='neo4j', help='Neo4j username')
-    parser.add_argument('--neo4j-password', type=str, default=os.getenv('NEO4J_PASSWORD', 'password'), help='Neo4j password')
+    parser.add_argument('--neo4j-password', type=str, default=os.getenv('NEO4J_PASSWORD', ''), help='Neo4j password (or set NEO4J_PASSWORD env var)')
     
     args = parser.parse_args()
     

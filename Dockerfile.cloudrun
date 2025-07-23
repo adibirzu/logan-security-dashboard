@@ -1,0 +1,145 @@
+# Logan Security Dashboard - Cloud Run Optimized Dockerfile
+# Optimized for Google Cloud Run deployment
+
+# =============================================================================
+# Base Image with System Dependencies
+# =============================================================================
+FROM node:20-alpine AS base
+
+# Install system dependencies and security updates
+RUN apk update && apk upgrade && \
+    apk add --no-cache \
+    libc6-compat \
+    python3 \
+    py3-pip \
+    python3-dev \
+    build-base \
+    openssl \
+    ca-certificates \
+    curl \
+    git \
+    && rm -rf /var/cache/apk/*
+
+# Create non-root user for security
+RUN addgroup --system --gid 1001 logan && \
+    adduser --system --uid 1001 --ingroup logan logan
+
+# Set working directory
+WORKDIR /app
+
+# =============================================================================
+# Python Dependencies Layer
+# =============================================================================
+FROM base AS python-deps
+
+# Copy Python requirements if they exist
+COPY scripts/requirements.txt ./python-requirements.txt 2>/dev/null || echo "oci==2.126.4" > ./python-requirements.txt
+
+# Install Python dependencies
+RUN pip3 install --no-cache-dir --upgrade pip && \
+    pip3 install --no-cache-dir -r python-requirements.txt
+
+# =============================================================================
+# Node.js Dependencies Layer
+# =============================================================================
+FROM base AS node-deps
+
+# Copy package files
+COPY package.json package-lock.json* ./
+
+# Install Node.js dependencies
+RUN npm ci --only=production --frozen-lockfile && \
+    npm cache clean --force
+
+# =============================================================================
+# Build Layer
+# =============================================================================
+FROM base AS builder
+
+# Accept build arguments
+ARG NODE_ENV=production
+ARG NEXT_TELEMETRY_DISABLED=1
+ARG LOGAN_REGION
+ARG LOGAN_COMPARTMENT_ID
+ARG LOGAN_NAMESPACE
+ARG TARGET_SCHEMA
+ARG ORACLE_DB_USER
+
+# Copy Python dependencies from python-deps layer
+COPY --from=python-deps /usr/lib/python3.*/site-packages /usr/lib/python3.11/site-packages
+COPY --from=python-deps /usr/bin/pip* /usr/bin/
+
+# Copy Node.js dependencies
+COPY --from=node-deps /app/node_modules ./node_modules
+
+# Copy source code
+COPY . .
+
+# Copy Python scripts
+COPY scripts/ ./scripts/ 2>/dev/null || true
+
+# Set build environment variables
+ENV NODE_ENV=${NODE_ENV}
+ENV NEXT_TELEMETRY_DISABLED=${NEXT_TELEMETRY_DISABLED}
+ENV PYTHON_PATH=/usr/bin/python3
+ENV NEXT_PUBLIC_LOGAN_REGION=${LOGAN_REGION}
+ENV NEXT_PUBLIC_LOGAN_COMPARTMENT_ID=${LOGAN_COMPARTMENT_ID}
+ENV NEXT_PUBLIC_LOGAN_NAMESPACE=${LOGAN_NAMESPACE}
+
+# Build the application
+RUN npm run build
+
+# =============================================================================
+# Runtime Layer - Cloud Run Optimized
+# =============================================================================
+FROM base AS runtime
+
+# Set production environment
+ENV NODE_ENV=production
+ENV NEXT_TELEMETRY_DISABLED=1
+ENV PYTHON_PATH=/usr/bin/python3
+
+# Cloud Run specific environment variables
+ENV PORT=8080
+ENV HOSTNAME="0.0.0.0"
+
+# Copy Python dependencies
+COPY --from=python-deps /usr/lib/python3.*/site-packages /usr/lib/python3.11/site-packages
+COPY --from=python-deps /usr/bin/pip* /usr/bin/
+
+# Copy Node.js runtime dependencies only (production dependencies)
+COPY --from=node-deps /app/node_modules ./node_modules
+
+# Copy built application
+COPY --from=builder --chown=logan:logan /app/.next/standalone ./
+COPY --from=builder --chown=logan:logan /app/.next/static ./.next/static
+COPY --from=builder --chown=logan:logan /app/public ./public
+
+# Copy Python scripts and configurations
+COPY --from=builder --chown=logan:logan /app/scripts ./scripts 2>/dev/null || true
+
+# Copy configuration files if they exist
+COPY --from=builder --chown=logan:logan /app/config ./config 2>/dev/null || true
+
+# Create necessary directories with proper permissions
+RUN mkdir -p /app/logs /app/temp /app/uploads && \
+    chown -R logan:logan /app/logs /app/temp /app/uploads && \
+    chmod 755 /app/logs /app/temp /app/uploads
+
+# Create health check script for Cloud Run
+RUN echo '#!/bin/sh\ncurl -f http://localhost:$PORT/api/health || exit 1' > /app/healthcheck.sh && \
+    chmod +x /app/healthcheck.sh && \
+    chown logan:logan /app/healthcheck.sh
+
+# Switch to non-root user
+USER logan
+
+# Expose Cloud Run port
+EXPOSE 8080
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
+    CMD /app/healthcheck.sh
+
+# Start the application
+CMD ["node", "server.js"]

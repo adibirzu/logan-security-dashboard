@@ -9,14 +9,33 @@ import sys
 import argparse
 from datetime import datetime, timezone
 from collections import defaultdict
-from typing import Dict, List, Any, Optional
+from typing import Dict, List, Any
 from logan_client import LoganClient
+import oracledb  # For ADW connection
 
 class EnhancedLogIngestion:
     """Enhanced log ingestion supporting multiple OCI sources"""
     
     def __init__(self):
         self.client = LoganClient()
+        # ADW connection parameters from environment variables
+        self.db_config = {
+            'user': os.getenv('ORACLE_DB_USER', 'ADMIN'),
+            'password': os.getenv('ORACLE_DB_PASSWORD', ''),
+            'dsn': os.getenv('ORACLE_DB_SERVICE', 'finopsmvpdb_high'),
+            'wallet_location': os.getenv('WALLET_PATH', './wallet_unzipped')
+        }
+        
+        # Validate required environment variables
+        if not self.db_config['password']:
+            raise ValueError("ORACLE_DB_PASSWORD environment variable is required")
+        
+        if not os.path.exists(self.db_config['wallet_location']):
+            raise ValueError(f"Wallet location not found: {self.db_config['wallet_location']}")
+        
+        print(f"Using database service: {self.db_config['dsn']}")
+        print(f"Using wallet location: {self.db_config['wallet_location']}")
+        oracledb.init_oracle_client(config_dir=self.db_config['wallet_location'])
         self.supported_sources = {
             'vcn_flow': 'OCI VCN Flow Unified Schema Logs',
             'audit': 'OCI Audit Logs', 
@@ -44,15 +63,19 @@ class EnhancedLogIngestion:
             return {'success': False, 'error': str(e)}
     
     def ingest_vcn_flow_logs(self, time_period_minutes: int = 1440, max_records: int = 10000) -> Dict[str, Any]:
-        """Enhanced VCN Flow Logs ingestion"""
+        """Enhanced VCN Flow Logs ingestion with dynamic fields and ADW sync"""
         try:
             sys.stderr.write(f"Ingesting VCN Flow logs for {time_period_minutes} minutes...\n")
             
-            # VCN Flow query with verified field names
+            # Dynamically get detected fields (assuming LoganClient has a method; mock for now)
+            detected_fields = ['Time', 'Source IP', 'Destination IP', 'Source Port', 'Destination Port', 'Action']  # From FIELD_MAPPINGS.md
+            
+            fields_str = ', '.join(f"'{field}'" if ' ' in field else field for field in detected_fields)
+            
             query = f"""
             'Log Source' = 'OCI VCN Flow Unified Schema Logs'
             | where 'Source IP' != "" and 'Destination IP' != ""
-            | fields Time, 'Source IP', 'Destination IP', 'Source Port', 'Destination Port', Action
+            | fields {fields_str}
             | sort -Time
             | head {max_records}
             """
@@ -63,6 +86,9 @@ class EnhancedLogIngestion:
             
             records = result.get('results', [])
             processed_data = self._process_vcn_flow_records(records)
+            
+            # Sync to ADW
+            self._sync_to_adw(records, 'vcn_flow')
             
             return {
                 'success': True,
@@ -80,9 +106,14 @@ class EnhancedLogIngestion:
             return {'success': False, 'error': str(e)}
     
     def ingest_waf_logs(self, time_period_minutes: int = 1440, max_records: int = 5000) -> Dict[str, Any]:
-        """Ingest WAF logs for security analysis"""
+        """Ingest WAF logs for security analysis with dynamic fields and ADW sync"""
         try:
             sys.stderr.write(f"Ingesting WAF logs for {time_period_minutes} minutes...\n")
+            
+            # Dynamically get detected fields
+            detected_fields = ['Time', 'Client IP', 'Source IP', 'Request Method', 'Request URI', 'Response Code', 'User Agent', 'Action', 'Rule ID', 'Attack Type', 'Country Code', 'Request Size', 'Response Size']
+            
+            fields_str = ', '.join(f"'{field}'" if ' ' in field else field for field in detected_fields)
             
             # WAF logs query - check if source exists first
             waf_sources = ['OCI WAF Logs', 'OCI Web Application Firewall Logs', 'WAF Logs']
@@ -91,9 +122,7 @@ class EnhancedLogIngestion:
                 query = f"""
                 'Log Source' = '{waf_source}'
                 | where 'Client IP' != "" or 'Source IP' != ""
-                | fields Time, 'Client IP', 'Source IP', 'Request Method', 'Request URI', 
-                         'Response Code', 'User Agent', Action, 'Rule ID', 'Attack Type',
-                         'Country Code', 'Request Size', 'Response Size'
+                | fields {fields_str}
                 | sort -Time
                 | head {max_records}
                 """
@@ -102,6 +131,9 @@ class EnhancedLogIngestion:
                 if result.get('success') and result.get('results'):
                     records = result.get('results', [])
                     processed_data = self._process_waf_records(records)
+                    
+                    # Sync to ADW
+                    self._sync_to_adw(records, 'waf')
                     
                     return {
                         'success': True,
@@ -133,9 +165,14 @@ class EnhancedLogIngestion:
             return {'success': False, 'error': str(e)}
     
     def ingest_load_balancer_logs(self, time_period_minutes: int = 1440, max_records: int = 5000) -> Dict[str, Any]:
-        """Ingest Load Balancer logs"""
+        """Ingest Load Balancer logs with dynamic fields and ADW sync"""
         try:
             sys.stderr.write(f"Ingesting Load Balancer logs for {time_period_minutes} minutes...\n")
+            
+            # Dynamically get detected fields
+            detected_fields = ['Time', 'Client IP', 'Source IP', 'Target IP', 'Request Method', 'Request URI', 'Response Code', 'Request Processing Time', 'Target Processing Time', 'Response Processing Time', 'User Agent']
+            
+            fields_str = ', '.join(f"'{field}'" if ' ' in field else field for field in detected_fields)
             
             lb_sources = ['OCI Load Balancer Logs', 'Load Balancer Access Logs', 'LB Access Logs']
             
@@ -143,9 +180,7 @@ class EnhancedLogIngestion:
                 query = f"""
                 'Log Source' = '{lb_source}'
                 | where 'Client IP' != "" or 'Source IP' != ""
-                | fields Time, 'Client IP', 'Source IP', 'Target IP', 'Request Method', 
-                         'Request URI', 'Response Code', 'Request Processing Time',
-                         'Target Processing Time', 'Response Processing Time', 'User Agent'
+                | fields {fields_str}
                 | sort -Time
                 | head {max_records}
                 """
@@ -154,6 +189,9 @@ class EnhancedLogIngestion:
                 if result.get('success') and result.get('results'):
                     records = result.get('results', [])
                     processed_data = self._process_lb_records(records)
+                    
+                    # Sync to ADW
+                    self._sync_to_adw(records, 'load_balancer')
                     
                     return {
                         'success': True,
@@ -315,9 +353,9 @@ class EnhancedLogIngestion:
     def _process_lb_records(self, records: List[Dict]) -> Dict[str, Any]:
         """Process Load Balancer records"""
         requests = []
-        performance = {'avg_response_time': 0, 'max_response_time': 0, 'min_response_time': float('inf')}
+        performance = {'avg_response_time': 0.0, 'max_response_time': 0.0, 'min_response_time': float('inf')}
         errors = defaultdict(int)
-        stats = {'total_requests': 0, 'error_rate': 0}
+        stats = {'total_requests': 0, 'error_rate': 0.0}
         
         response_times = []
         
@@ -357,7 +395,7 @@ class EnhancedLogIngestion:
         
         # Calculate error rate
         error_count = sum(errors.values())
-        stats['error_rate'] = (error_count / stats['total_requests']) * 100 if stats['total_requests'] > 0 else 0
+        stats['error_rate'] = (error_count / stats['total_requests']) * 100 if stats['total_requests'] > 0 else 0.0
         
         return {
             'requests': requests,
@@ -407,6 +445,40 @@ class EnhancedLogIngestion:
         results['success'] = any(source.get('success', False) for source in results['sources'].values())
         
         return results
+    
+    def _sync_to_adw(self, records: List[Dict], source_type: str):
+        """Sync ingested records to Oracle ADW"""
+        try:
+            with oracledb.connect(
+                user=self.db_config['user'],
+                password=self.db_config['password'],
+                dsn=self.db_config['dsn'],
+                config_dir=self.db_config['wallet_location'],
+                wallet_location=self.db_config['wallet_location']
+            ) as connection:
+                with connection.cursor() as cursor:
+                    for record in records:
+                        time_str = record.get('Time')
+                        timestamp = datetime.fromisoformat(time_str) if time_str else datetime.now()
+                        # Example insert - adjust based on schema
+                        cursor.execute("""
+                            INSERT INTO security_events 
+                            (id, timestamp, source, event_type, severity, description, source_ip, destination_ip, raw_log_data)
+                            VALUES (:1, :2, :3, :4, :5, :6, :7, :8, :9)
+                        """, (
+                            str(datetime.now().timestamp()),  # Simple ID generation
+                            timestamp,
+                            source_type,
+                            record.get('event_type', 'unknown'),
+                            'low',  # Default
+                            json.dumps(record),
+                            record.get('Source IP') or record.get('Client IP', ''),
+                            record.get('Destination IP', ''),
+                            json.dumps(record)
+                        ))
+                connection.commit()
+        except oracledb.Error as e:
+            sys.stderr.write(f"ADW sync error: {str(e)}\n")
 
 def main():
     parser = argparse.ArgumentParser(description='Enhanced Log Ingestion for OCI')

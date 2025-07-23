@@ -1,0 +1,221 @@
+# Logan Security Dashboard - Helm Values
+
+# Global configuration
+global:
+  imageRegistry: ""
+  imagePullSecrets: []
+  storageClass: ""
+
+# Image configuration
+image:
+  registry: logan-security
+  repository: logan-dashboard
+  tag: "latest"
+  pullPolicy: IfNotPresent
+  pullSecrets: []
+
+# Deployment configuration
+replicaCount: 2
+
+# Service configuration
+service:
+  type: ClusterIP
+  port: 3000
+  targetPort: http
+  annotations: {}
+
+# Ingress configuration
+ingress:
+  enabled: true
+  className: "nginx"
+  annotations:
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/proxy-body-size: "50m"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "300"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "300"
+    nginx.ingress.kubernetes.io/limit-rps: "10"
+    nginx.ingress.kubernetes.io/limit-connections: "5"
+  hosts:
+    - host: logan.your-domain.com
+      paths:
+        - path: /
+          pathType: Prefix
+  tls:
+    - secretName: logan-tls-secret
+      hosts:
+        - logan.your-domain.com
+
+# Resources configuration
+resources:
+  limits:
+    cpu: 1000m
+    memory: 2Gi
+  requests:
+    cpu: 500m
+    memory: 1Gi
+
+# Autoscaling configuration
+autoscaling:
+  enabled: true
+  minReplicas: 2
+  maxReplicas: 10
+  targetCPUUtilizationPercentage: 70
+  targetMemoryUtilizationPercentage: 80
+
+# Pod Disruption Budget
+podDisruptionBudget:
+  enabled: true
+  minAvailable: 1
+
+# Security Context
+podSecurityContext:
+  runAsNonRoot: true
+  runAsUser: 1001
+  runAsGroup: 1001
+  fsGroup: 1001
+
+securityContext:
+  allowPrivilegeEscalation: false
+  readOnlyRootFilesystem: false
+  capabilities:
+    drop:
+    - ALL
+
+# Node selector, tolerations, and affinity
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}
+
+# Environment variables
+env:
+  NODE_ENV: "production"
+  NEXT_TELEMETRY_DISABLED: "1"
+  PORT: "3000"
+  HOSTNAME: "0.0.0.0"
+  LOG_LEVEL: "info"
+  LOG_FORMAT: "json"
+  FEATURE_MODULE_SYSTEM_ENABLED: "true"
+  FEATURE_ADVANCED_ANALYTICS: "true"
+  CACHE_TTL: "3600"
+  MAX_QUERY_RESULTS: "10000"
+  QUERY_TIMEOUT: "30000"
+
+# Logan specific configuration
+logan:
+  region: "us-ashburn-1"
+  namespace: "your-namespace"
+  compartmentId: "ocid1.compartment.oc1..your-compartment-id"
+
+# Oracle Database configuration
+oracle:
+  user: "your-db-user"
+  password: "your-db-password"
+  connectionString: "your-connection-string"
+  walletPath: "/app/wallet_unzipped"
+
+# Security configuration
+security:
+  encryptionKey: "your-32-character-encryption-key-here"
+  sessionSecret: "your-session-secret-key-minimum-32-chars"
+
+# Persistence configuration
+persistence:
+  logs:
+    enabled: true
+    size: 10Gi
+    storageClass: ""
+    accessMode: ReadWriteOnce
+  uploads:
+    enabled: true
+    size: 5Gi
+    storageClass: ""
+    accessMode: ReadWriteOnce
+
+# Redis configuration
+redis:
+  enabled: true
+  auth:
+    enabled: true
+    password: "" # Set via values override or secret
+  master:
+    resources:
+      limits:
+        cpu: 200m
+        memory: 512Mi
+      requests:
+        cpu: 100m
+        memory: 256Mi
+
+# Network Policy
+networkPolicy:
+  enabled: true
+  ingress:
+    enabled: true
+  egress:
+    enabled: true
+
+# Service Account
+serviceAccount:
+  create: true
+  annotations: {}
+  name: ""
+
+# Monitoring configuration
+monitoring:
+  enabled: false
+  serviceMonitor:
+    enabled: false
+    namespace: ""
+  prometheusRule:
+    enabled: false
+    namespace: ""
+
+# Extra configuration
+extraVolumes: []
+extraVolumeMounts: []
+extraEnvVars: []
+extraEnvVarsSecret: ""
+
+# Pod annotations and labels
+podAnnotations: {}
+podLabels: {}
+
+# Liveness and readiness probes
+livenessProbe:
+  httpGet:
+    path: /api/health
+    port: http
+  initialDelaySeconds: 60
+  periodSeconds: 30
+  timeoutSeconds: 10
+  failureThreshold: 3
+
+readinessProbe:
+  httpGet:
+    path: /api/health
+    port: http
+  initialDelaySeconds: 30
+  periodSeconds: 10
+  timeoutSeconds: 5
+  failureThreshold: 3
+
+# Startup probe
+startupProbe:
+  httpGet:
+    path: /api/health
+    port: http
+  initialDelaySeconds: 10
+  periodSeconds: 10
+  timeoutSeconds: 5
+  failureThreshold: 10
+
+# Update strategy
+updateStrategy:
+  type: RollingUpdate
+  rollingUpdate:
+    maxSurge: 1
+    maxUnavailable: 0
