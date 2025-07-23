@@ -387,7 +387,61 @@ GROUP BY TRUNC(timestamp), source, event_type, severity;
 -- GRANT SELECT, INSERT, UPDATE, DELETE ON threat_intelligence_indicators TO LOGAN_APP_USER;
 -- GRANT SELECT, INSERT, UPDATE, DELETE ON log_source_mapping TO LOGAN_APP_USER;
 
+-- Enhanced Schema Extensions for ML and IP Graphs
+
+-- Extend security_events with ML fields
+ALTER TABLE security_events ADD (
+    anomaly_score NUMBER,
+    predicted_root_cause VARCHAR2(255),
+    cpu_usage NUMBER,
+    ram_usage NUMBER,
+    access_type VARCHAR2(50)
+);
+
+-- Create ml_predictions table
+CREATE TABLE ml_predictions (
+    id VARCHAR2(36) PRIMARY KEY,
+    event_id VARCHAR2(36) REFERENCES security_events(id),
+    model_type VARCHAR2(50),
+    prediction JSON,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Create ip_nodes table
+CREATE TABLE ip_nodes (
+    ip VARCHAR2(45) PRIMARY KEY,
+    first_seen TIMESTAMP,
+    last_seen TIMESTAMP,
+    threat_level VARCHAR2(20),
+    country_code VARCHAR2(2),
+    metadata JSON
+);
+
+-- Create ip_edges table
+CREATE TABLE ip_edges (
+    id VARCHAR2(36) PRIMARY KEY,
+    source_ip VARCHAR2(45) REFERENCES ip_nodes(ip),
+    destination_ip VARCHAR2(45) REFERENCES ip_nodes(ip),
+    event_type VARCHAR2(100),
+    count NUMBER DEFAULT 1,
+    first_occurrence TIMESTAMP,
+    last_occurrence TIMESTAMP,
+    attributes JSON
+);
+
+-- Add indexes for new tables
+CREATE INDEX idx_ml_predictions_event_id ON ml_predictions(event_id);
+CREATE INDEX idx_ip_nodes_threat_level ON ip_nodes(threat_level);
+CREATE INDEX idx_ip_edges_source_ip ON ip_edges(source_ip);
+CREATE INDEX idx_ip_edges_destination_ip ON ip_edges(destination_ip);
+
+-- Create view for IP graph
+CREATE OR REPLACE VIEW v_ip_graph AS
+SELECT n.ip AS node, e.source_ip, e.destination_ip, e.event_type, e.count
+FROM ip_nodes n
+LEFT JOIN ip_edges e ON n.ip = e.source_ip OR n.ip = e.destination_ip;
+
 COMMIT;
 
--- Schema creation completed
-SELECT 'Logan Security Dashboard Oracle 23ai schema created successfully!' as status FROM dual;
+-- Enhanced schema creation completed
+SELECT 'Logan Security Dashboard enhanced Oracle 23ai schema created successfully!' as status FROM dual;

@@ -1,5 +1,40 @@
+# Logan Security Dashboard - Python Dependencies
+# Required for backend scripts and OCI integration
+
+# Oracle Cloud Infrastructure SDK
 oci==2.155.1
+
+# Database connectivity
+oracledb==2.0.1
+
+# Environment management
 python-dotenv==1.0.0
+
+# Configuration parsing
 PyYAML>=6.0
 toml>=0.10.2
-requests
+
+# HTTP requests
+requests==2.31.0
+
+# Data processing
+pandas==2.1.4
+numpy==1.25.2
+
+# Network analysis (optional)
+networkx==3.2.1
+
+# Neo4j driver (optional)
+neo4j==5.15.0
+
+# JSON processing
+jsonschema==4.20.0
+
+# Logging
+structlog==23.2.0
+
+# Date/time utilities
+python-dateutil==2.8.2
+
+# Security utilities
+cryptography==41.0.8

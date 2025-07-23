@@ -154,7 +154,7 @@ export const config: AppConfig = {
       server: getEnvVar('ORACLE_MCP_SERVER', 'localhost') || 'localhost',
       port: getEnvNumber('ORACLE_MCP_PORT', 8080),
       connectionString: getEnvVar('ORACLE_CONNECTION_STRING') || 
-                       `${getEnvVar('ORACLE_DB_USER', 'logan_user')}/${getEnvVar('ORACLE_DB_PASSWORD', 'password')}@${getEnvVar('ORACLE_DB_HOST', 'localhost')}:${getEnvNumber('ORACLE_DB_PORT', 1521)}/${getEnvVar('ORACLE_DB_SERVICE', 'ORCL')}`,
+                       `${getEnvVar('ORACLE_DB_USER')}/${getEnvVar('ORACLE_DB_PASSWORD')}@${getEnvVar('ORACLE_DB_HOST', 'localhost')}:${getEnvNumber('ORACLE_DB_PORT', 1521)}/${getEnvVar('ORACLE_DB_SERVICE', 'ORCL')}`,
       targetSchema: getEnvVar('TARGET_SCHEMA') || getEnvVar('ORACLE_MCP_SCHEMA', 'LOGAN_USER') || 'LOGAN_USER',
       cacheDir: getEnvVar('CACHE_DIR', '.cache') || '.cache',
       thickMode: getEnvBoolean('THICK_MODE', false) || getEnvBoolean('ORACLE_THICK_MODE', false),

@@ -1,0 +1,24 @@
+apiVersion: v2
+name: logan-security-dashboard
+description: A comprehensive security monitoring and analysis platform for Oracle Cloud Infrastructure (OCI) Logging Analytics
+type: application
+version: 1.0.0
+appVersion: "1.0.0"
+home: https://github.com/logan-security/dashboard
+sources:
+  - https://github.com/logan-security/dashboard
+maintainers:
+  - name: Logan Security Team
+    email: security@logan-dashboard.com
+keywords:
+  - security
+  - monitoring
+  - logging
+  - analytics
+  - oracle
+  - oci
+  - threat-hunting
+  - siem
+annotations:
+  category: Security
+  licenses: MIT

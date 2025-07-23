@@ -6,6 +6,17 @@ This software was created to showcase Oracle Cloud Infrastructure (OCI) Logging 
 
 **This is NOT an official Oracle product** - it is a personal project demonstrating integration possibilities with OCI Logging Analytics.
 
+## 🔒 Security Notice
+
+**IMPORTANT: NO HARDCODED CREDENTIALS**
+
+This codebase contains **no hardcoded passwords, API keys, or other sensitive information**. All credentials must be provided through environment variables. Before deployment:
+
+1. **Generate secure secrets**: `./scripts/generate-secrets.sh`
+2. **Configure environment variables**: Update `.env` files with actual values
+3. **Never commit secrets**: Ensure `.env` files are in `.gitignore`
+4. **Follow security guide**: See [SECURITY_CREDENTIALS_GUIDE.md](SECURITY_CREDENTIALS_GUIDE.md)
+
 ---
 
 A comprehensive security monitoring and analysis dashboard built for Oracle Cloud Infrastructure (OCI) Logging Analytics. This Next.js application provides real-time security insights, threat analysis, and log source management with an intuitive web interface.

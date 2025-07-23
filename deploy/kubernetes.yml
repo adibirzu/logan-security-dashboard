@@ -1,0 +1,444 @@
+# Logan Security Dashboard - Kubernetes Deployment
+# Supports deployment to any Kubernetes cluster (EKS, GKE, AKS, etc.)
+
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: logan-security
+  labels:
+    name: logan-security
+
+---
+# ConfigMap for application configuration
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: logan-config
+  namespace: logan-security
+data:
+  NODE_ENV: "production"
+  NEXT_TELEMETRY_DISABLED: "1"
+  PORT: "3000"
+  HOSTNAME: "0.0.0.0"
+  LOG_LEVEL: "info"
+  LOG_FORMAT: "json"
+  FEATURE_MODULE_SYSTEM_ENABLED: "true"
+  FEATURE_ADVANCED_ANALYTICS: "true"
+  CACHE_TTL: "3600"
+  MAX_QUERY_RESULTS: "10000"
+  QUERY_TIMEOUT: "30000"
+
+---
+# Secret for sensitive configuration
+apiVersion: v1
+kind: Secret
+metadata:
+  name: logan-secrets
+  namespace: logan-security
+type: Opaque
+data:
+  # IMPORTANT: Replace these placeholder values with your actual base64-encoded secrets
+  # Generate base64 values using: echo -n "your-actual-value" | base64
+  # DO NOT commit real secrets to version control
+  ORACLE_DB_USER: "REPLACE_WITH_BASE64_ENCODED_DB_USER"
+  ORACLE_DB_PASSWORD: "REPLACE_WITH_BASE64_ENCODED_DB_PASSWORD"
+  ORACLE_DB_CONNECTION_STRING: "REPLACE_WITH_BASE64_ENCODED_CONNECTION_STRING"
+  ENCRYPTION_KEY: "REPLACE_WITH_BASE64_ENCODED_ENCRYPTION_KEY"
+  SESSION_SECRET: "REPLACE_WITH_BASE64_ENCODED_SESSION_SECRET"
+  LOGAN_COMPARTMENT_ID: "REPLACE_WITH_BASE64_ENCODED_COMPARTMENT_ID"
+  REDIS_PASSWORD: "REPLACE_WITH_BASE64_ENCODED_REDIS_PASSWORD"
+
+---
+# PersistentVolumeClaim for logs
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: logan-logs-pvc
+  namespace: logan-security
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 10Gi
+  storageClassName: standard
+
+---
+# PersistentVolumeClaim for uploads
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: logan-uploads-pvc
+  namespace: logan-security
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 5Gi
+  storageClassName: standard
+
+---
+# Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: logan-dashboard
+  namespace: logan-security
+  labels:
+    app: logan-dashboard
+spec:
+  replicas: 2
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  selector:
+    matchLabels:
+      app: logan-dashboard
+  template:
+    metadata:
+      labels:
+        app: logan-dashboard
+    spec:
+      serviceAccountName: logan-service-account
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1001
+        runAsGroup: 1001
+        fsGroup: 1001
+      containers:
+      - name: logan-dashboard
+        image: logan-security/logan-dashboard:latest
+        imagePullPolicy: Always
+        ports:
+        - name: http
+          containerPort: 3000
+          protocol: TCP
+        env:
+        - name: LOGAN_REGION
+          value: "us-ashburn-1"
+        - name: LOGAN_NAMESPACE
+          value: "your-namespace"
+        - name: TNS_ADMIN
+          value: "/app/wallet_unzipped"
+        - name: PYTHON_PATH
+          value: "/usr/bin/python3"
+        - name: PYTHONPATH
+          value: "/app/scripts"
+        envFrom:
+        - configMapRef:
+            name: logan-config
+        - secretRef:
+            name: logan-secrets
+        volumeMounts:
+        - name: logs-volume
+          mountPath: /app/logs
+        - name: uploads-volume
+          mountPath: /app/uploads
+        - name: temp-volume
+          mountPath: /app/temp
+        - name: wallet-volume
+          mountPath: /app/wallet_unzipped
+          readOnly: true
+        resources:
+          limits:
+            cpu: 1000m
+            memory: 2Gi
+          requests:
+            cpu: 500m
+            memory: 1Gi
+        livenessProbe:
+          httpGet:
+            path: /api/health
+            port: http
+          initialDelaySeconds: 60
+          periodSeconds: 30
+          timeoutSeconds: 10
+          failureThreshold: 3
+        readinessProbe:
+          httpGet:
+            path: /api/health
+            port: http
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
+        securityContext:
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: false
+          capabilities:
+            drop:
+            - ALL
+      volumes:
+      - name: logs-volume
+        persistentVolumeClaim:
+          claimName: logan-logs-pvc
+      - name: uploads-volume
+        persistentVolumeClaim:
+          claimName: logan-uploads-pvc
+      - name: temp-volume
+        emptyDir: {}
+      - name: wallet-volume
+        secret:
+          secretName: oracle-wallet-secret
+      tolerations:
+      - key: "node.kubernetes.io/not-ready"
+        operator: "Exists"
+        effect: "NoExecute"
+        tolerationSeconds: 300
+      - key: "node.kubernetes.io/unreachable"
+        operator: "Exists"
+        effect: "NoExecute"
+        tolerationSeconds: 300
+
+---
+# Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: logan-dashboard-service
+  namespace: logan-security
+  labels:
+    app: logan-dashboard
+spec:
+  type: ClusterIP
+  ports:
+  - port: 3000
+    targetPort: http
+    protocol: TCP
+    name: http
+  selector:
+    app: logan-dashboard
+
+---
+# Ingress
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: logan-dashboard-ingress
+  namespace: logan-security
+  annotations:
+    kubernetes.io/ingress.class: "nginx"
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/proxy-body-size: "50m"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "300"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "300"
+    nginx.ingress.kubernetes.io/limit-rps: "10"
+    nginx.ingress.kubernetes.io/limit-connections: "5"
+spec:
+  tls:
+  - hosts:
+    - logan.your-domain.com
+    secretName: logan-tls-secret
+  rules:
+  - host: logan.your-domain.com
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: logan-dashboard-service
+            port:
+              number: 3000
+
+---
+# ServiceAccount
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: logan-service-account
+  namespace: logan-security
+
+---
+# Role for accessing secrets and configmaps
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  namespace: logan-security
+  name: logan-role
+rules:
+- apiGroups: [""]
+  resources: ["secrets", "configmaps"]
+  verbs: ["get", "list"]
+
+---
+# RoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: logan-rolebinding
+  namespace: logan-security
+subjects:
+- kind: ServiceAccount
+  name: logan-service-account
+  namespace: logan-security
+roleRef:
+  kind: Role
+  name: logan-role
+  apiGroup: rbac.authorization.k8s.io
+
+---
+# HorizontalPodAutoscaler
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: logan-dashboard-hpa
+  namespace: logan-security
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: logan-dashboard
+  minReplicas: 2
+  maxReplicas: 10
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: 70
+  - type: Resource
+    resource:
+      name: memory
+      target:
+        type: Utilization
+        averageUtilization: 80
+  behavior:
+    scaleUp:
+      stabilizationWindowSeconds: 300
+      policies:
+      - type: Percent
+        value: 100
+        periodSeconds: 15
+    scaleDown:
+      stabilizationWindowSeconds: 300
+      policies:
+      - type: Percent
+        value: 50
+        periodSeconds: 60
+
+---
+# PodDisruptionBudget
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: logan-dashboard-pdb
+  namespace: logan-security
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app: logan-dashboard
+
+---
+# NetworkPolicy
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: logan-dashboard-netpol
+  namespace: logan-security
+spec:
+  podSelector:
+    matchLabels:
+      app: logan-dashboard
+  policyTypes:
+  - Ingress
+  - Egress
+  ingress:
+  - from:
+    - namespaceSelector:
+        matchLabels:
+          name: ingress-nginx
+    ports:
+    - protocol: TCP
+      port: 3000
+  egress:
+  - to: []
+    ports:
+    - protocol: TCP
+      port: 443  # HTTPS
+    - protocol: TCP
+      port: 80   # HTTP
+    - protocol: TCP
+      port: 1521 # Oracle DB
+    - protocol: TCP
+      port: 53   # DNS
+    - protocol: UDP
+      port: 53   # DNS
+
+---
+# Redis Deployment (Optional)
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: redis
+  namespace: logan-security
+  labels:
+    app: redis
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: redis
+  template:
+    metadata:
+      labels:
+        app: redis
+    spec:
+      containers:
+      - name: redis
+        image: redis:7-alpine
+        ports:
+        - containerPort: 6379
+        command:
+        - redis-server
+        - --requirepass
+        - $(REDIS_PASSWORD)
+        - --maxmemory
+        - 256mb
+        - --maxmemory-policy
+        - allkeys-lru
+        env:
+        - name: REDIS_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: logan-secrets
+              key: REDIS_PASSWORD
+        resources:
+          limits:
+            cpu: 200m
+            memory: 512Mi
+          requests:
+            cpu: 100m
+            memory: 256Mi
+        volumeMounts:
+        - name: redis-data
+          mountPath: /data
+      volumes:
+      - name: redis-data
+        emptyDir: {}
+
+---
+# Redis Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: redis-service
+  namespace: logan-security
+  labels:
+    app: redis
+spec:
+  type: ClusterIP
+  ports:
+  - port: 6379
+    targetPort: 6379
+    protocol: TCP
+    name: redis
+  selector:
+    app: redis
