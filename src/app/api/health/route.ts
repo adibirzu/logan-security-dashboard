@@ -52,8 +52,6 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     
     if (checkStatuses.some(status => status === 'unhealthy')) {
       healthStatus.status = 'unhealthy';
-    } else if (checkStatuses.some(status => status === 'degraded')) {
-      healthStatus.status = 'degraded';
     }
 
     const statusCode = healthStatus.status === 'healthy' ? 200 : 503;
@@ -88,9 +86,10 @@ async function checkDatabase() {
   
   try {
     // Import database client dynamically to avoid initialization issues
-    const { testOracleConnection } = await import('@/lib/database/oracle-client');
+    const { testDatabaseConnection } = await import('@/lib/database/oracle-client');
     
-    const isConnected = await testOracleConnection();
+    const result = await testDatabaseConnection();
+    const isConnected = result.success;
     const responseTime = Date.now() - startTime;
     
     return {
