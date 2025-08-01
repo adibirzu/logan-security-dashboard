@@ -1,8 +1,8 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  // Enable standalone output for Docker containers
-  output: 'standalone',
+  // Docker containers will use npm start instead of standalone
+  // output: 'standalone',
   
   // Performance optimizations
   experimental: {
@@ -17,12 +17,14 @@ const nextConfig: NextConfig = {
       'framer-motion',
       'date-fns'
     ],
-    turbo: {
-      rules: {
-        '*.svg': {
-          loaders: ['@svgr/webpack'],
-          as: '*.js',
-        },
+  },
+  
+  // Turbopack configuration (moved from experimental.turbo)
+  turbopack: {
+    rules: {
+      '*.svg': {
+        loaders: ['@svgr/webpack'],
+        as: '*.js',
       },
     },
   },
