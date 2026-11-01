@@ -72,287 +72,48 @@ class LoganClient:
             raise Exception(f"Failed to get namespace: {e}")
 
     def execute_query_like_console(self, query, time_period_minutes=60, max_count=2000, bypass_all_processing=False):
-        """Execute query with same parameters as OCI Console"""
-        try:
-            from datetime import datetime, timedelta, timezone
-            
-            # Calculate time range like console
-            end_time = datetime.now(timezone.utc)
-            start_time = end_time - timedelta(minutes=time_period_minutes)
-            
-            # Debug: Print the exact query being sent (only if debug enabled)
-            if os.getenv('LOGAN_DEBUG') == 'true':
-                sys.stderr.write(f"LoganClient: Console mode query string: '{query}'\n")
-                sys.stderr.write(f"LoganClient: Query length: {len(query)}\n")
-            
-            if bypass_all_processing:
-                # Complete bypass - but still need minimal OCI API compatibility fixes
-                console_query = query.replace("!= null", "!= \"\"").replace("is not null", "!= \"\"")
-                # Also fix != value patterns that OCI API doesn't support
-                import re
-                pattern = r"(\w+)\s*!=\s*([^\s|]+)"
-                matches = re.findall(pattern, console_query)
-                for field, value in matches:
-                    if value != "null":
-                        old_expr = f"{field} != {value}"
-                        new_expr = f"{field} != \"\""
-                        console_query = console_query.replace(old_expr, new_expr)
-                        if os.getenv('LOGAN_DEBUG') == 'true':
-                            sys.stderr.write(f"LoganClient: API compatibility fix: '{old_expr}' -> '{new_expr}'\n")
-                
-                if os.getenv('LOGAN_DEBUG') == 'true':
-                    sys.stderr.write(f"LoganClient: Complete bypass enabled - only API compatibility fixes applied\n")
-            else:
-                # Try minimal conversion - fix != operators for OCI compatibility
-                console_query = query.replace("!= null", "!= \"\"").replace("is not null", "!= \"\"")
-                
-                # Also fix specific value comparisons like != T1574.002
-                import re
-                # Pattern to match field != value (but not != null which we already handled)
-                pattern = r"(\w+)\s*!=\s*([^\s|]+)"
-                matches = re.findall(pattern, console_query)
-                
-                for field, value in matches:
-                    if value != "null":  # Skip null comparisons we already handled
-                        # Convert field != value to field is not null (simpler approach)
-                        old_expr = f"{field} != {value}"
-                        new_expr = f"{field} != \"\""
-                        console_query = console_query.replace(old_expr, new_expr)
-                        if os.getenv('LOGAN_DEBUG') == 'true':
-                            sys.stderr.write(f"LoganClient: Converted '{old_expr}' to '{new_expr}' for OCI compatibility\n")
-                
-                if console_query != query and os.getenv('LOGAN_DEBUG') == 'true':
-                    sys.stderr.write(f"LoganClient: Final converted query: {console_query}\n")
-            
-            # Create query details matching console parameters exactly
-            query_details = {
-                "subSystem": "LOG",
-                "queryString": console_query,
-                "shouldRunAsync": False,  # Use sync for simpler testing
-                "shouldIncludeTotalCount": True,
-                "compartmentId": self.config["tenancy"],
-                "compartmentIdInSubtree": True,
-                "timeFilter": {
-                    "timeStart": start_time.isoformat().replace('+00:00', 'Z'),
-                    "timeEnd": end_time.isoformat().replace('+00:00', 'Z'),
-                    "timeZone": "UTC"
-                },
-                "maxTotalCount": max_count
-            }
-            
-            if os.getenv('LOGAN_DEBUG') == 'true':
-                sys.stderr.write(f"LoganClient: Console payload: {query_details}\n")
-                sys.stderr.write(f"LoganClient: Executing console-like query with compartment_id_in_subtree=True\n")
-                sys.stderr.write(f"LoganClient: Time range: {start_time.isoformat()} to {end_time.isoformat()}\n")
-            
-            # Make direct HTTP request to match console exactly
-            import requests
-            from oci.signer import Signer
-            
-            # Create OCI request signer
-            signer = Signer(
-                tenancy=self.config["tenancy"],
-                user=self.config["user"],
-                fingerprint=self.config["fingerprint"],
-                private_key_file_location=self.config["key_file"],
-                pass_phrase=self.config.get("pass_phrase")
-            )
-            
-            # Console URL format
-            url = f"https://loganalytics.{self.region}.oci.oraclecloud.com/20200601/namespaces/{self.namespace}/search/actions/query"
-            params = {"limit": max_count}
-            
-            if os.getenv('LOGAN_DEBUG') == 'true':
-                sys.stderr.write(f"LoganClient: Making direct HTTP request to: {url}\n")
-            
-            response = requests.post(url, json=query_details, auth=signer, params=params)
-            
-            if response.status_code == 200:
-                # Synchronous response
-                data = response.json()
-                result = {
-                    "success": True,
-                    "results": data.get("items", []),
-                    "total_count": data.get("totalCount", 0),
-                    "execution_time": data.get("queryExecutionTimeInMs", 0),
-                    "are_partial_results": data.get("arePartialResults", False)
-                }
-            elif response.status_code == 201:
-                # Async response - query was submitted
-                data = response.json()
-                if os.getenv('LOGAN_DEBUG') == 'true':
-                    sys.stderr.write(f"LoganClient: Async query submitted successfully, percent complete: {data.get('percentComplete', 0)}\n")
-                
-                # For now, treat async as successful with empty results
-                # In a full implementation, you'd poll for the actual results
-                result = {
-                    "success": True,
-                    "results": [],
-                    "total_count": 0,
-                    "execution_time": 0,
-                    "are_partial_results": False,
-                    "async_query": True,
-                    "percent_complete": data.get("percentComplete", 0)
-                }
-            else:
-                if os.getenv('LOGAN_DEBUG') == 'true':
-                    sys.stderr.write(f"LoganClient: HTTP Error {response.status_code}: {response.text}\n")
-                return {"error": f"HTTP {response.status_code}: {response.text}", "success": False}
-            
-            result["query_used"] = console_query
-            result["original_query"] = query
-            result["time_period_minutes"] = time_period_minutes
-            result["console_mode"] = True
-            result["compartment_id_in_subtree"] = True
-            
-            return result
-            
-        except oci.exceptions.ServiceError as e:
-            sys.stderr.write(f"OCI Service Error in console mode: Code={e.code}, Message={e.message}\n")
-            return {"error": f"OCI Service Error: {e.message}", "success": False}
-        except Exception as e:
-            sys.stderr.write(f"General error in console mode: {e}\n")
-            return {"error": str(e), "success": False}
+        """Compatibility entry point; every path preserves the authored query."""
+        return self.execute_query(query, time_period_minutes, max_count)
 
     def execute_query(self, query, time_period_minutes=1440, max_count=50):
-        """Execute a LOGAN query with enhanced time handling and retry logic"""
-        original_query = query
-        
-        # Pre-process query to fix common syntax issues
-        query = self._fix_query_syntax(query)
-        
-        # Use enhanced time filtering if query needs it
-        if time_period_minutes and not self._has_time_filter(query):
-            try:
-                query = self._add_time_filter_with_field(query, time_period_minutes, 'dateRelative')
-                
-                query_details = oci.log_analytics.models.QueryDetails(
-                    compartment_id=self.compartment_id,
-                    query_string=query,
-                    sub_system=oci.log_analytics.models.QueryDetails.SUB_SYSTEM_LOG,
-                    max_total_count=max_count
-                )
-                
-                response = self.client.query(self.namespace, query_details)
-                result = self._format_response(response.data)
-                
-                # Add timing information
-                result["query_used"] = query
-                result["time_period_minutes"] = time_period_minutes
-                result["time_method_used"] = "timestamp"
-                
-                return result
-                
-            except oci.exceptions.ServiceError as e:
-                sys.stderr.write(f"OCI Service Error with timestamp method: Code={e.code}, Message={e.message}\n")
-                # Try fallback without time filtering
-                return self._execute_query_fallback(original_query, max_count)
-        else:
-            # Original query execution without time filtering
-            try:
-                query_details = oci.log_analytics.models.QueryDetails(
-                    compartment_id=self.compartment_id,
-                    query_string=query,
-                    sub_system=oci.log_analytics.models.QueryDetails.SUB_SYSTEM_LOG,
-                    max_total_count=max_count
-                )
-                
-                response = self.client.query(self.namespace, query_details)
-                result = self._format_response(response.data)
-                
-                # Add timing information
-                result["query_used"] = query
-                result["time_period_minutes"] = time_period_minutes
-                
-                return result
-                
-            except oci.exceptions.ServiceError as e:
-                sys.stderr.write(f"OCI Service Error during query execution: Code={e.code}, Message={e.message}, Headers={e.headers}\n")
-                return {"error": f"OCI Service Error: {e.message}", "success": False}
-            except Exception as e:
-                sys.stderr.write(f"General error during query execution: {e}\n")
-                return {"error": str(e), "success": False}
-    
-    def _fix_query_syntax(self, query):
-        """Fix common OCI Logging Analytics query syntax issues"""
-        # Fix Action field syntax - remove quotes and use proper syntax
-        query = query.replace("Action in (drop, reject)", "Action in ('drop', 'reject')")
-        
-        # Fix != null syntax to proper OCI syntax - use exists/not empty check
-        query = query.replace("!= null", "!= \"\"").replace("is not null", "!= \"\"")
-        
-        # Fix stats function syntax - OCI Logging Analytics uses different syntax
-        import re
-        
-        # Fix count(*) to count() - OCI doesn't support count(*)
-        query = query.replace("stats count(*)", "stats count")
-        
-        # Fix count(field) syntax - fix WAF-specific syntax issues
-        # Special handling for WAF queries with count('Host IP Address (Client)')
-        if "WAF" in query and "count('Host IP Address (Client)')" in query:
-            query = query.replace("count('Host IP Address (Client)')", "count")
-        
-        # General count(field) syntax fix
-        count_field_pattern = r"stats count\(['\"]?([^')]+)['\"]?\)"
-        if re.search(count_field_pattern, query):
-            # For WAF and other specific log sources, try to use count() without field
-            if "WAF" in query or "Suricata" in query:
-                query = re.sub(count_field_pattern, "stats count", query)
-            else:
-                # For VCN Flow logs, just use count without parentheses
-                query = re.sub(count_field_pattern, "stats count", query)
-        
-        # Fix log source references to match available sources (only for known bad sources)
-        query = query.replace("'Windows Sysmon Events'", "'OCI Audit Logs'")
-        query = query.replace("'Event ID'", "'Event Type'")
-        
-        # Fix top command syntax
-        query = query.replace("| top 10 Count", "| sort -Count | head 10")
-        
-        # Remove lookup commands that might not be available (but preserve WAF lookups)
-        if "| lookup" in query and "WAF" not in query and "Suricata" not in query:
-            # Remove lookup part and everything after it
-            lookup_pos = query.find("| lookup")
-            if lookup_pos > 0:
-                query = query[:lookup_pos].strip()
-        
-        return query
-    
-    def _execute_query_fallback(self, original_query, max_count):
-        """Fallback query execution without time filtering"""
+        """Execute exact OCL within an explicit UTC window and selected scope."""
         try:
-            # Fix syntax and try again
-            query = self._fix_query_syntax(original_query)
-            
-            # Simplify the query further if it's still complex
-            if "| stats" in query and "| sort" in query:
-                # Remove sort to see if that helps
-                sort_pos = query.find("| sort")
-                if sort_pos > 0:
-                    query = query[:sort_pos].strip()
-            
-            query_details = oci.log_analytics.models.QueryDetails(
+            if not isinstance(query, str) or not query.strip():
+                raise ValueError("Query must be non-empty text")
+            minutes = int(time_period_minutes or 1440)
+            limit = int(max_count)
+            if not 1 <= minutes <= 44640 or not 1 <= limit <= 2000:
+                raise ValueError("Time window must be 1..44640 minutes and result limit 1..2000")
+            end = datetime.now(timezone.utc)
+            start = end - timedelta(minutes=minutes)
+            details = oci.log_analytics.models.QueryDetails(
                 compartment_id=self.compartment_id,
+                compartment_id_in_subtree=True,
                 query_string=query,
-                sub_system=oci.log_analytics.models.QueryDetails.SUB_SYSTEM_LOG,
-                max_total_count=max_count
+                sub_system="LOG",
+                max_total_count=limit,
+                time_filter=oci.log_analytics.models.TimeRange(
+                    time_start=start, time_end=end, time_zone="UTC"),
+                should_run_async=False,
+                should_include_total_count=True,
+                query_timeout_in_seconds=25,
             )
-            
-            response = self.client.query(self.namespace, query_details)
+            response = self.client.query(self.namespace, details)
+            if response.status == 201:
+                return {"success": False, "status": "pending", "results": [],
+                        "error": "Query is still running; results are not complete",
+                        "query_used": query, "are_partial_results": True}
             result = self._format_response(response.data)
-            
-            result["query_used"] = query
-            result["fallback_used"] = True
-            
+            result.update({"query_used": query, "original_query": query,
+                           "time_period_minutes": minutes, "compartment_id_in_subtree": True,
+                           "time_range": {"start": start.isoformat(), "end": end.isoformat(), "timezone": "UTC"},
+                           "status": "partial" if result.get("are_partial_results") else "complete"})
             return result
-            
-        except oci.exceptions.ServiceError as e:
-            sys.stderr.write(f"OCI Service Error in fallback: Code={e.code}, Message={e.message}\n")
-            return {"error": f"OCI Service Error: {e.message}", "success": False}
-        except Exception as e:
-            sys.stderr.write(f"General error in fallback: {e}\n")
-            return {"error": str(e), "success": False}
-    
+        except oci.exceptions.ServiceError as error:
+            return {"success": False, "status": "failed", "error": f"OCI Service Error: {error.message}"}
+        except Exception as error:
+            return {"success": False, "status": "failed", "error": str(error)}
+
     def _has_time_filter(self, query):
         """Check if query already has time filtering"""
         query_lower = query.lower()

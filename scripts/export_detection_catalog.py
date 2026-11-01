@@ -15,18 +15,20 @@ ROOT = Path(__file__).resolve().parents[1]
 
 def export(root=ROOT):
     rules, assets, sources = [], [], []
+    upstream_metadata = None
     for path in sorted((root / 'config').glob('*.json')):
         data = json.loads(path.read_text())
         relative = str(path.relative_to(root))
         sources.append({'file': relative, 'sha256': hashlib.sha256(path.read_bytes()).hexdigest()})
-        if path.name == 'security_rules.json':
+        if path.name == 'detection_catalog.json':
+            upstream_metadata = data['metadata']
             for rule in data['rules']:
-                rules.append({**rule, 'id': 'logan-dashboard:' + rule['id'],
+                rules.append({**rule, 'id': rule['id'],
                               'title': rule['name'], 'level': rule['severity'],
                               'query': rule['oci_query'], 'platform': 'oci_logan',
-                              'source_repository': 'logan-security-dashboard', 'file': relative,
+                              'source_repository': 'oci-log-analytics-detections', 'file': rule['source_file'],
                               'evidence': 'code-backed', 'provider_validation': 'unverified',
-                              'provenance_note': 'Baseline converter exports include repeated example rule patterns; not independent validated detections.'})
+                              'provenance_note': 'Pinned upstream query content; upstream validation is separate from validation in the consumer tenant.'})
         def walk(value, pointer=''):
             if isinstance(value, dict):
                 for key, child in value.items():
@@ -71,6 +73,8 @@ def export(root=ROOT):
             assets.append({'file': relative, 'line': line, 'query': query,
                            'evidence': 'code-backed', 'execution': 'not_executed',
                            'kind': 'template' if '${' in query or '{' in query else 'literal'})
+    if not rules:
+        raise ValueError('Pinned detection catalog missing or empty; run scripts/sync_detection_catalog.py')
     mappings = []
     for path in sorted((root / 'src/lib/mitre-attack').glob('*.ts')):
         text = path.read_text()
@@ -81,7 +85,7 @@ def export(root=ROOT):
     # Query source examples may contain environment-specific address literals.
     for asset in assets:
         asset['query'] = re.sub(r'(?<![\w.])(?:\d{1,3}\.){3}\d{1,3}(?![\w.])', '<IP_ADDRESS>', asset['query'])
-    return {'mitre_mapping_assets': mappings, 'version': '1.0' , 'source_repository': 'logan-security-dashboard',
+    return {'upstream_catalog': upstream_metadata, 'mitre_mapping_assets': mappings, 'version': '1.0' , 'source_repository': 'logan-security-dashboard',
             'evidence': 'code-backed', 'provider_validation': 'unverified',
             'network_hunting_label': 'Network Beacon & C2 Threat Hunting',
             'network_hunting_product': 'OCI Network Threat & Beacon Hunter',
