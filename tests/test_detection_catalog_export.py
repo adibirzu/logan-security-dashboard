@@ -12,10 +12,12 @@ class CatalogExportTests(unittest.TestCase):
     def test_export_is_deterministic_and_keeps_baseline_provenance(self):
         catalog = exporter.export()
         self.assertEqual(catalog, exporter.export())
-        self.assertEqual(len(catalog['rules']), 200)
-        self.assertEqual(catalog['stats']['unique_rule_queries'], 5)
+        self.assertEqual(len(catalog['rules']), 1368)
+        self.assertEqual(catalog['upstream_catalog']['upstream_commit'], '2ae1c63d07bbafe9113437a952749d9a09327757')
+        self.assertIn('MIT License', catalog['upstream_catalog']['upstream_license'])
+        self.assertEqual(catalog['stats']['unique_rule_queries'], 1266)
         self.assertTrue(all(rule['provider_validation'] == 'unverified' for rule in catalog['rules']))
-        self.assertEqual(len({r['id'] for r in catalog['rules']}), 200)
+        self.assertEqual(len({r['id'] for r in catalog['rules']}), 1368)
 
     def test_hunting_inventory_has_mitre_mappings_and_no_address_literals(self):
         catalog = exporter.export()

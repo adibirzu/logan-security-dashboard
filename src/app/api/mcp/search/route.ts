@@ -1,25 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { exec } from 'child_process'
+import { execFile } from 'child_process'
 import { promisify } from 'util'
 import path from 'path'
 import { parseOCILogContent, formatTimestamp, formatSource } from '@/lib/log-parser'
 
-const execAsync = promisify(exec)
+const execFileAsync = promisify(execFile)
 
 async function callPythonScript(scriptName: string, args: string[] = []) {
   try {
     const scriptPath = path.join(process.cwd(), 'scripts', scriptName)
     
-    // Properly escape arguments that contain spaces
-    const escapedArgs = args.map(arg => {
-      // Always wrap arguments in single quotes to prevent shell expansion
-      // and escape any single quotes within the argument
-      return `'${arg.replace(/'/g, "'\\''")}'`;
-    })
-    
-    const command = `python3 "${scriptPath}" ${escapedArgs.join(' ')}`
-    
-    const { stdout, stderr } = await execAsync(command, {
+    const { stdout, stderr } = await execFileAsync('python3', [scriptPath, ...args], {
       env: {
         ...process.env,
         LOGAN_REGION: process.env.NEXT_PUBLIC_LOGAN_REGION || 'eu-frankfurt-1',
@@ -42,24 +33,14 @@ async function callPythonScript(scriptName: string, args: string[] = []) {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
-    const { query, timePeriodMinutes, timeRange, bypassValidation, validateOnly } = body
-
-    if (!query) {
-      return NextResponse.json({
-        success: false,
-        error: 'Query is required'
-      }, { status: 400 })
+    const { query, timePeriodMinutes, timeRange, bypassValidation, validateOnly, maxCount, maxResults } = body
+    const timePeriod = timeRange ?? timePeriodMinutes ?? 1440
+    const limit = maxCount ?? maxResults ?? 100
+    if (typeof query !== 'string' || !query.trim() || query.length > 100000 ||
+        !Number.isInteger(timePeriod) || timePeriod < 1 || timePeriod > 44640 ||
+        !Number.isInteger(limit) || limit < 1 || limit > 2000) {
+      return NextResponse.json({ success: false, error: 'Provide query text, a numeric window of 1..44640 minutes and limit of 1..2000' }, { status: 400 })
     }
-
-    // Use timeRange if provided, otherwise fall back to timePeriodMinutes
-    const timePeriod = timeRange || timePeriodMinutes || 1440;
-
-    // Debug logging
-    console.log('Search API: query=', query, 'timePeriod=', timePeriod, 'bypassValidation=', bypassValidation, 'validateOnly=', validateOnly);
-    console.log('Search API: env vars=', {
-      LOGAN_REGION: process.env.NEXT_PUBLIC_LOGAN_REGION,
-      LOGAN_COMPARTMENT_ID: process.env.NEXT_PUBLIC_LOGAN_COMPARTMENT_ID
-    });
 
     // If this is just a validation request, use the parse endpoint
     if (validateOnly) {
@@ -74,7 +55,8 @@ export async function POST(request: NextRequest) {
     const args = [
       'search',
       '--query', query,
-      '--time-period', timePeriod.toString()
+      '--time-period', timePeriod.toString(),
+      '--max-count', limit.toString()
     ];
 
     // Add bypass validation flag if requested
@@ -102,7 +84,7 @@ export async function POST(request: NextRequest) {
         let sourceInfo = 'Unknown';
         let severity = 'info';
         let details = '';
-        let timestamp = new Date().toISOString();
+        let timestamp = '';
         let sourceIp = null;
         let user = null;
         let eventName = null;
@@ -118,7 +100,7 @@ export async function POST(request: NextRequest) {
             compartmentName = parsedLogData.compartmentName;
             message = parsedLogData.message || 'OCI Log Event';
             sourceInfo = formatSource(parsedLogData.eventName, parsedLogData.compartmentName);
-            timestamp = parsedLogData.timestamp || new Date().toISOString();
+            timestamp = parsedLogData.timestamp || '';
             user = parsedLogData.user;
             sourceIp = parsedLogData.sourceIp;
             severity = parsedLogData.severity || 'info';
@@ -171,13 +153,6 @@ export async function POST(request: NextRequest) {
             }
           }
           
-          // If no timestamp found, use current time but mark it as estimated
-          if (!hasTimestamp) {
-            // Use current time minus a small random offset to indicate it's recent but estimated
-            const randomOffset = Math.floor(Math.random() * 300000); // Random 0-5 minutes
-            timestamp = new Date(Date.now() - randomOffset).toISOString();
-          }
-          
           // Improve source info extraction
           if (sourceInfo === 'Unknown' || sourceInfo === '') {
             // Try to construct a better source from available data
@@ -209,12 +184,12 @@ export async function POST(request: NextRequest) {
           }
         
         // Format timestamp to be human readable with improved UTC handling
-        const formattedTimestamp = formatTimestamp(timestamp);
+        const formattedTimestamp = timestamp ? formatTimestamp(timestamp) : 'Unknown';
         
         return {
           id: `search-${index}`,
           timestamp: formattedTimestamp,
-          rawTimestamp: timestamp, // Keep raw timestamp for further processing
+          rawTimestamp: timestamp || null, // Keep raw timestamp for further processing
           severity: ['critical', 'high', 'medium', 'low'].includes(severity) ? severity : 'info',
           source: sourceInfo,
           message: message,
@@ -232,8 +207,10 @@ export async function POST(request: NextRequest) {
         success: true,
         results: events,
         executionTime: result.execution_time || 0,
-        total: result.total || events.length,
+        total: result.total ?? events.length,
         queryUsed: result.query_used,
+        status: result.status,
+        arePartialResults: Boolean(result.are_partial_results),
         timeFilterMethod: result.time_filter_method,
         timeRange: result.time_range,
         warning: result.warning
@@ -241,7 +218,8 @@ export async function POST(request: NextRequest) {
     } else {
       return NextResponse.json({
         success: false,
-        error: result.error || 'Search failed'
+        error: result.error || 'Search failed',
+        status: result.status || 'failed'
       }, { status: 500 })
     }
   } catch (error) {

@@ -1,255 +1,80 @@
 import { NextRequest, NextResponse } from 'next/server'
-import * as fs from 'fs'
-import * as path from 'path'
+import fs from 'fs'
+import path from 'path'
 
-const LOGAN_QUERIES_FILE = path.join(process.cwd(), 'config', 'logan-working-queries.json')
-const MITRE_QUERIES_FILE = path.join(process.cwd(), 'config', 'mitre-enhanced-queries.json')
-
-interface LoganQueryCategory {
-  name: string
-  description: string
-  queries: LoganQuery[]
-}
-
-interface LoganQuery {
+interface StoredRule {
   id: string
   name: string
   description: string
-  query: string
+  oci_query: string
   category: string
   tags: string[]
-  timeRange: string
-  maxResults: number
+  provider_validation: string
+  upstream_validation_status: string
+  source_url: string
 }
 
-interface LoganQueriesFile {
-  version: string
-  description: string
-  last_updated: string
-  categories: Record<string, LoganQueryCategory>
-}
-
-// Load Logan working queries file
-function loadLoganQueries(): LoganQueriesFile | null {
-  try {
-    if (fs.existsSync(LOGAN_QUERIES_FILE)) {
-      const content = fs.readFileSync(LOGAN_QUERIES_FILE, 'utf8')
-      return JSON.parse(content)
-    }
-  } catch (error) {
-    console.error('Error loading Logan queries:', error)
-  }
-  return null
-}
-
-// Load MITRE enhanced queries file
-function loadMitreQueries(): any {
-  try {
-    if (fs.existsSync(MITRE_QUERIES_FILE)) {
-      const content = fs.readFileSync(MITRE_QUERIES_FILE, 'utf8')
-      return JSON.parse(content)
-    }
-  } catch (error) {
-    console.error('Error loading MITRE queries:', error)
-  }
-  return null
-}
-
-// Convert MITRE queries to Logan format
-function convertMitreToLoganFormat(mitreData: any): LoganQueryCategory {
-  // Handle different possible structures
-  let queriesArray = []
-  if (mitreData.queries) {
-    queriesArray = mitreData.queries
-  } else if (mitreData.mitre_enhanced_queries?.queries) {
-    queriesArray = mitreData.mitre_enhanced_queries.queries
-  } else {
-    console.warn('MITRE queries data structure not recognized:', Object.keys(mitreData))
-    queriesArray = []
-  }
-
-  const queries: LoganQuery[] = queriesArray.map((query: any) => ({
-    id: query.id,
-    name: query.name,
-    description: query.description || query.query || 'Enhanced MITRE query',
-    query: query.query,
-    category: query.category || 'mitre-attack',
-    tags: query.mitre_mapping ? [
-      'mitre-attack',
-      'windows-sysmon',
-      query.mitre_mapping.tactic || 'unknown',
-      ...(query.mitre_mapping.techniques || [])
-    ] : ['mitre-attack', 'windows-sysmon'],
-    timeRange: '1440m', // Default to 24 hours
-    maxResults: 1000
+function loadQueries() {
+  const catalog = JSON.parse(fs.readFileSync(path.join(process.cwd(), 'config/detection_catalog.json'), 'utf8'))
+  if (catalog.metadata?.schema_version !== '1.0' || !Array.isArray(catalog.rules)) throw new Error('Unsupported catalog')
+  const queries = (catalog.rules as StoredRule[]).map(rule => ({
+    id: rule.id, name: rule.name, description: rule.description, query: rule.oci_query,
+    category: rule.category, tags: rule.tags, timeRange: '24h', maxResults: 100,
+    provider_validation: rule.provider_validation,
+    upstream_validation_status: rule.upstream_validation_status, source_url: rule.source_url,
   }))
-
-  return {
-    name: 'MITRE ATT&CK Enhanced',
-    description: 'Enhanced MITRE ATT&CK queries for Windows Sysmon events with technique extraction and mapping',
-    queries
-  }
+  return { queries, metadata: catalog.metadata }
 }
 
-// GET - Retrieve Logan working queries
 export async function GET(request: NextRequest) {
   try {
-    const { searchParams } = new URL(request.url)
-    const category = searchParams.get('category')
-    const tag = searchParams.get('tag')
-    
-    const loganQueries = loadLoganQueries()
-    const mitreQueries = loadMitreQueries()
-    
-    if (!loganQueries) {
-      return NextResponse.json({
-        success: false,
-        error: 'Logan queries file not found'
-      }, { status: 404 })
+    const catalog = loadQueries()
+    const category = request.nextUrl.searchParams.get('category')
+    const tag = request.nextUrl.searchParams.get('tag')
+    const queries = catalog.queries.filter(query => (!category || query.category === category) && (!tag || query.tags.includes(tag)))
+    const categories: Record<string, { name: string; description: string; queries: typeof queries }> = {}
+    for (const query of queries) {
+      categories[query.category] ??= { name: query.category, description: 'Pinned OCI Log Analytics content', queries: [] }
+      categories[query.category].queries.push(query)
     }
-
-    // Merge MITRE queries with Logan queries
-    let categories = { ...loganQueries.categories }
-    if (mitreQueries) {
-      try {
-        const mitreCategory = convertMitreToLoganFormat(mitreQueries)
-        if (mitreCategory.queries.length > 0) {
-          categories['mitre_enhanced'] = mitreCategory
-        }
-      } catch (error) {
-        console.error('Error converting MITRE queries:', error)
-      }
-    }
-
-    // Filter by category if specified
-    if (category) {
-      const filteredCategories: Record<string, LoganQueryCategory> = {}
-      if (categories[category]) {
-        filteredCategories[category] = categories[category]
-      }
-      categories = filteredCategories
-    }
-
-    // Filter by tag if specified
-    if (tag) {
-      const filteredCategories: Record<string, LoganQueryCategory> = {}
-      Object.entries(categories).forEach(([catKey, catData]) => {
-        const filteredQueries = catData.queries.filter(query => 
-          query.tags.includes(tag)
-        )
-        if (filteredQueries.length > 0) {
-          filteredCategories[catKey] = {
-            ...catData,
-            queries: filteredQueries
-          }
-        }
-      })
-      categories = filteredCategories
-    }
-
-    // Transform to flat array if needed
-    const allQueries: LoganQuery[] = []
-    Object.values(categories).forEach(category => {
-      allQueries.push(...category.queries)
-    })
-
-    return NextResponse.json({
-      success: true,
-      data: {
-        version: loganQueries.version,
-        description: loganQueries.description,
-        last_updated: loganQueries.last_updated,
-        total_queries: allQueries.length,
-        total_categories: Object.keys(categories).length,
-        categories,
-        queries: allQueries // Flat array for easy access
-      }
-    })
-  } catch (error) {
-    console.error('Error retrieving Logan queries:', error)
-    return NextResponse.json({
-      success: false,
-      error: 'Failed to retrieve Logan queries'
-    }, { status: 500 })
+    return NextResponse.json({ success: true, data: {
+      version: '1.0', description: 'Pinned OCI Log Analytics detections catalog',
+      last_updated: catalog.metadata.upstream_generated_at,
+      upstream_commit: catalog.metadata.upstream_commit,
+      total_queries: queries.length, total_categories: Object.keys(categories).length, categories, queries,
+    } })
+  } catch {
+    return NextResponse.json({ success: false, error: 'Detection catalog unavailable; run the pinned catalog sync' }, { status: 503 })
   }
 }
 
-// POST - Execute a Logan query
+function minutes(value: unknown): number {
+  if (typeof value === 'number') return value
+  if (typeof value !== 'string') return NaN
+  const match = /^(\d+)(m|h|d)$/.exec(value)
+  return match ? Number(match[1]) * ({ m: 1, h: 60, d: 1440 }[match[2]] ?? NaN) : NaN
+}
+
 export async function POST(request: NextRequest) {
   try {
-    const body = await request.json()
-    const { queryId, customQuery, timeRange, maxResults } = body
-
-    const loganQueries = loadLoganQueries()
-    
-    if (!loganQueries && !customQuery) {
-      return NextResponse.json({
-        success: false,
-        error: 'Logan queries file not found and no custom query provided'
-      }, { status: 404 })
+    const { queryId, customQuery, timeRange, maxResults } = await request.json()
+    const catalog = queryId ? loadQueries() : null
+    const queryInfo = catalog?.queries.find(query => query.id === queryId)
+    if (queryId && !queryInfo) return NextResponse.json({ success: false, error: 'Query ID not found' }, { status: 404 })
+    const query = queryInfo?.query ?? customQuery
+    const timePeriodMinutes = minutes(timeRange ?? '24h')
+    const limit = maxResults ?? queryInfo?.maxResults ?? 100
+    if (typeof query !== 'string' || !query.trim() || !Number.isInteger(timePeriodMinutes) || timePeriodMinutes < 1 || timePeriodMinutes > 44640 || !Number.isInteger(limit) || limit < 1 || limit > 2000) {
+      return NextResponse.json({ success: false, error: 'Invalid query, time range or result limit' }, { status: 400 })
     }
-
-    let queryToExecute = customQuery
-    let queryInfo = null
-
-    // If queryId provided, find the specific query
-    if (queryId && loganQueries) {
-      let foundQuery: LoganQuery | undefined = undefined
-      
-      for (const category of Object.values(loganQueries.categories)) {
-        const query = category.queries.find(q => q.id === queryId)
-        if (query) {
-          foundQuery = query
-          break
-        }
-      }
-
-      if (!foundQuery) {
-        return NextResponse.json({
-          success: false,
-          error: `Query with ID ${queryId} not found`
-        }, { status: 404 })
-      }
-
-      queryToExecute = foundQuery.query
-      queryInfo = foundQuery
-    }
-
-    if (!queryToExecute) {
-      return NextResponse.json({
-        success: false,
-        error: 'No query to execute'
-      }, { status: 400 })
-    }
-
-    // Execute the query via the MCP search API
-    const searchResponse = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/api/mcp/search`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        query: queryToExecute,
-        timePeriodMinutes: timeRange || (queryInfo?.timeRange === '24h' ? 1440 : 60),
-        maxResults: maxResults || queryInfo?.maxResults || 100,
-        bypassValidation: false
-      })
+    const response = await fetch(new URL('/api/mcp/search', process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'), {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ query, timePeriodMinutes, maxResults: limit }),
     })
-
-    const searchResult = await searchResponse.json()
-
-    return NextResponse.json({
-      success: true,
-      query_info: queryInfo,
-      query_executed: queryToExecute,
-      execution_result: searchResult
-    })
-
-  } catch (error) {
-    console.error('Error executing Logan query:', error)
-    return NextResponse.json({
-      success: false,
-      error: 'Failed to execute Logan query'
-    }, { status: 500 })
+    const result = await response.json()
+    const success = response.ok && result.success === true
+    return NextResponse.json({ success, query_info: queryInfo ?? null, query_executed: query, execution_result: result }, { status: success ? 200 : (response.ok ? 502 : response.status) })
+  } catch {
+    return NextResponse.json({ success: false, error: 'Query execution unavailable' }, { status: 500 })
   }
 }

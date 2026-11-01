@@ -23,6 +23,16 @@ A comprehensive security monitoring and analysis dashboard built for Oracle Clou
 
 ![Logan Security Dashboard](https://img.shields.io/badge/Next.js-15.3.5-black) ![TypeScript](https://img.shields.io/badge/TypeScript-5.0-blue) ![Python](https://img.shields.io/badge/Python-3.8+-green) ![OCI](https://img.shields.io/badge/OCI-Logging%20Analytics-red)
 
+## Current detection catalog
+
+The rules browser and query library use a pinned snapshot of
+[OCI Log Analytics Detections](https://github.com/adibirzu/oci-log-analytics-detections):
+**1,368 content items / 1,266 distinct query patterns** at upstream commit
+`2ae1c63d07bbafe9113437a952749d9a09327757`.
+Query text and provenance are preserved. Upstream validation is displayed
+separately from validation in your tenant; imported content is not automatically
+scheduled or deployed. See [refresh and validation instructions](docs/DETECTION_CATALOG_SYNC.md).
+
 ## 🚀 Project Overview
 
 Logan Security Dashboard is a modern web application that integrates with OCI Logging Analytics to provide security teams with centralized monitoring, threat detection, and log analysis capabilities. The platform combines the power of OCI's cloud-native logging infrastructure with an intuitive dashboard for security operations.
