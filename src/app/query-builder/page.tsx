@@ -601,7 +601,7 @@ export default function QueryBuilderPage() {
                   Security Rules Library
                 </CardTitle>
                 <CardDescription>
-                  Prebuilt detection rules from Elastic and Splunk converted to OCI Logging Analytics format
+                  Detection queries and hunts from the pinned OCI Log Analytics detections catalog
                 </CardDescription>
               </CardHeader>
             </Card>

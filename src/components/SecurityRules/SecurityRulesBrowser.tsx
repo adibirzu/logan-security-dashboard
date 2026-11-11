@@ -37,6 +37,9 @@ interface SecurityRule {
   author: string
   date_created: string
   date_converted: string
+  source_url?: string
+  upstream_validation_status?: string
+  provider_validation?: string
 }
 
 interface SecurityRulesResponse {
@@ -54,6 +57,7 @@ interface SecurityRulesResponse {
     sources: Record<string, number>
     severities: Record<string, number>
   }
+  metadata?: { upstream_commit: string; total_content_items: number; unique_query_patterns: number }
   error?: string
 }
 
@@ -79,7 +83,8 @@ export function SecurityRulesBrowser({ onRuleSelect, className }: SecurityRulesB
   // Pagination
   const [currentPage, setCurrentPage] = useState(1)
   const [totalRules, setTotalRules] = useState(0)
-  const [statistics, setStatistics] = useState<any>(null)
+  const [statistics, setStatistics] = useState<SecurityRulesResponse['statistics'] | null>(null)
+  const [catalogMetadata, setCatalogMetadata] = useState<SecurityRulesResponse['metadata']>()
   
   const itemsPerPage = 20
 
@@ -105,6 +110,7 @@ export function SecurityRulesBrowser({ onRuleSelect, className }: SecurityRulesB
         setRules(data.rules)
         setTotalRules(data.pagination.total)
         setStatistics(data.statistics)
+        setCatalogMetadata(data.metadata)
       } else {
         setError(data.error || 'Failed to load security rules')
       }
@@ -138,6 +144,7 @@ export function SecurityRulesBrowser({ onRuleSelect, className }: SecurityRulesB
 
   const getSeverityColor = (severity: string) => {
     switch (severity.toLowerCase()) {
+      case 'critical':
       case 'high':
         return 'bg-red-100 text-red-800 border-red-200'
       case 'medium':
@@ -178,7 +185,7 @@ export function SecurityRulesBrowser({ onRuleSelect, className }: SecurityRulesB
           <div>
             <h2 className="text-2xl font-bold">Security Rules Library</h2>
             <p className="text-muted-foreground">
-              Prebuilt security detection rules converted from Elastic and Splunk
+              OCI Log Analytics detections, application analytics, and threat hunts
             </p>
           </div>
           <Button
@@ -192,13 +199,23 @@ export function SecurityRulesBrowser({ onRuleSelect, className }: SecurityRulesB
           </Button>
         </div>
 
+        {catalogMetadata && (
+          <p className="text-sm text-muted-foreground">
+            {catalogMetadata.total_content_items.toLocaleString()} content items ·{' '}
+            {catalogMetadata.unique_query_patterns.toLocaleString()} distinct query patterns ·{' '}
+            <a className="underline" href={`https://github.com/adibirzu/oci-log-analytics-detections/tree/${catalogMetadata.upstream_commit}`} target="_blank" rel="noopener noreferrer">
+              Source {catalogMetadata.upstream_commit.slice(0, 8)}
+            </a>. Queries require validation against your tenant before operational use.
+          </p>
+        )}
+
         {/* Statistics */}
         {statistics && (
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             <Card>
               <CardContent className="p-4">
                 <div className="text-2xl font-bold text-blue-600">{statistics.total}</div>
-                <div className="text-sm text-muted-foreground">Total Rules</div>
+                <div className="text-sm text-muted-foreground">Content Items</div>
               </CardContent>
             </Card>
             <Card>
@@ -244,13 +261,13 @@ export function SecurityRulesBrowser({ onRuleSelect, className }: SecurityRulesB
                 <Input
                   placeholder="Search rules..."
                   value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
+                  onChange={(e) => { setSearchTerm(e.target.value); setCurrentPage(1) }}
                   className="pl-10"
                 />
               </div>
 
               {/* Category Filter */}
-              <Select value={categoryFilter} onValueChange={setCategoryFilter}>
+              <Select value={categoryFilter} onValueChange={(value) => { setCategoryFilter(value); setCurrentPage(1) }}>
                 <SelectTrigger>
                   <SelectValue placeholder="All Categories" />
                 </SelectTrigger>
@@ -265,7 +282,7 @@ export function SecurityRulesBrowser({ onRuleSelect, className }: SecurityRulesB
               </Select>
 
               {/* Source Filter */}
-              <Select value={sourceFilter} onValueChange={setSourceFilter}>
+              <Select value={sourceFilter} onValueChange={(value) => { setSourceFilter(value); setCurrentPage(1) }}>
                 <SelectTrigger>
                   <SelectValue placeholder="All Sources" />
                 </SelectTrigger>
@@ -280,7 +297,7 @@ export function SecurityRulesBrowser({ onRuleSelect, className }: SecurityRulesB
               </Select>
 
               {/* Severity Filter */}
-              <Select value={severityFilter} onValueChange={setSeverityFilter}>
+              <Select value={severityFilter} onValueChange={(value) => { setSeverityFilter(value); setCurrentPage(1) }}>
                 <SelectTrigger>
                   <SelectValue placeholder="All Severities" />
                 </SelectTrigger>
@@ -469,6 +486,11 @@ export function SecurityRulesBrowser({ onRuleSelect, className }: SecurityRulesB
                           </div>
                         )}
 
+                        <div className="text-sm text-muted-foreground">
+                          <p>Upstream validation: {rule.upstream_validation_status || 'not recorded'}</p>
+                          <p>This tenant: {rule.provider_validation || 'not run'}</p>
+                        </div>
+
                         {/* Metadata */}
                         <div className="grid grid-cols-2 gap-4 text-sm text-muted-foreground">
                           <div>
@@ -478,10 +500,10 @@ export function SecurityRulesBrowser({ onRuleSelect, className }: SecurityRulesB
                             <span className="font-semibold">Original ID:</span> {rule.original_rule_id}
                           </div>
                           <div>
-                            <span className="font-semibold">Created:</span> {rule.date_created}
+                            <span className="font-semibold">Created:</span> {rule.date_created || 'Not supplied'}
                           </div>
                           <div>
-                            <span className="font-semibold">Converted:</span> {new Date(rule.date_converted).toLocaleDateString()}
+                            <span className="font-semibold">Catalog snapshot:</span> {new Date(rule.date_converted).toLocaleDateString()}
                           </div>
                         </div>
                       </div>

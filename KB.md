@@ -15,3 +15,9 @@ Add an entry after every error that needed investigation and a fix. Use the next
 - Fix: <what changed, with file/command>
 - Prevention: <how to avoid it next time>
 ```
+
+## KB-001: Query execution changes Windows detection semantics
+- Error: A Windows Sysmon query executes as OCI Audit Logs with Event Type substituted for Event ID; exclusion predicates and MITRE lookups can change or disappear.
+- Root cause: The validator and client used string replacements and broad fallbacks as syntax repair. The bypass path also rewrote exclusions and searched the tenancy root.
+- Fix: The search API and analyzer now send exact OCL through one SDK execution path using the selected compartment, explicit UTC window, bounded result cap and completion metadata. The catalog importer preserves pinned source provenance and separates upstream validation from tenant validation.
+- Prevention: Run `python3 -m unittest discover -s tests -v`, `npm run test:api`, and the pinned importer `--check` before refreshing content. Never treat a rewritten, partial, pending or failed search as a validated detection.
