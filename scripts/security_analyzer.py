@@ -261,79 +261,23 @@ class SecurityAnalyzer:
             print(f"Error calculating resolved threats: {e}", file=sys.stderr)
             return 0
 
-    def search_logs(self, query, time_period_minutes=1440, bypass_validation=False):
-        """Execute a custom log search with optional validation bypass"""
-        try:
-            # First, test connection to OCI Logging Analytics
-            connection_test_result = self.client.test_connection()
-            if not connection_test_result.get("success"):
-                sys.stderr.write(f"SecurityAnalyzer: OCI connection test failed: {connection_test_result.get('error', 'Unknown error')}\n")
-                return connection_test_result # Return the connection error
-
-            if os.getenv('LOGAN_DEBUG') == 'true':
-                sys.stderr.write("SecurityAnalyzer: OCI connection test successful. Proceeding with query.\n")
-
-            original_query = query
-            query_was_modified = False
-            validation_warnings = []
-
-            if bypass_validation:
-                # Send query as-is without any validation or modification
-                if os.getenv('LOGAN_DEBUG') == 'true':
-                    sys.stderr.write("SecurityAnalyzer: Bypassing validation - sending query as-is to OCI\n")
-                # Use console-like execution with proper parameters and bypass all preprocessing
-                result = self.client.execute_query_like_console(query, time_period_minutes, 2000, bypass_all_processing=True)
-            else:
-                # Validate and fix the query before execution
-                validation_result = self.validator.validate_and_fix_query(query)
-                
-                if not validation_result.get("success"):
-                    if os.getenv('LOGAN_DEBUG') == 'true':
-                        sys.stderr.write(f"SecurityAnalyzer: Query validation failed: {validation_result.get('error')}\n")
-                        # Try suggested alternative
-                        suggested_query = validation_result.get("suggested_alternative", "* | head 10")
-                        sys.stderr.write(f"SecurityAnalyzer: Trying suggested alternative: {suggested_query}\n")
-                    else:
-                        suggested_query = validation_result.get("suggested_alternative", "* | head 10")
-                    query = suggested_query
-                    query_was_modified = True
-                else:
-                    # Use the fixed query
-                    query = validation_result.get("fixed_query", query)
-                    validation_warnings = validation_result.get("warnings", [])
-                    
-                    if query != original_query:
-                        if os.getenv('LOGAN_DEBUG') == 'true':
-                            sys.stderr.write(f"SecurityAnalyzer: Query was modified from '{original_query}' to '{query}'\n")
-                        query_was_modified = True
-                    
-                    # Log any warnings
-                    if os.getenv('LOGAN_DEBUG') == 'true':
-                        for warning in validation_warnings:
-                            sys.stderr.write(f"SecurityAnalyzer: Warning: {warning}\n")
-
-                result = self.client.execute_query(query, time_period_minutes, 100)
-            
-            if result.get("success"):
-                return {
-                    "success": True,
-                    "results": result.get("results", []),
-                    "total": result.get("total_count", 0),
-                    "execution_time": result.get("execution_time", 0),
-                    "query": query,
-                    "original_query": original_query,
-                    "query_was_modified": query_was_modified,
-                    "validation_bypassed": bypass_validation,
-                    "validation_warnings": validation_warnings,
-                    "time_period_minutes": time_period_minutes,
-                    "fallback_used": result.get("fallback_used", False)
-                }
-            
+    def search_logs(self, query, time_period_minutes=1440, bypass_validation=False, max_count=100):
+        """Execute authored query text; OCI validates its syntax and field contract."""
+        result = self.client.execute_query(query, time_period_minutes, max_count)
+        if not result.get("success"):
             return result
-            
-        except Exception as e:
-            sys.stderr.write(f"SecurityAnalyzer: General error in search_logs: {e}\n")
-            return {"error": str(e), "success": False}
+        return {
+            **result,
+            "total": result.get("total_count", 0),
+            "query": query,
+            "original_query": query,
+            "query_was_modified": False,
+            "validation_bypassed": bypass_validation,
+            "validation_warnings": [],
+            "time_period_minutes": time_period_minutes,
+            "fallback_used": False,
+        }
+
 
 def main():
     parser = argparse.ArgumentParser(description='Security Analyzer for OCI LOGAN')
@@ -342,6 +286,7 @@ def main():
     parser.add_argument('--severity', default='all', help='Event severity filter')
     parser.add_argument('--query', type=str, help='Custom query string')
     parser.add_argument('--time-period', type=int, default=1440, help='Time period in minutes')
+    parser.add_argument('--max-count', type=int, default=100, help='Maximum result count (1..2000)')
     parser.add_argument('--bypass-validation', action='store_true', help='Send query as-is without validation')
     
     args = parser.parse_args()
@@ -362,7 +307,7 @@ def main():
             if not args.query:
                 result = {"error": "Query string required", "success": False}
             else:
-                result = analyzer.search_logs(args.query, args.time_period, args.bypass_validation)
+                result = analyzer.search_logs(args.query, args.time_period, args.bypass_validation, args.max_count)
         else:
             result = {"error": "Invalid action", "success": False}
             

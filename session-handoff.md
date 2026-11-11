@@ -106,3 +106,14 @@ Tab/layout receipt: OCI-DEMO `local/videos/screenshots/forge-baseline-tabs.json`
 - ConfigMaps/mounts: none created or patched by this packet; existing deployment mounts preserved.
 - Blockers: prior dirty application work, existing branch history, redaction and authoritative tests require their owner gates before broad merge. Scanner checkout resolves Git to its parent dev directory and cannot be independently committed as a Scanner repository. No remote push authorized/performed.
 - Recommended Next Step: use the canonical OCI-DEMO generator check for managed artifacts; reconcile only redaction-clean reviewed changes into local main while preserving every unrelated source/index change. Record final branch hashes and individual holds in OCI-DEMO session handoff.
+
+
+## 2026-11-01 Detection catalog sync
+
+- Imported query content from `adibirzu/oci-log-analytics-detections` at `2ae1c63d07bbafe9113437a952749d9a09327757`: 1,368 items and 1,266 distinct query strings, with file/query hashes, upstream attribution and license.
+- Both catalog APIs, browser and exporter consume the pinned snapshot. Execution preserves authored OCL and the selected scope/window; pending, partial and failed results remain distinct.
+- Validation: seven Python tests and six API tests passed; lint, focused application-source typechecking and catalog drift check passed in isolated verification.
+- Full build remains blocked by the existing missing `ws` dependency; repository-wide typechecking also encounters four missing aliases in separate Forge overlay snippets. Both reproduced on untouched upstream main.
+- No OCI query, deployment, alarm creation or release acceptance. Tenant validation remains not run.
+- Refresh and verification instructions: `docs/DETECTION_CATALOG_SYNC.md`. Unrelated local edits excluded from publication.
+- Publication scan: Gitleaks reported 69 matches, all independently classified as query-file SHA256 digests; zero unknown findings. Scanner rules were unchanged.

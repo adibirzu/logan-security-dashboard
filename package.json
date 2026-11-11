@@ -6,7 +6,8 @@
     "dev": "next dev --turbopack",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "test:api": "node --test tests/*.test.cjs"
   },
   "dependencies": {
     "@hello-pangea/dnd": "^18.0.1",
